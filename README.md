@@ -1,5 +1,5 @@
-Grocery CRUD
-=============
-Grocery CRUD is a PHP and Codeigniter Framework library that creates a full functional CRUD system without the need to customise JavaScript or CSS.
+###################
+Resultados do modelo de bloco - Instituto Infnet
+###################
 
-For more information, visit http://www.grocerycrud.com
+Quando estiver funcional, este sistema será usado para exibir e manter os resultados de estudantes dos cursos do Instituto Infnet, a partir de avaliações realizadas no Moodle LMS.

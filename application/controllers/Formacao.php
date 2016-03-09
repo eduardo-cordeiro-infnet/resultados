@@ -1,5 +1,5 @@
 <?php
-class Escola extends CI_Controller {
+class Formacao extends CI_Controller {
 
 		public function __construct()
 		{
@@ -15,9 +15,12 @@ class Escola extends CI_Controller {
 		{
 			$crud = new grocery_CRUD();
 
-			$crud->set_table('escolas')
-				->set_subject('escola')
-				->required_fields('nome', 'sigla');
+			$crud->set_subject('formação');
+			$crud->set_table('formacoes');
+			$crud->fields('nome', 'sigla', 'id_escola');
+			$crud->display_as('id_escola','Escola');
+			$crud->required_fields('nome', 'sigla', 'id_escola');
+			$crud->set_relation('id_escola','escolas','{sigla} ({nome})');
 
 			$output = $crud->render();
 
