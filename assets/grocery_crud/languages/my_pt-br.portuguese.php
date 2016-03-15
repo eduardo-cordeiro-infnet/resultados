@@ -4,7 +4,7 @@
 	$lang['list_actions'] 			= 'Ações';
 	$lang['list_page'] 			= 'Página';
 	$lang['list_paging_of'] 		= 'de';
-	$lang['list_displaying']		= 'Registros de {start} a {end}, num total de {results} registros';
+	$lang['list_displaying']		= 'Registros de {start} a {end}, total de {results} registros';
 	$lang['list_filtered_from']		= '(filtrado de um total de {total_results} registros)';
 	$lang['list_show_entries']		= 'Exibir {paging} entradas';
 	$lang['list_no_items']			= 'Nenhum registro a ser exibido';

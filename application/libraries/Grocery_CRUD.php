@@ -2531,7 +2531,8 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 		return $this->get_readonly_input($field_info, $value);
 	}
-
+#http://grocerycrud.amitsgarage.com/bwl-knowledge-base/enhance-the-read-view/
+/*
 	protected function get_upload_file_readonly_input($field_info,$value)
 	{
 		$file = $file_url = base_url().$field_info->extras->upload_path.'/'.$value;
@@ -2540,7 +2541,7 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 		return $this->get_readonly_input($field_info, $value);
 	}
-
+#*/
 	protected function get_relation_n_n_input($field_info_type, $selected_values)
 	{
 		$has_priority_field = !empty($field_info_type->extras->priority_field_relation_table) ? true : false;
@@ -2796,6 +2797,124 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 		return $input_fields;
 	}
 
+	#http://grocerycrud.amitsgarage.com/bwl-knowledge-base/enhance-the-read-view/
+	/******Replace / Update the below function in the library******/
+	protected function get_read_input_fields($field_values = null)
+	{
+		$read_fields = $this->get_read_fields();
+
+		$this->field_types = null;
+		$this->required_fields = null;
+
+		$read_inputs = array();
+		foreach ($read_fields as $field)
+		{
+			if (!empty($this->change_field_type)
+			&& isset($this->change_field_type[$field->field_name])
+			&& $this->change_field_type[$field->field_name]->type == 'hidden')
+			{
+				continue;
+			}
+			$this->field_type($field->field_name, 'readonly');
+		}
+
+		$fields = $this->get_read_fields();
+		$types     = $this->get_field_types();
+
+		$input_fields = array();
+
+		foreach($fields as $field_num => $field)
+		{
+			$field_info = $types[$field->field_name];
+
+			if(isset($field_info->db_type) && ($field_info->db_type == 'tinyint' || ($field_info->db_type == 'int' && $field_info->db_max_length == 1)))
+			{
+				$field_value = $this->get_true_false_readonly_input($field_info, $field_values->{$field->field_name});
+			}
+			else
+			{
+				$field_value = !empty($field_values) && isset($field_values->{$field->field_name}) ? $field_values->{$field->field_name} : null;
+			}
+			if(!isset($this->callback_read_field[$field->field_name]))
+			{
+				$field_input = $this->get_field_input($field_info, $field_value);
+			}
+			else
+			{
+				$primary_key = $this->getStateInfo()->primary_key;
+				$field_input = $field_info;
+				$field_input->input = call_user_func($this->callback_read_field[$field->field_name], $field_value, $primary_key, $field_info, $field_values);
+			}
+
+			switch ($field_info->crud_type)
+			{
+				case 'invisible':
+				unset($this->read_fields[$field_num]);
+				unset($fields[$field_num]);
+				continue;
+				break;
+				case 'hidden':
+				$this->read_hidden_fields[] = $field_input;
+				unset($this->read_fields[$field_num]);
+				unset($fields[$field_num]);
+				continue;
+				break;
+			}
+
+			$input_fields[$field->field_name] = $field_input;
+		}
+
+		return $input_fields;
+	}
+
+	/***** Add the new functions to the library****/
+	protected function get_true_false_readonly_input($field_info,$value)
+	{
+		$value_is_null = empty($value) && $value !== '0' && $value !== 0 ? true : false;
+		$true_string = is_array($field_info->extras) && array_key_exists(1,$field_info->extras) ? $field_info->extras[1] : $this->default_true_false_text[1];
+		$false_string =  is_array($field_info->extras) && array_key_exists(0,$field_info->extras) ? $field_info->extras[0] : $this->default_true_false_text[0];
+
+		return $value === '1' || ($value_is_null && $field_info->default === '1') ? $true_string : $false_string;
+	}
+
+	protected function get_upload_file_readonly_input($field_info,$value)
+	{
+
+		$this->load_js_fancybox();
+
+		$this->set_js_config($this->default_javascript_path.'/jquery_plugins/config/jquery.fancybox.config.js');
+
+		$unique = mt_rand();
+
+		$uploader_display_none     = empty($value) ? "" : "display:none;";
+		$file_display_none      = empty($value) ?  "display:none;" : "";
+
+		$is_image = !empty($value) &&
+		( substr($value,-4) == '.jpg'
+		|| substr($value,-4) == '.png'
+		|| substr($value,-5) == '.jpeg'
+		|| substr($value,-4) == '.gif'
+		|| substr($value,-5) == '.tiff')
+		? true : false;
+
+		$image_class = $is_image ? 'image-thumbnail' : '';
+
+		$file_url = base_url().$field_info->extras->upload_path.'/'.$value;
+
+		$input = "<div id='success_$unique' class='upload-success-url' style='$file_display_none padding-top:7px;'>";
+		$input .= "<a href='".$file_url."' id='file_$unique' class='open-file";
+		//Code altered by Amit Shah - for the sake of using thumbnails
+		$_file_url = $field_info->extras->upload_path."/$value";
+		//$input .= $is_image ? " $image_class'><img src='".$file_url."' height='50px'>" : "' target='_blank'>$value";
+		$input .= $is_image ? " $image_class'>" . $this->img->rimg($_file_url, array('shortside'=>50, 'sharpen'=>true)) : "' target='_blank'>$value";
+		//Code Alteration ends here
+		$input .= "</a> ";
+		$input .= "</div><div style='clear:both'></div>";
+
+		return $input;
+	}
+
+/*
 	protected function get_read_input_fields($field_values = null)
 	{
 		$read_fields = $this->get_read_fields();
@@ -2853,6 +2972,7 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 		return $input_fields;
 	}
+#*/
 
 	protected function setThemeBasics()
 	{
