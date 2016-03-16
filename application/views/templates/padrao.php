@@ -1,17 +1,17 @@
 <div class="menu-superior">
-	<label>Cadastros:</label>
-    <a href="<?php echo site_url('cadastros/escola')?>">Escolas</a> |
-    <a href="<?php echo site_url('cadastros/formacao')?>">Formações</a> |
-    <a href="<?php echo site_url('cadastros/modalidade')?>">Modalidades</a> |
-    <a href="<?php echo site_url('cadastros/bloco')?>">Blocos</a> |
-    <a href="<?php echo site_url('cadastros/disciplina')?>">Disciplinas</a> |
-    <a href="<?php echo site_url('cadastros/turma')?>">Turmas</a> |
+    <label>Cadastros:</label>
+    <?php echo anchor(site_url('cadastros/escola'), 'Escolas') ?> |
+    <?php echo anchor(site_url('cadastros/formacao'), 'Formações') ?> |
+    <?php echo anchor(site_url('cadastros/modalidade'), 'Modalidades') ?> |
+    <?php echo anchor(site_url('cadastros/bloco'), 'Blocos') ?> |
+    <?php echo anchor(site_url('cadastros/disciplina'), 'Disciplinas') ?> |
+    <?php echo anchor(site_url('cadastros/turma'), 'Turmas') ?> |
     Competências e subcompetências |
     Usuários |
     Perfis
 </div>
 <div class="menu-superior">
-	<label>Relatórios:</label>
+    <label>Relatórios:</label>
     Mapa de competências |
     Demonstrativo de competências |
     Histórico individual |

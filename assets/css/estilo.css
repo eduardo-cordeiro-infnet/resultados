@@ -20,3 +20,14 @@ a:hover
 {
 	font-weight: bold;
 }
+
+.tamanho-icone
+{
+	height: 16px;
+	margin-left: 5px;
+}
+
+.float-right
+{
+	float: right;
+}
