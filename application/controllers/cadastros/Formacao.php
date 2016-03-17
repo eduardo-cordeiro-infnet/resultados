@@ -25,6 +25,7 @@ class Formacao extends CI_Controller {
 				->set_relation('id_escola','escolas','{sigla} ({nome})')
 				->display_as('id_escola','Escola');
 
+			$crud->unset_jquery();
 			$output = $crud->render();
 
 			$this->_output_padrao($output);
