@@ -28,9 +28,5 @@
     echo link_tag('assets/css/estilo.css');
     ?>
 
-    <?php foreach($js_files as $file): ?>
-        <script src="<?php echo $file; ?>"></script>
-    <?php endforeach; ?>
-    <script src="<?php echo base_url('assets/js/vendor/modernizr-2.8.3-respond-1.4.2.min.js')?>"></script>
 </head>
 <body>

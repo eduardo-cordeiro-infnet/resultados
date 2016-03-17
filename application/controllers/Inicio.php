@@ -18,7 +18,9 @@ class Inicio extends CI_Controller {
 			$data['title'] = 'Cadastros';
 
 			$this->load->view('templates/cabecalho', $data);
-			$this->load->view('templates/padrao', $data);
+			$this->load->view('templates/navbar', $data);
+			//$this->load->view('templates/padrao', $data);
+			$this->load->view('templates/dashboard', $data);
 			$this->load->view('templates/rodape');
 		}
 }
