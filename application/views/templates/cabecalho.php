@@ -25,8 +25,15 @@
     //echo link_tag('css/mystyles.css');
     echo link_tag('assets/css/vendor/bootstrap.css');
     echo link_tag('assets/css/vendor/animate.css');
+    echo link_tag('assets/css/vendor/jquery.mmenu.all.css');
     echo link_tag('assets/css/estilo.css');
+
+    //$this->load->spark('cssmin/1.0.0');
+    //$source = array('assets/css/vendor/bootstrap.css', 'assets/css/vendor/animate.css', 'assets/css/estilo.css');
+    //$minified = minifycss($source);
+    //print_r($minified);
     ?>
 
 </head>
 <body>
+
