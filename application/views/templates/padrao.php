@@ -9,8 +9,9 @@
     Competências e subcompetências |
     Usuários |
     Perfis
-</div>
-<div class="menu-superior">
+
+    <br/>
+
     <label>Relatórios:</label>
     Mapa de competências |
     Demonstrativo de competências |
