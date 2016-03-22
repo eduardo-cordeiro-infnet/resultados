@@ -24,6 +24,7 @@ class Disciplina extends CI_Controller {
 				->set_relation('id_bloco', 'blocos', '{nome}')
 				->display_as('id_bloco', 'Bloco');
 
+			$crud->unset_jquery();
 			$output = $crud->render();
 
 			$this->_output_padrao($output);

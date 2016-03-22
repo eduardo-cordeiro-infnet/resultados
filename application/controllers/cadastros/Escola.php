@@ -23,6 +23,7 @@ class Escola extends CI_Controller {
 				->required_fields('nome', 'sigla', 'ativa')
 				->unique_fields('sigla');
 
+			$crud->unset_jquery();
 			$output = $crud->render();
 
 			$this->_output_padrao($output);

@@ -40,6 +40,7 @@ class Turma extends CI_Controller {
 
 			->callback_column('nome', array($this->Turma_model, 'obter_nome_com_link_moodle'));
 
+		$crud->unset_jquery();
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de turmas';
