@@ -11,6 +11,7 @@
     </div>
     <ul class="navbar-right">
       <li><?php echo $title; ?></li>
+      <li><button class="btn btn-primary">Logout</button></li>
     </ul>
   </div>
 </nav>
