@@ -17,16 +17,23 @@
     <?php echo link_tag('assets/img/favicon.ico', 'shortcut icon', 'image/ico'); ?>
 
     <?php
-    foreach($css_files as $file): ?>
+    if (isset($css_files))
+    {
+        foreach($css_files as $file): ?>
         <link rel="stylesheet" href="<?php echo $file; ?>" type="text/css"/>
-    <?php endforeach; ?>
+    <?php
+        endforeach;
+    }
+    ?>
 
     <?php
     //echo link_tag('css/mystyles.css');
     echo link_tag('assets/css/vendor/bootstrap.css');
     echo link_tag('assets/css/vendor/animate.css');
+    echo link_tag('assets/css/vendor/jquery.mmenu.all.css');
     echo link_tag('assets/css/estilo.css');
     ?>
 
 </head>
 <body>
+

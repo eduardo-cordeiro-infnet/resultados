@@ -2723,8 +2723,9 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 			$field_info = $types[$field->field_name];
 
 			#http://www.grocerycrud.com/forums/topic/61-default-field-values-for-add-form/#entry1945
+			# adicionada verificação de se o campo possui valor default
 			#$field_value = !empty($field_values) && isset($field_values->{$field->field_name}) ? $field_values->{$field->field_name} : null;
-			$field_value = !empty($field_values) && isset($field_values->{$field->field_name}) ? $field_values->{$field->field_name} : $field_info->default;
+			$field_value = !empty($field_values) && isset($field_values->{$field->field_name}) ? $field_values->{$field->field_name} : isset($field_info->default) ? $field_info->default : null;
 
 			if(!isset($this->callback_add_field[$field->field_name]))
 			{

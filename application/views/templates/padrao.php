@@ -6,7 +6,7 @@
     <?php echo anchor(site_url('cadastros/bloco'), 'Blocos') ?> |
     <?php echo anchor(site_url('cadastros/disciplina'), 'Disciplinas') ?> |
     <?php echo anchor(site_url('cadastros/turma'), 'Turmas') ?> |
-    Competências e subcompetências |
+    <?php echo anchor(site_url('cadastros/competencia'), 'Competências e subcompetências') ?> |
     Usuários |
     Perfis
 

@@ -48,9 +48,9 @@ class Turma extends CI_Controller {
 			->display_as('id_mdl_course_category', 'Categoria no Moodle')
 			->display_as('link_moodle', 'Acessar Moodle')
 
-			->add_action('Cadastrar disciplinas da turma', base_url('assets/img/lista_mais.png'), 'cadastros/turma/disciplinas/')
+			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_moodle'))
 
-			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_moodle'));
+			->add_action('Cadastrar disciplinas da turma', base_url('assets/img/livros-vertical.png'), 'cadastros/turma/disciplinas');
 
 		$crud->unset_jquery();
 		$output = $crud->render();
@@ -60,7 +60,7 @@ class Turma extends CI_Controller {
 		$this->_output_padrao($output);
 	}
 
-	public function disciplinas($id_turma)
+	public function disciplinas($id_turma = null)
 	{
 		$crud = new grocery_CRUD();
 
@@ -73,35 +73,40 @@ class Turma extends CI_Controller {
 			->fields('id_turma', 'id_disciplina', 'id_mdl_course', 'trimestre_inicio', 'ano_inicio', 'trimestre_fim', 'ano_fim')
 			->unset_edit_fields('id_turma')
 
+			->set_relation('id_bloco_red', 'blocos', '{nome}')
+
 			->field_type('id_turma', 'hidden', $id_turma)
-			->field_type('id_mdl_course', 'dropdown', $this->Turma_model->obter_cursos_moodle())
+			->field_type('id_disciplina', 'dropdown', $this->Turma_model->obter_disciplinas_blocos($id_turma, $crud->getState()))
+			->field_type('id_mdl_course', 'dropdown', $this->Turma_model->obter_cursos_moodle($id_turma))
 			->field_type('trimestre_inicio', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano_inicio', 'enum', array(2014, 2015, 2016, 2017, 2018))
 			->field_type('trimestre_fim', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano_fim', 'enum', array(2014, 2015, 2016, 2017, 2018))
 
-			->required_fields('id_disciplina')
+			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_disciplina_moodle'))
+			->callback_column('periodo', array($this->Turma_model, 'obter_periodo_disciplina'))
 
-			->set_relation('id_bloco_red', 'blocos', '{nome}')
-			->set_relation('id_disciplina', 'disciplinas', '{nome}')
+			->required_fields('id_disciplina')
 
 			->display_as('id_bloco_red', 'Bloco')
 			->display_as('id_disciplina', 'Disciplina')
 			->display_as('link_moodle', 'Acessar Moodle')
 			->display_as('periodo', 'Período')
-			->display_as('id_mdl_course', 'Curso no Moodle')
+			->display_as('id_mdl_course', 'Disciplina no Moodle')
 
-			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_disciplina_moodle'))
-			->callback_column('periodo', array($this->Turma_model, 'obter_periodo_disciplina'))
+			->add_action('Cadastrar competências', base_url('assets/img/lista-num.png'), 'cadastros/competencia')
+		;
 
-			->where('id_turma', $id_turma);
+		if (intval($id_turma) > 0)
+		{
+			$crud->where('id_turma', $id_turma);
+		}
 
 		$crud->unset_jquery();
 		$output = $crud->render();
 
-		$output->title = 'Disciplinas da turma';
+		$output->title = 'Cadastro de disciplinas da turma';
 
 		$this->_output_padrao($output);
 	}
-
 }
