@@ -39,7 +39,14 @@ class Turma extends CI_Controller {
 			->set_relation('id_escola_red', 'escolas', '{sigla}')
 			->set_relation('id_formacao', 'formacoes', '{sigla} - {nome}')
 			->set_relation('id_modalidade', 'modalidades', '{nome}')
-			->set_relation_n_n('disciplinas', 'disciplinas_turmas', 'disciplinas', 'id_turma', 'id_disciplina', 'nome')
+			->set_relation_n_n(
+				'disciplinas',
+				'disciplinas_turmas',
+				'disciplinas',
+				'id_turma',
+				'id_disciplina',
+				'nome'
+			)
 
 			->display_as('id_escola_red', 'Escola')
 			->display_as('id_formacao', 'Formação')
@@ -76,7 +83,7 @@ class Turma extends CI_Controller {
 			->set_relation('id_bloco_red', 'blocos', '{nome}')
 
 			->field_type('id_turma', 'hidden', $id_turma)
-			->field_type('id_disciplina', 'dropdown', $this->Turma_model->obter_disciplinas_blocos($id_turma, $crud->getState()))
+			->field_type('id_disciplina', 'dropdown', $this->Turma_model->obter_disciplinas_blocos($id_turma, $crud->getState(), $crud->getStateInfo()))
 			->field_type('id_mdl_course', 'dropdown', $this->Turma_model->obter_cursos_moodle($id_turma))
 			->field_type('trimestre_inicio', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano_inicio', 'enum', array(2014, 2015, 2016, 2017, 2018))
@@ -94,6 +101,7 @@ class Turma extends CI_Controller {
 			->display_as('periodo', 'Período')
 			->display_as('id_mdl_course', 'Disciplina no Moodle')
 
+			->add_action('Cadastrar avaliações', base_url('assets/img/texto-lapis.png'), 'cadastros/turma/avaliacoes')
 			->add_action('Cadastrar competências', base_url('assets/img/lista-num.png'), 'cadastros/competencia')
 		;
 
@@ -106,6 +114,55 @@ class Turma extends CI_Controller {
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de disciplinas da turma';
+
+		$this->_output_padrao($output);
+	}
+
+	public function avaliacoes($id_disciplina_turma = null)
+	{
+		$crud = new grocery_CRUD();
+
+		$crud->set_model('cadastros/Turma_model');
+
+		$crud->set_subject('avaliação')
+			->set_table('avaliacoes')
+
+			->columns('id_disciplina_turma', 'nome', 'links_moodle', 'ativa')
+			->fields('id_disciplina_turma', 'nome', 'ativa', 'atividades_moodle')
+
+			->set_relation_n_n(
+				'atividades_moodle',
+				'avaliacoes_mdl_course_modules',
+				'lmsinfne_mdl.mdl_assign',
+				'id_avaliacao',
+				'instance_mdl_course_modules',
+				'name',
+				'',
+				array('course' => $this->Turma_model->obter_id_curso_moodle($id_disciplina_turma))
+			)
+
+			->field_type('id_disciplina_turma', 'dropdown', $this->Turma_model->obter_disciplinas_turmas($id_disciplina_turma))
+			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
+
+			->callback_column('links_moodle', array($this->Turma_model, 'obter_links_avaliacoes_moodle'))
+
+			->required_fields('id_disciplina_turma', 'nome')
+
+			->display_as('id_disciplina_turma', 'Disciplina')
+			->display_as('links_moodle', 'Acessar Moodle')
+			->display_as('atividades_moodle', 'Atividades no Moodle')
+		;
+
+		if (intval($id_disciplina_turma) > 0)
+		{
+			$crud->where('id_disciplina_turma', $id_disciplina_turma);
+		}
+
+		$crud->unset_jquery();
+		$output = $crud->render();
+
+
+		$output->title = 'Cadastro de avaliações da disciplina';
 
 		$this->_output_padrao($output);
 	}

@@ -27,7 +27,7 @@ class Competencia extends CI_Controller {
 			->columns('id_disciplina_turma', 'codigo', 'nome')
 			->fields('id_disciplina_turma', 'codigo', 'nome')
 
-			->field_type('id_disciplina_turma', 'dropdown', $this->Competencia_model->obter_disciplinas_turmas())
+			->field_type('id_disciplina_turma', 'dropdown', $this->Competencia_model->obter_disciplinas_turmas($id_disciplina_turma))
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 
 			->required_fields('id_disciplina_turma', 'nome')

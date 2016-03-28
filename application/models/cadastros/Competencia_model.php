@@ -7,28 +7,10 @@ class Competencia_model extends Grocery_CRUD_Model {
 	 * Retorna uma lista com as disciplinas que estão associadas a turmas
 	 * @return array
 	 */
-	public function obter_disciplinas_turmas()
+	public function obter_disciplinas_turmas($id_disciplina_turma)
 	{
-		$consulta = $this->db->query("
-			select dt.id,
-				CONCAT(
-					CONCAT_WS(' > ', e.sigla, f.nome, t.nome, b.nome, d.nome),
-						case
-							when d.denominacao_bloco is not null then CONCAT(' (', d.denominacao_bloco, ')')
-							else ''
-						end
-				) disciplina_turma_com_caminho,
-				CONCAT(e.sigla, f.nome, t.nome, b.nome) bloco_com_caminho,
-				d.denominacao_bloco
-			from disciplinas_turmas dt
-				join disciplinas d on d.id = dt.id_disciplina
-				join blocos b on b.id = d.id_bloco
-				join turmas t on t.id = dt.id_turma
-				join formacoes f on f.id = t.id_formacao
-				join escolas e on e.id = f.id_escola
-			order by bloco_com_caminho, denominacao_bloco
-			;
-		");
+		$this->load->library('Consultas_SQL');
+		$consulta = $this->db->query($this->consultas_sql->disciplinas_turmas_com_caminho(), array($id_disciplina_turma));
 
 		$disciplinas_turmas = array();
 
@@ -66,13 +48,8 @@ class Competencia_model extends Grocery_CRUD_Model {
 	 */
 	public function obter_competencias_disciplina($id_disciplina_turma)
 	{
-		$consulta = $this->db->query("
-			select cmp.id,
-				CONCAT_WS(' - ', cmp.codigo, cmp.nome) nome_com_codigo
-			from competencias cmp
-				join disciplinas_turmas dt on dt.id = cmp.id_disciplina_turma
-			where dt.id = ?;
-		", array($id_disciplina_turma));
+		$this->load->library('Consultas_SQL');
+		$consulta = $this->db->query($this->consultas_sql->competencias_disciplina_turma(), array($id_disciplina_turma));
 
 		$competencias_disciplina = array();
 
