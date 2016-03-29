@@ -176,3 +176,7 @@ a:hover {
 .float-right {
   float: right;
 }
+
+.db-verificar table, .db-verificar td {
+  border: 1px solid;
+}

@@ -86,12 +86,11 @@ class Consultas_SQL {
 	/**
 	 * Retornar disciplinas que estão associadas a turmas no seguinte formato:
 	 * {Sigla da escola} > {Formação} > {Turma} > {Bloco} > {Disciplina}
-	 * Se for informado id_disciplina_turma, esta disciplina é ordenada no ínicio
 	 * @return string
 	 */
-	public function disciplinas_turmas_com_caminho()
+	public function disciplinas_turmas_com_caminho($retornar_disciplina_turma_especifica = false)
 	{
-		return "
+		$sql = "
 			select dt.id,
 				CONCAT(
 					CONCAT_WS(' > ', e.sigla, f.nome, t.nome, b.nome, d.nome),
@@ -109,8 +108,20 @@ class Consultas_SQL {
 				join turmas t on t.id = dt.id_turma
 				join formacoes f on f.id = t.id_formacao
 				join escolas e on e.id = f.id_escola
+		";
+
+		if ($retornar_disciplina_turma_especifica)
+		{
+			$sql .= "
+			having disciplina_turma_selecionada = 1
+			";
+		}
+
+		$sql .= "
 			order by disciplina_turma_selecionada desc, bloco_com_caminho, denominacao_bloco;
 		";
+
+		return $sql;
 	}
 
 	/**
@@ -142,6 +153,27 @@ class Consultas_SQL {
 				join avaliacoes_mdl_course_modules acm on acm.instance_mdl_course_modules = cm.instance
 			where m.name = 'assign'
 				and acm.id_avaliacao = ?
+		";
+	}
+
+	/**
+	 * Retornar o nome de uma avaliação específica
+	 * @return string
+	 */
+	public function nome_avaliacao()
+	{
+		return "
+			select CONCAT_WS(' / ', a.nome, asg.name) nome_avaliacao
+			from avaliacoes a
+				join avaliacoes_mdl_course_modules acm on acm.id_avaliacao = a.id
+				join lmsinfne_mdl.mdl_assign asg on asg.id = acm.instance_mdl_course_modules
+			where
+				a.id = ?
+				and exists (
+					select 1 from v_rubricas_avaliacoes vra
+					where vra.id_avaliacao = a.id
+						and vra.id_mdl_gradingform_rubric_criteria = ?
+				)
 		";
 	}
 }

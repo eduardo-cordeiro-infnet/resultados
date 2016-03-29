@@ -166,7 +166,7 @@ class Turma_model extends Grocery_CRUD_Model {
 	/**
 	 * Obter ID de curso no Moodle
 	 *
-	 * Retorna o id do curso no Moodle associado à disciplina de turma informada
+	 * Retorna o ID do curso no Moodle associado à disciplina de turma informada
 	 * @return string
 	 */
 	public function obter_id_curso_moodle($id_disciplina_turma = null)
@@ -225,5 +225,65 @@ class Turma_model extends Grocery_CRUD_Model {
 		}
 
 		return $disciplinas_turmas;
+	}
+
+	/**
+	 * Obter ID de disciplina em turma
+	 *
+	 * Retorna o ID de uma disciplina em uma turma específica,
+	 * a partir do ID de uma avaliação
+	 * @return string
+	 */
+	public function obter_id_disciplina_turma($id_avaliacao = null)
+	{
+		if ($id_avaliacao)
+		{
+			$resultado = $this->db->select('id_disciplina_turma')->get_where('avaliacoes', array('id' => $id_avaliacao))->result();
+
+			return isset($resultado[0]) ? $resultado[0]->id_disciplina_turma : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Obter disciplina de turma
+	 *
+	 * Retorna o caminho de uma disciplina associada a uma turma específica
+	 * @return array
+	 */
+	public function obter_disciplina_turma($id_disciplina_turma)
+	{
+		$this->load->library('Consultas_SQL');
+		$consulta = $this->db->query($this->consultas_sql->disciplinas_turmas_com_caminho(true), array($id_disciplina_turma));
+
+		$disciplinas_turmas = array();
+
+		foreach ($consulta->result() as $linha) {
+			return $linha->disciplina_turma_com_caminho;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Obter nome de avaliação
+	 *
+	 * Retorna o nome da avaliação para exibição no cadastro de competências por rubrica
+	 * @return string
+	 */
+	public function obter_nome_avaliacao($id_avaliacao, $id_mdl_gradingform_rubric_criteria)
+	{
+		if ($id_mdl_gradingform_rubric_criteria instanceof stdClass)
+		{
+			$id_mdl_gradingform_rubric_criteria = $id_mdl_gradingform_rubric_criteria->id_mdl_gradingform_rubric_criteria;
+		}
+
+		$this->load->library('Consultas_SQL');
+		$resultado = $this->db->query($this->consultas_sql->nome_avaliacao(), array($id_avaliacao, $id_mdl_gradingform_rubric_criteria))->result();
+
+		$disciplinas_turmas = array();
+
+		return isset($resultado[0]) ? $resultado[0]->nome_avaliacao : null;
 	}
 }

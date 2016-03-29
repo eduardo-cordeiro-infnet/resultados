@@ -151,6 +151,8 @@ class Turma extends CI_Controller {
 			->display_as('id_disciplina_turma', 'Disciplina')
 			->display_as('links_moodle', 'Acessar Moodle')
 			->display_as('atividades_moodle', 'Atividades no Moodle')
+
+			->add_action('Associar competências a rubricas', base_url('assets/img/prancheta-correto.png'), 'cadastros/turma/rubricas')
 		;
 
 		if (intval($id_disciplina_turma) > 0)
@@ -161,6 +163,63 @@ class Turma extends CI_Controller {
 		$crud->unset_jquery();
 		$output = $crud->render();
 
+
+		$output->title = 'Cadastro de avaliações da disciplina';
+
+		$this->_output_padrao($output);
+	}
+
+	public function rubricas($id_avaliacao = null)
+	{
+		$crud = new grocery_CRUD();
+
+		$crud->set_model('cadastros/Turma_model');
+
+		$id_disciplina_turma = $this->Turma_model->obter_id_disciplina_turma($id_avaliacao);
+
+		$crud->set_subject('rubrica')
+			->set_table('v_rubricas_avaliacoes')
+
+			->set_primary_key('id_mdl_gradingform_rubric_criteria')
+
+			->columns('id_disciplina_turma', 'id_avaliacao', 'rubrica', 'subcompetencias')
+			->fields('id_mdl_gradingform_rubric_criteria', 'id_disciplina_turma', 'id_avaliacao', 'rubrica', 'subcompetencias')
+
+			->set_relation_n_n(
+				'subcompetencias',
+				'subcompetencias_mdl_gradingform_rubric_criteria',
+				'subcompetencias',
+				'id_mdl_gradingform_rubric_criteria',
+				'id_subcompetencia',
+				'{codigo_competencia_red}.{codigo} {nome}',
+				'',
+				array('id_disciplina_turma_red' => $id_disciplina_turma)
+			)
+
+			# Campo chave incluído para haver algum campo na operação update
+			->field_type('id_mdl_gradingform_rubric_criteria', 'hidden')
+			->field_type('rubrica', 'readonly')
+
+			->callback_column('id_disciplina_turma', array($this->Turma_model, 'obter_disciplina_turma'))
+			->callback_edit_field('id_disciplina_turma', array($this->Turma_model, 'obter_disciplina_turma'))
+			->callback_column('id_avaliacao', array($this->Turma_model, 'obter_nome_avaliacao'))
+			->callback_edit_field('id_avaliacao', array($this->Turma_model, 'obter_nome_avaliacao'))
+
+			->display_as('id_disciplina_turma', 'Disciplina')
+			->display_as('id_avaliacao', 'Avaliação')
+			->display_as('subcompetencias', 'Subcompetências')
+
+			->unset_add()
+			->unset_delete()
+		;
+
+		if (intval($id_avaliacao) > 0)
+		{
+			$crud->where('id_avaliacao', $id_avaliacao);
+		}
+
+		$crud->unset_jquery();
+		$output = $crud->render();
 
 		$output->title = 'Cadastro de avaliações da disciplina';
 
