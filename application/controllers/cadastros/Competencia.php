@@ -1,19 +1,21 @@
 <?php
 class Competencia extends CI_Controller {
+
 	public function __construct()
 	{
 			parent::__construct();
 
-			$this->load->database();
-
-			$this->load->library('grocery_CRUD');
+			$this->load
+				->library('grocery_CRUD')
+				->database()
+			;
 	}
 
 	function _output_padrao($output = null)
 	{
 		$this->load->view('templates/cabecalho', $output);
 		$this->load->view('templates/padrao', $output);
-		$this->load->view('templates/rodape');
+		$this->load->view('templates/rodape', $output);
 	}
 
 	public function cadastro($id_disciplina_turma = null)
@@ -49,6 +51,10 @@ class Competencia extends CI_Controller {
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de competências';
+		$output->mensagem_informativa = 'Nesta tela são cadastradas as competências de cada disciplina.</p><p>
+			O conjunto de competências é específico para a disciplina realizada em cada turma, conforme a associação realizada no ' . anchor(site_url('cadastros/turma'), 'cadastro de turmas') . '.</p><p>
+			É possível cadastrar as subcompetências clicando no ícone "<i>Cadastrar subcompetências</i>", na coluna "Ações": ' . img(base_url('assets/img/lista-num-decimal.png'), '', array('title' => 'Cadastrar subcompetências'))
+		;
 
 		$this->_output_padrao($output);
 	}
@@ -57,7 +63,7 @@ class Competencia extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('cadastros/Competencia_model');
+		$crud->set_model('Competencia_model');
 
 		$crud->set_subject('subcompetência')
 			->set_table('subcompetencias')
@@ -87,7 +93,10 @@ class Competencia extends CI_Controller {
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de subcompetências';
-
+		$output->mensagem_informativa = 'Nesta tela são cadastradas as subcompetências de cada competência.</p><p>
+			O código da subcompetência deve ser cadastrado como número inteiro. Por exemplo, se a subcompetência for 3.4, o código será 4, dentro da competência 3.</p><p>
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/turma/rubricas'), 'cadastro de subcompetências por rubrica') . '.'
+		;
 		$this->_output_padrao($output);
 	}
 }

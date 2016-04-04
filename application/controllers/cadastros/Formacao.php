@@ -1,40 +1,55 @@
 <?php
 class Formacao extends CI_Controller {
 
-		public function __construct()
-		{
-				parent::__construct();
+	public function __construct()
+	{
+			parent::__construct();
 
-				$this->load->database();
-				$this->load->helper('url');
+			$this->load
+				->library('grocery_CRUD')
+				->database()
+			;
+	}
 
-				$this->load->library('grocery_CRUD');
-		}
+	function _output_padrao($output = null)
+	{
+		$this->load->view('templates/cabecalho', $output);
+		$this->load->view('templates/padrao', $output);
+		$this->load->view('templates/rodape', $output);
+	}
 
-		public function cadastro()
-		{
-			$crud = new grocery_CRUD();
+	public function cadastro()
+	{
+		$crud = new grocery_CRUD();
 
-			$crud->set_subject('formação')
-				->set_table('formacoes')
-				->columns('id_escola', 'nome', 'sigla', 'ativa')
-				->fields('id_escola', 'nome', 'sigla', 'ativa')
-				->field_type('ativa', 'dropdown', array('Não', 'Sim'))
-				->required_fields('id_escola', 'nome', 'sigla')
-				->unique_fields('sigla')
-				->set_relation('id_escola','escolas','{sigla} ({nome})')
-				->display_as('id_escola','Escola');
+		$crud->set_subject('formação')
+			->set_table('formacoes')
 
-			$crud->unset_jquery();
-			$output = $crud->render();
+			->columns('id_escola', 'nome', 'sigla', 'ativa')
+			->fields('id_escola', 'nome', 'sigla', 'ativa')
 
-			$this->_output_padrao($output);
-		}
+			->set_relation('id_escola','escolas','{sigla} ({nome})')
 
-		function _output_padrao($output = null)
-		{
-			$this->load->view('templates/cabecalho', $output);
-			$this->load->view('templates/padrao', $output);
-			$this->load->view('templates/rodape');
-		}
+			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
+
+			->required_fields('id_escola', 'nome', 'sigla')
+
+			->unique_fields('sigla')
+
+			->display_as('id_escola','Escola')
+
+			->unset_read()
+		;
+
+		$crud->unset_jquery();
+		$output = $crud->render();
+
+		$output->title = 'Cadastro de escolas';
+		$output->mensagem_informativa = 'Nesta tela são cadastradas as formações do Instituto, independente de serem oferecidas de forma presencial, à distância ou em qualquer modalidade.</p><p>
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/bloco'), 'cadastro de blocos') . ' para associar blocos a cada formação.'
+		;
+
+		$this->_output_padrao($output);
+	}
+
 }

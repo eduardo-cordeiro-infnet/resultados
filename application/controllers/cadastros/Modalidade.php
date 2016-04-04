@@ -1,38 +1,51 @@
 <?php
 class Modalidade extends CI_Controller {
 
-		public function __construct()
-		{
-				parent::__construct();
+	public function __construct()
+	{
+			parent::__construct();
 
-				$this->load->database();
-				$this->load->helper('url');
+			$this->load
+				->library('grocery_CRUD')
+				->database()
+			;
+	}
 
-				$this->load->library('grocery_CRUD');
-		}
+	function _output_padrao($output = null)
+	{
+		$this->load->view('templates/cabecalho', $output);
+		$this->load->view('templates/padrao', $output);
+		$this->load->view('templates/rodape', $output);
+	}
 
-		public function cadastro()
-		{
-			$crud = new grocery_CRUD();
+	public function cadastro()
+	{
+		$crud = new grocery_CRUD();
 
-			$crud->set_subject('modalidade')
-				->set_table('modalidades')
-				->columns('nome', 'ativa')
-				->fields('nome', 'ativa')
-				->field_type('ativa', 'dropdown', array('Não', 'Sim'))
-				->required_fields('nome')
-				->unique_fields('nome');
+		$crud->set_subject('modalidade')
+			->set_table('modalidades')
 
-			$crud->unset_jquery();
-			$output = $crud->render();
+			->columns('nome', 'ativa')
+			->fields('nome', 'ativa')
 
-			$this->_output_padrao($output);
-		}
+			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 
-		function _output_padrao($output = null)
-		{
-			$this->load->view('templates/cabecalho', $output);
-			$this->load->view('templates/padrao', $output);
-			$this->load->view('templates/rodape');
-		}
+			->required_fields('nome')
+
+			->unique_fields('nome')
+
+			->unset_read()
+		;
+
+		$crud->unset_jquery();
+		$output = $crud->render();
+
+		$output->title = 'Cadastro de modalidades';
+		$output->mensagem_informativa = 'Nesta tela são cadastradas as modalidades em que são oferecidas as formações do Instituto.</p><p>
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/turma'), 'cadastro de turmas') . ' para definir a modalidade de cada turma.'
+		;
+
+		$this->_output_padrao($output);
+	}
+
 }

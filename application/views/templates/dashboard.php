@@ -294,7 +294,7 @@
                   </g>
                 </svg>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <?php echo anchor(site_url('#'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
+                <?php echo anchor(site_url('cadastros/competencia'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
             <!-- usuarios -->
