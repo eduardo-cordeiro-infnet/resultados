@@ -145,9 +145,19 @@ class Turma_model extends Grocery_CRUD_Model {
 	}
 
 	/**
+	 * Obter período da turma
+	 *
+	 * Retorna o período da turma formatado
+	 * @return string
+	 */
+	public function obter_periodo_turma($valor, $linha) {
+		return implode('T', array_filter(array($linha->trimestre, $linha->ano)));
+	}
+
+	/**
 	 * Obter período da disciplina
 	 *
-	 * Retorna o nome da turma com um link para a categoria da turma no LMS, se houver
+	 * Retorna o período da disciplina formatado
 	 * @return string
 	 */
 	public function obter_periodo_disciplina($valor, $linha) {

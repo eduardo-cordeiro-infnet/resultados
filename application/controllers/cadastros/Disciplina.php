@@ -36,7 +36,7 @@ class Disciplina extends CI_Controller {
 			->required_fields('nome')
 
 			->display_as('id_bloco', 'Bloco')
-			->display_as('denominacao_bloco', 'Denominação no bloco')]
+			->display_as('denominacao_bloco', 'Denominação no bloco')
 
 			->unset_read()
 		;

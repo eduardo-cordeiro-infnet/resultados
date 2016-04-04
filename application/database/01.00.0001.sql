@@ -1,0 +1,3 @@
+ALTER TABLE `turmas`
+	ADD COLUMN `trimestre` INT(11) NULL DEFAULT NULL AFTER `nome`,
+	ADD COLUMN `ano` YEAR NULL DEFAULT NULL AFTER `trimestre`;
