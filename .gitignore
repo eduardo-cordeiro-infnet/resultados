@@ -11,3 +11,4 @@ index.php
 ftpsync.settings
 *.tar
 *.tgz
+*[css|js]min*
