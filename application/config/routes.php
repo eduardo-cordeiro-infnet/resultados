@@ -57,8 +57,12 @@ $route['cadastros/turma/avaliacoes(.*)'] = 'cadastros/turma/avaliacoes$1';
 $route['cadastros/turma/rubricas(.*)'] = 'cadastros/turma/rubricas$1';
 $route['cadastros/competencia/subcompetencias(.*)'] = 'cadastros/competencia/subcompetencias$1';
 
-$route['cadastros/(:any)/(:any)/(:any)'] = 'cadastros/$1/cadastro/$2/$3';
-$route['cadastros/(:any)/(:any)'] = 'cadastros/$1/cadastro/$2';
-$route['cadastros/(:any)'] = 'cadastros/$1/cadastro';
+$route['cadastros/(:any)/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2/$3$4';
+$route['cadastros/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2$3';
+$route['cadastros/(:any)(.*)'] = 'cadastros/$1/cadastro$2';
+
+$route['relatorios/resultados_turma/(:num)'] = 'relatorios/resultados_turma/relatorio/$1';
+//$route['relatorios/resultados_turma/relatorio(.*)'] = 'relatorios/resultados_turma/relatorio$1';
+$route['relatorios/resultados_turma'] = 'relatorios/resultados_turma/selecionar_turma';
 
 $route['default_controller'] = 'inicio';

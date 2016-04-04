@@ -23,7 +23,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('cadastros/Turma_model');
+		$crud->set_model('Turma_model');
 
 		$crud->set_subject('turma')
 			->set_table('turmas')
@@ -71,7 +71,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('cadastros/Turma_model');
+		$crud->set_model('Turma_model');
 
 		$crud->set_subject('disciplina')
 			->set_table('disciplinas_turmas')
@@ -122,7 +122,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('cadastros/Turma_model');
+		$crud->set_model('Turma_model');
 
 		$crud->set_subject('avaliação')
 			->set_table('avaliacoes')
@@ -173,7 +173,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('cadastros/Turma_model');
+		$crud->set_model('Turma_model');
 
 		$id_disciplina_turma = $this->Turma_model->obter_id_disciplina_turma($id_avaliacao);
 
@@ -191,7 +191,7 @@ class Turma extends CI_Controller {
 				'subcompetencias',
 				'id_mdl_gradingform_rubric_criteria',
 				'id_subcompetencia',
-				'{codigo_competencia_red}.{codigo} {nome}',
+				'{codigo_completo_calc} {nome}',
 				'',
 				array('id_disciplina_turma_red' => $id_disciplina_turma)
 			)

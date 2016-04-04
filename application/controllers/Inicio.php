@@ -12,10 +12,12 @@ class Inicio extends CI_Controller {
 			$data['js_files'] = array();
 			$data['output'] = '';
 
-			$data['title'] = 'Cadastros';
-
+			$data['title'] = 'Dashboard';
 			$this->load->view('templates/cabecalho', $data);
-			$this->load->view('templates/padrao', $data);
+			$this->load->view('templates/menu', $data);
+			$this->load->view('templates/navbar', $data);
+			//$this->load->view('templates/padrao', $data);
+			$this->load->view('templates/dashboard', $data);
 			$this->load->view('templates/rodape');
 		}
 }
