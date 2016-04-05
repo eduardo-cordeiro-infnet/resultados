@@ -135,10 +135,10 @@
                 <?php echo anchor(site_url('cadastros/escola'), 'ENTRAR', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
-            <!-- formacoes -->
+            <!-- programas -->
             <div class="col-md-3">
               <div class="card card-lvl1">
-                <h3 class="text-center">Formações</h3>
+                <h3 class="text-center">Programas</h3>
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 378.178 378.178" style="enable-background:new 0 0 378.178 378.178;" xml:space="preserve">
                   <g>
                     <g>
@@ -188,7 +188,7 @@
                   </g>
                 </svg>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <?php echo anchor(site_url('cadastros/formacao'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
+                <?php echo anchor(site_url('cadastros/programa'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
             <!-- modalidades -->

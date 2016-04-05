@@ -29,11 +29,11 @@ class Turma extends CI_Controller {
 		$crud->set_subject('turma')
 			->set_table('turmas')
 
-			->columns('id_escola_red', 'id_formacao', 'nome', 'id_modalidade', 'periodo', 'link_moodle', 'qtd_disciplinas_calc', 'ativa')
-			->fields('nome', 'id_formacao', 'id_modalidade', 'id_mdl_course_category', 'trimestre', 'ano', 'ativa', 'disciplinas')
+			->columns('id_escola_red', 'id_programa', 'nome', 'id_modalidade', 'periodo', 'link_moodle', 'qtd_disciplinas_calc', 'ativa')
+			->fields('nome', 'id_programa', 'id_modalidade', 'id_mdl_course_category', 'trimestre', 'ano', 'ativa', 'disciplinas')
 
 			->set_relation('id_escola_red', 'escolas', '{sigla}')
-			->set_relation('id_formacao', 'formacoes', '{sigla} - {nome}')
+			->set_relation('id_programa', 'programas', '{sigla} - {nome}')
 			->set_relation('id_modalidade', 'modalidades', '{nome}')
 			->set_relation_n_n(
 				'disciplinas',
@@ -49,10 +49,10 @@ class Turma extends CI_Controller {
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 			->field_type('id_mdl_course_category', 'dropdown', $this->Turma_model->obter_categorias_moodle())
 
-			->required_fields('nome', 'id_formacao', 'id_modalidade')
+			->required_fields('nome', 'id_programa', 'id_modalidade')
 
 			->display_as('id_escola_red', 'Escola')
-			->display_as('id_formacao', 'Formação')
+			->display_as('id_programa', 'Programa')
 			->display_as('id_modalidade', 'Modalidade')
 			->display_as('qtd_disciplinas_calc', 'Disciplinas')
 			->display_as('id_mdl_course_category', 'Categoria no Moodle')
@@ -71,8 +71,8 @@ class Turma extends CI_Controller {
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de turmas';
-		$output->mensagem_informativa = 'Nesta tela são cadastradas as turmas de cada formação.</p><p>
-			Cada turma deve ser associada a uma formação e modalidade.</p><p>
+		$output->mensagem_informativa = 'Nesta tela são cadastradas as turmas de cada programa.</p><p>
+			Cada turma deve ser associada a um programa e modalidade.</p><p>
 			O período da turma indica o trimestre e ano em que a turma foi iniciada. Este dado é apenas para informação, não impacta nas funcionalidades do sistema.</p><p>
 			Se for definida a categoria da turma no Moodle (ou seja, a página do Moodle correspondente à turma), é exibido um link para o Moodle na lista.</p><p>
 			É possível cadastrar as disciplinas cursadas por cada turma clicando no ícone "<i>Cadastrar disciplinas da turma</i>", na coluna "Ações": ' . img(base_url('assets/img/livros-vertical.png'), '', array('title' => 'Cadastrar disciplinas da turma')) . '</p><p>

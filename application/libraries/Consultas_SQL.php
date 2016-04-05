@@ -84,7 +84,7 @@ class Consultas_SQL {
 
 	/**
 	 * Retorna disciplinas que estão associadas a turmas no seguinte formato:
-	 * {Sigla da escola} > {Formação} > {Turma} > {Bloco} > {Disciplina}
+	 * {Sigla da escola} > {Programa} > {Turma} > {Bloco} > {Disciplina}
 	 * @return string
 	 */
 	public function disciplinas_turmas_com_caminho($disciplina_turma_especifica = false, $apenas_com_rubricas_subcompetencias = false, $sem_disciplina_turma_selecionada = false)
@@ -93,13 +93,13 @@ class Consultas_SQL {
 
 		$db->select("dt.id,
 			CONCAT(
-				CONCAT_WS(' > ', e.sigla, f.nome, t.nome, b.nome, d.nome),
+				CONCAT_WS(' > ', e.sigla, p.nome, t.nome, b.nome, d.nome),
 					case
 						when d.denominacao_bloco is not null then CONCAT(' (', d.denominacao_bloco, ')')
 						else ''
 					end
 			) disciplina_turma_com_caminho,
-			CONCAT(e.sigla, f.nome, t.nome, b.nome) bloco_com_caminho,
+			CONCAT(e.sigla, p.nome, t.nome, b.nome) bloco_com_caminho,
 			d.denominacao_bloco"
 		);
 
@@ -108,7 +108,7 @@ class Consultas_SQL {
 			->join('disciplinas d', 'd.id = dt.id_disciplina')
 			->join('blocos b', 'b.id = d.id_bloco')
 			->join('turmas t', 't.id = dt.id_turma')
-			->join('formacoes f', 'f.id = t.id_formacao')
+			->join('programas p', 'p.id = t.id_programa')
 			->join('escolas e', 'e.id = f.id_escola')
 		;
 

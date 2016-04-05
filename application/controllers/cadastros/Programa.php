@@ -1,5 +1,5 @@
 <?php
-class Formacao extends CI_Controller {
+class Programa extends CI_Controller {
 
 	public function __construct()
 	{
@@ -22,8 +22,8 @@ class Formacao extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_subject('formação')
-			->set_table('formacoes')
+		$crud->set_subject('programa')
+			->set_table('programas')
 
 			->columns('id_escola', 'nome', 'sigla', 'ativa')
 			->fields('id_escola', 'nome', 'sigla', 'ativa')
@@ -45,8 +45,8 @@ class Formacao extends CI_Controller {
 		$output = $crud->render();
 
 		$output->title = 'Cadastro de escolas';
-		$output->mensagem_informativa = 'Nesta tela são cadastradas as formações do Instituto, independente de serem oferecidas de forma presencial, à distância ou em qualquer modalidade.</p><p>
-			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/bloco'), 'cadastro de blocos') . ' para associar blocos a cada formação.'
+		$output->mensagem_informativa = 'Nesta tela são cadastrados os programas do Instituto, independente de serem oferecidas de forma presencial, à distância ou em qualquer modalidade.</p><p>
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/bloco'), 'cadastro de blocos') . ' para associar blocos a cada programa.'
 		;
 
 		$this->_output_padrao($output);

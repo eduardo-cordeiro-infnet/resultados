@@ -2,11 +2,11 @@
         <label>Cadastros:</label>
         <?php echo anchor(site_url('cadastros/escola'), 'Escolas') ?> |
         <?php echo anchor(site_url('cadastros/modalidade'), 'Modalidades') ?> |
-        <?php echo anchor(site_url('cadastros/formacao'), 'Formações') ?> |
+        <?php echo anchor(site_url('cadastros/programa'), 'Programas') ?> |
         <?php echo anchor(site_url('cadastros/bloco'), 'Blocos') ?> |
         <?php echo anchor(site_url('cadastros/disciplina'), 'Disciplinas') ?> |
         <?php echo anchor(site_url('cadastros/turma'), 'Turmas') ?> |
-        <?php echo anchor(site_url('cadastros/competencia'), 'Competências e subcompetências') ?> |
+        <?php echo anchor(site_url('cadastros/competencia'), 'Competências') ?> |
         Usuários |
         Perfis
 

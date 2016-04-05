@@ -42,7 +42,7 @@ class Escola extends CI_Controller {
 
 		$output->title = 'Cadastro de escolas';
 		$output->mensagem_informativa = 'Nesta tela são cadastradas as escolas do Instituto.</p><p>
-			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/formacao'), 'cadastro de formações') . ' para associar cada curso a uma escola.'
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/programa'), 'cadastro de programas') . ' para associar cada curso a uma escola.'
 		;
 
 		$this->_output_padrao($output);

@@ -42,7 +42,7 @@ class Bloco extends CI_Controller {
 
 		$output->title = 'Cadastro de blocos';
 		$output->mensagem_informativa = 'Nesta tela são cadastrados os blocos de disciplinas. Blocos são agrupamentos de 5 disciplinas (4 regulares + projeto de bloco) com um assunto em comum.</p><p>
-			Um mesmo bloco pode ser utilizado em diferentes formações, contanto que as disciplinas do bloco sejam as mesmas.</p><p>
+			Um mesmo bloco pode ser utilizado em diferentes programas, contanto que as disciplinas do bloco sejam as mesmas.</p><p>
 			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/disciplina'), 'cadastro de disciplinas') . ' para definir a o bloco de cada disciplina.'
 		;
 
