@@ -24,7 +24,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('Turma_model');
+		$crud->set_model('grocery_crud/Turma_crud_model');
 
 		$crud->set_subject('turma')
 			->set_table('turmas')
@@ -47,7 +47,7 @@ class Turma extends CI_Controller {
 			->field_type('trimestre', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano', 'enum', array(2012, 2013, 2014, 2015, 2016, 2017, 2018))
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
-			->field_type('id_mdl_course_category', 'dropdown', $this->Turma_model->obter_categorias_moodle())
+			->field_type('id_mdl_course_category', 'dropdown', $this->Turma_crud_model->obter_categorias_moodle())
 
 			->required_fields('nome', 'id_programa', 'id_modalidade')
 
@@ -59,8 +59,8 @@ class Turma extends CI_Controller {
 			->display_as('periodo', 'Período')
 			->display_as('link_moodle', 'Acessar Moodle')
 
-			->callback_column('periodo', array($this->Turma_model, 'obter_periodo_turma'))
-			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_moodle'))
+			->callback_column('periodo', array($this->Turma_crud_model, 'obter_periodo_turma'))
+			->callback_column('link_moodle', array($this->Turma_crud_model, 'obter_link_moodle'))
 
 			->add_action('Cadastrar disciplinas da turma', base_url('assets/img/livros-vertical.png'), 'cadastros/turma/disciplinas')
 
@@ -86,7 +86,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('Turma_model');
+		$crud->set_model('grocery_crud/Turma_crud_model');
 
 		$crud->set_subject('disciplina')
 			->set_table('disciplinas_turmas')
@@ -98,15 +98,15 @@ class Turma extends CI_Controller {
 			->set_relation('id_bloco_red', 'blocos', '{nome}')
 
 			->field_type('id_turma', 'hidden', $id_turma)
-			->field_type('id_disciplina', 'dropdown', $this->Turma_model->obter_disciplinas_blocos($id_turma, $crud->getState(), $crud->getStateInfo()))
-			->field_type('id_mdl_course', 'dropdown', $this->Turma_model->obter_cursos_moodle($id_turma))
+			->field_type('id_disciplina', 'dropdown', $this->Turma_crud_model->obter_disciplinas_blocos($id_turma, $crud->getState(), $crud->getStateInfo()))
+			->field_type('id_mdl_course', 'dropdown', $this->Turma_crud_model->obter_cursos_moodle($id_turma))
 			->field_type('trimestre_inicio', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano_inicio', 'enum', array(2014, 2015, 2016, 2017, 2018))
 			->field_type('trimestre_fim', 'dropdown', array(1 => '1T', 2 => '2T', 3 => '3T', 4 => '4T'))
 			->field_type('ano_fim', 'enum', array(2014, 2015, 2016, 2017, 2018))
 
-			->callback_column('link_moodle', array($this->Turma_model, 'obter_link_disciplina_moodle'))
-			->callback_column('periodo', array($this->Turma_model, 'obter_periodo_disciplina'))
+			->callback_column('link_moodle', array($this->Turma_crud_model, 'obter_link_disciplina_moodle'))
+			->callback_column('periodo', array($this->Turma_crud_model, 'obter_periodo_disciplina'))
 
 			->required_fields('id_disciplina')
 
@@ -150,7 +150,7 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('Turma_model');
+		$crud->set_model('grocery_crud/Turma_crud_model');
 
 		$crud->set_subject('avaliação')
 			->set_table('avaliacoes')
@@ -166,13 +166,13 @@ class Turma extends CI_Controller {
 				'instance_mdl_course_modules',
 				'name',
 				'',
-				array('course' => $this->Turma_model->obter_id_curso_moodle($id_disciplina_turma))
+				array('course' => $this->Turma_crud_model->obter_id_curso_moodle($id_disciplina_turma))
 			)
 
-			->field_type('id_disciplina_turma', 'dropdown', $this->Turma_model->obter_disciplinas_turmas($id_disciplina_turma))
+			->field_type('id_disciplina_turma', 'dropdown', $this->Turma_crud_model->obter_disciplinas_turmas($id_disciplina_turma))
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 
-			->callback_column('links_moodle', array($this->Turma_model, 'obter_links_avaliacoes_moodle'))
+			->callback_column('links_moodle', array($this->Turma_crud_model, 'obter_links_avaliacoes_moodle'))
 
 			->required_fields('id_disciplina_turma', 'nome')
 
@@ -209,9 +209,9 @@ class Turma extends CI_Controller {
 	{
 		$crud = new grocery_CRUD();
 
-		$crud->set_model('Turma_model');
+		$crud->set_model('grocery_crud/Turma_crud_model');
 
-		$id_disciplina_turma = $this->Turma_model->obter_id_disciplina_turma($id_avaliacao);
+		$id_disciplina_turma = $this->Turma_crud_model->obter_id_disciplina_turma($id_avaliacao);
 
 		$crud->set_subject('rubrica')
 			->set_table('v_rubricas_avaliacoes')
@@ -236,10 +236,10 @@ class Turma extends CI_Controller {
 			->field_type('id_mdl_gradingform_rubric_criteria', 'hidden')
 			->field_type('rubrica', 'readonly')
 
-			->callback_column('id_disciplina_turma', array($this->Turma_model, 'obter_disciplina_turma'))
-			->callback_edit_field('id_disciplina_turma', array($this->Turma_model, 'obter_disciplina_turma'))
-			->callback_column('id_avaliacao', array($this->Turma_model, 'obter_nome_avaliacao'))
-			->callback_edit_field('id_avaliacao', array($this->Turma_model, 'obter_nome_avaliacao'))
+			->callback_column('id_disciplina_turma', array($this->Turma_crud_model, 'obter_disciplina_turma'))
+			->callback_edit_field('id_disciplina_turma', array($this->Turma_crud_model, 'obter_disciplina_turma'))
+			->callback_column('id_avaliacao', array($this->Turma_crud_model, 'obter_nome_avaliacao'))
+			->callback_edit_field('id_avaliacao', array($this->Turma_crud_model, 'obter_nome_avaliacao'))
 
 			->display_as('id_disciplina_turma', 'Disciplina')
 			->display_as('id_avaliacao', 'Avaliação')

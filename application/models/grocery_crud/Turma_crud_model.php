@@ -1,5 +1,5 @@
 <?php
-class Turma_model extends Grocery_CRUD_Model {
+class Turma_crud_model extends Grocery_CRUD_Model {
 
 	/**
 	 * Obter link Moodle
