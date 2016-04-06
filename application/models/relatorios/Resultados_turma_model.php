@@ -1,11 +1,13 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Resultados_turma_model extends CI_Model {
+
 	public function __construct()
 	{
-		$this->load->database();
 		$this->load
 			->library('Consultas_SQL')
-			->helper('class_helper');
+			->helper('class_helper')
+			->database()
+		;
 	}
 
 	/**
@@ -38,9 +40,9 @@ class Resultados_turma_model extends CI_Model {
 	{
 		$dados_relatorio = $this->db->query($this->consultas_sql->resultados_avaliacoes_disciplina_turma(), array($id_disciplina_turma))->result();
 
-		//$avaliacoes = $this->obter_avaliacoes_disciplina($dados_relatorio);
-
 		$dados['estudantes'] = $this->obter_estudantes_turma($dados_relatorio);
+		$dados['avaliacoes'] = $this->obter_avaliacoes_disciplina($dados_relatorio);
+
 		return $dados;
 	}
 
@@ -91,20 +93,38 @@ class Resultados_turma_model extends CI_Model {
 	 * inclusive rubricas e subcompetências associadas
 	 * @return array
 	 */
-	private function obter_avaliacoes_disciplina($id_disciplina_turma)
+	private function obter_avaliacoes_disciplina($dados_relatorio)
 	{
 		carregar_classe(array(
 			'models/Avaliacao_model',
 			'models/Rubrica_model',
+			'models/Competencia_model',
 			'models/Subcompetencia_model'
 		));
 
 		$avaliacoes = array();
 
-		$consulta = $this->db->query($this->consultas_sql->avaliacoes_disciplina_turma(), array($id_disciplina_turma));
+		foreach ($dados_relatorio as $linha) {
+			$item_existente = false;
 
-		foreach ($consulta->result() as $linha) {
+			foreach ($estudantes as $estudante)
+			{
+				if ($linha->mdl_userid == $estudante->mdl_userid)
+				{
+					$item_existente = true;
+					break;
+				}
+			}
 
+			if (!$item_existente)
+			{
+				$estudantes[] = new Estudante_model(array(
+					'nome_completo' => $linha->nome_completo,
+					'email' => $linha->email,
+					'mdl_username' => $linha->mdl_username,
+					'mdl_userid' => $linha->mdl_userid
+				));
+			}
 		}
 
 		return $avaliacoes;

@@ -109,7 +109,7 @@ class Consultas_SQL {
 			->join('blocos b', 'b.id = d.id_bloco')
 			->join('turmas t', 't.id = dt.id_turma')
 			->join('programas p', 'p.id = t.id_programa')
-			->join('escolas e', 'e.id = f.id_escola')
+			->join('escolas e', 'e.id = p.id_escola')
 		;
 
 
@@ -232,81 +232,56 @@ class Consultas_SQL {
 			select a.id id_avaliacao,
 				a.nome nome_avaliacao,
 				acm.id id_avaliacoes_mdl_course_modules,
-				acm.id_mdl_course_module,
-				acm.id_mdl_assign,
-				acm.name_mdl_assign,
-				est.id mdl_userid,
-				est.nome_completo nome_completo,
-				est.email,
-				est.username mdl_username,
-				est.id mdl_userid,
+				cm.id id_mdl_course_module,
+				asg.id id_mdl_assign,
+				asg.name name_mdl_assign,
+				usr.id mdl_userid,
+				CONCAT_WS(' ', usr.firstname, usr.lastname) nome_completo,
+				usr.email,
+				usr.username mdl_username,
 				grc.id id_mdl_gradingform_rubric_criteria,
 				grc.description rubrica,
 				scmp.id id_subcompetencia,
 				scmp.codigo_completo_calc codigo_subcompetencia,
 				scmp.nome nome_subcompetencia,
-				scmp.codigo_competencia,
-				scmp.nome_competencia,
+				cmp.codigo codigo_competencia,
+				cmp.nome nome_competencia,
 				sub.attemptnumber num_tentativa_ultima_entrega,
 				grl.id id_mdl_gradingform_rubric_levels,
 				grl.score pontuacao_rubrica,
 				grl.attemptnumber num_tentativa_ultima_correcao
 			from avaliacoes a
 				join disciplinas_turmas dt on dt.id	= a.id_disciplina_turma
-				left join (
-					select acm.id,
-						acm.id_avaliacao,
-						cm.id id_mdl_course_module,
-						asg.id id_mdl_assign,
-						asg.name name_mdl_assign
-					from avaliacoes_mdl_course_modules acm
-						join lmsinfne_mdl.mdl_course_modules cm on cm.instance = acm.instance_mdl_course_modules
-						join lmsinfne_mdl.mdl_modules m on m.id = cm.module
-						join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
-					where m.name = 'assign'
-				) acm on acm.id_avaliacao = a.id
-				left join (
-					select usr.id,
-						CONCAT_WS(' ', usr.firstname, usr.lastname) nome_completo,
-						usr.email,
-						usr.username,
-						cx.instanceid
-					from lmsinfne_mdl.mdl_user usr
-						join lmsinfne_mdl.mdl_role_assignments ra on ra.userid = usr.id
-						join lmsinfne_mdl.mdl_role r on r.id = ra.roleid
-						join lmsinfne_mdl.mdl_context cx on cx.id = ra.contextid
-					where r.archetype = 'student'
-				) est on est.instanceid = dt.id_mdl_course
-				left join (
-					select grc.id,
-						grc.description,
-						grc.sortorder,
-						gd.id id_mdl_grading_definitions,
-						cx.instanceid instanceid_mdl_context
-					from lmsinfne_mdl.mdl_gradingform_rubric_criteria grc
-						join lmsinfne_mdl.mdl_grading_definitions gd on gd.id = grc.definitionid
-						join lmsinfne_mdl.mdl_grading_areas ga on ga.id = gd.areaid
-						join lmsinfne_mdl.mdl_context cx on cx.id = ga.contextid
-				) grc on grc.instanceid_mdl_context = acm.id_mdl_course_module
-				left join (
-					select scmp.id,
-						scmp.codigo_completo_calc,
-						scmp.nome,
-						cmp.codigo codigo_competencia,
-						cmp.nome nome_competencia,
-						sgrc.id_mdl_gradingform_rubric_criteria
-					from subcompetencias scmp
-						join competencias cmp on cmp.id = scmp.id_competencia
-						join subcompetencias_mdl_gradingform_rubric_criteria sgrc on sgrc.id_subcompetencia = scmp.id
-				) scmp on scmp.id_mdl_gradingform_rubric_criteria = grc.id
-				left join lmsinfne_mdl.mdl_assign_submission sub on sub.id = (
-					select sub2.id
-					from lmsinfne_mdl.mdl_assign_submission sub2
-					where sub2.assignment = acm.id_mdl_assign
-						and sub2.userid = est.id
-						and sub2.status = 'submitted'
-					order by sub2.attemptnumber desc
-				)
+				left join avaliacoes_mdl_course_modules acm on acm.id_avaliacao = a.id
+				left join lmsinfne_mdl.mdl_course_modules cm on cm.instance = acm.instance_mdl_course_modules
+				left join lmsinfne_mdl.mdl_modules m on m.id = cm.module
+					and m.name = 'assign'
+				left join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
+
+				left join lmsinfne_mdl.mdl_context cx on cx.instanceid = dt.id_mdl_course
+				left join lmsinfne_mdl.mdl_role_assignments ra on ra.contextid = cx.id
+				left join lmsinfne_mdl.mdl_role r on r.id = ra.roleid
+					and r.archetype = 'student'
+				left join lmsinfne_mdl.mdl_user usr on usr.id = ra.userid
+
+				left join lmsinfne_mdl.mdl_context cx2 on cx2.instanceid = cm.id
+				left join lmsinfne_mdl.mdl_grading_areas ga on ga.contextid = cx2.id
+				left join lmsinfne_mdl.mdl_grading_definitions gd on gd.areaid = ga.id
+				left join lmsinfne_mdl.mdl_gradingform_rubric_criteria grc on grc.definitionid = gd.id
+
+				left join subcompetencias_mdl_gradingform_rubric_criteria sgrc on id_mdl_gradingform_rubric_criteria = grc.id
+				left join subcompetencias scmp on scmp.id = sgrc.id_subcompetencia
+				left join competencias cmp on cmp.id = scmp.id_competencia
+				left join lmsinfne_mdl.mdl_assign_submission sub on sub.assignment = asg.id
+					and sub.userid = usr.id
+					and sub.status = 'submitted'
+					and sub.attemptnumber = (
+						select MAX(sub2.attemptnumber)
+						from lmsinfne_mdl.mdl_assign_submission sub2
+						where sub2.assignment = asg.id
+							and sub2.userid = usr.id
+							and sub2.status = 'submitted'
+					)
 				left join (
 					select grl.id,
 						gin.id id_mdl_grading_instances,
@@ -322,18 +297,18 @@ class Consultas_SQL {
 						join lmsinfne_mdl.mdl_gradingform_rubric_fillings grf on grf.instanceid = gin.id
 							and grf.levelid = grl.id
 					where gin.status = 1
-				) grl on grl.definitionid = grc.id_mdl_grading_definitions
+				) grl on grl.definitionid = gd.id
 					and grl.criterionid = grc.id
-					and grl.userid = est.id
+					and grl.userid = usr.id
 					and grl.id_mdl_grading_instances = (
 						select gin2.id
 						from lmsinfne_mdl.mdl_grading_definitions gd2
 							join lmsinfne_mdl.mdl_grading_instances gin2 on gin2.definitionid = gd2.id
 							join lmsinfne_mdl.mdl_assign_grades ag2 on ag2.id = gin2.itemid
 							join lmsinfne_mdl.mdl_gradingform_rubric_fillings grf2 on grf2.instanceid = gin2.id
-						where gd2.id = grc.id_mdl_grading_definitions
+						where gd2.id = gd.id
 							and gin2.status = grl.status
-							and ag2.userid = est.id
+							and ag2.userid = usr.id
 							and grf2.criterionid = grc.id
 							and grf2.levelid = grl.id
 						order by ag2.attemptnumber desc
