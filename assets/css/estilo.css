@@ -312,7 +312,18 @@ a:hover {
   display: none;
 }
 
-/* Caixas informativas */
+/* Caixas de mensagens */
+.report-div.alerta
+{
+  border-color: yellow;
+}
+.report-div.alerta p
+{
+  background: url(../img/alerta.png) no-repeat left center;
+  margin: 0px !important;
+  padding: 10px 0px 10px 25px !important;
+}
+
 .report-div.info
 {
   border-color: blue;

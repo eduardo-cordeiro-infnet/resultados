@@ -200,6 +200,54 @@ class Consultas_SQL {
 	}
 
 	/**
+	 * Retorna dados de uma disciplina em uma turma específica
+	 * @return string
+	 */
+	public function disciplina_disciplina_turma()
+	{
+		return "
+			select d.id,
+				d.nome,
+				d.denominacao_bloco,
+				b.id id_bloco,
+				b.nome nome_bloco
+			from disciplinas_turmas dt
+				join disciplinas d on d.id = dt.id_disciplina
+				join blocos b on b.id = d.id_bloco
+			where dt.id = ?;
+		";
+	}
+
+	/**
+	 * Retorna dados da turma a partir de uma disciplina da própria turma
+	 * @return string
+	 */
+	public function turma_disciplina_turma()
+	{
+		return "
+			select t.id,
+				t.nome,
+				t.trimestre,
+				t.ano,
+				t.id_mdl_course_category,
+				p.id id_programa,
+				p.nome nome_programa,
+				p.sigla sigla_programa,
+				m.id id_modalidade,
+				m.nome nome_modalidade,
+				e.id id_escola,
+				e.nome nome_escola,
+				e.sigla sigla_escola
+			from disciplinas_turmas dt
+				join turmas t on t.id = dt.id_turma
+				join programas p on p.id = t.id_programa
+				join modalidades m on m.id = t.id_modalidade
+				join escolas e on e.id = p.id_escola
+			where dt.id = ?;
+		";
+	}
+
+	/**
 	 * Retorna estudantes integrantes de uma disciplina em uma turma
 	 * @return string
 	 */
@@ -222,6 +270,35 @@ class Consultas_SQL {
 	}
 
 	/**
+	 * Retorna avaliações de uma disciplina em uma turma,
+	 * com informações sobre competências e subcompetências
+	 * @return string
+	 */
+	public function avaliacoes_disciplina_turma()
+	{
+		return "
+			select a.id id_avaliacao,
+				a.nome nome_avaliacao,
+				a.avaliacao_final,
+				vra.id_mdl_gradingform_rubric_criteria,
+				vra.rubrica,
+				vra.ordem_rubrica,
+				cmp.codigo codigo_competencia,
+				cmp.nome nome_competencia,
+				scmp.codigo_completo_calc codigo_subcompetencia,
+				scmp.nome nome_subcompetencia,
+				scmp.obrigatoria obrigatoria_subcompetencia
+			from avaliacoes a
+				left join v_rubricas_avaliacoes vra on vra.id_avaliacao = a.id
+				left join subcompetencias_mdl_gradingform_rubric_criteria sgrc on sgrc.id_mdl_gradingform_rubric_criteria = vra.id_mdl_gradingform_rubric_criteria
+				left join subcompetencias scmp on scmp.id = sgrc.id_subcompetencia
+				left join competencias cmp on cmp.id = scmp.id_competencia
+			where a.id_disciplina_turma = ?
+			order by a.avaliacao_final, a.nome, scmp.codigo_completo_calc, vra.ordem_rubrica;
+		";
+	}
+
+	/**
 	 * Retorna os resultados de todas as avaliações ativas cadastradas
 	 * em uma disciplina de uma turma, por estudante e rubrica
 	 * @return string
@@ -229,94 +306,38 @@ class Consultas_SQL {
 	public function resultados_avaliacoes_disciplina_turma()
 	{
 		return "
-			select a.id id_avaliacao,
-				a.nome nome_avaliacao,
-				acm.id id_avaliacoes_mdl_course_modules,
-				cm.id id_mdl_course_module,
-				asg.id id_mdl_assign,
-				asg.name name_mdl_assign,
-				usr.id mdl_userid,
+			select vra.id_avaliacao,
+				ag.userid,
 				CONCAT_WS(' ', usr.firstname, usr.lastname) nome_completo,
-				usr.email,
-				usr.username mdl_username,
-				grc.id id_mdl_gradingform_rubric_criteria,
-				grc.description rubrica,
-				scmp.id id_subcompetencia,
-				scmp.codigo_completo_calc codigo_subcompetencia,
-				scmp.nome nome_subcompetencia,
-				cmp.codigo codigo_competencia,
-				cmp.nome nome_competencia,
-				sub.attemptnumber num_tentativa_ultima_entrega,
-				grl.id id_mdl_gradingform_rubric_levels,
-				grl.score pontuacao_rubrica,
-				grl.attemptnumber num_tentativa_ultima_correcao
-			from avaliacoes a
-				join disciplinas_turmas dt on dt.id	= a.id_disciplina_turma
-				left join avaliacoes_mdl_course_modules acm on acm.id_avaliacao = a.id
-				left join lmsinfne_mdl.mdl_course_modules cm on cm.instance = acm.instance_mdl_course_modules
-				left join lmsinfne_mdl.mdl_modules m on m.id = cm.module
-					and m.name = 'assign'
-				left join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
-
-				left join lmsinfne_mdl.mdl_context cx on cx.instanceid = dt.id_mdl_course
-				left join lmsinfne_mdl.mdl_role_assignments ra on ra.contextid = cx.id
-				left join lmsinfne_mdl.mdl_role r on r.id = ra.roleid
-					and r.archetype = 'student'
-				left join lmsinfne_mdl.mdl_user usr on usr.id = ra.userid
-
-				left join lmsinfne_mdl.mdl_context cx2 on cx2.instanceid = cm.id
-				left join lmsinfne_mdl.mdl_grading_areas ga on ga.contextid = cx2.id
-				left join lmsinfne_mdl.mdl_grading_definitions gd on gd.areaid = ga.id
-				left join lmsinfne_mdl.mdl_gradingform_rubric_criteria grc on grc.definitionid = gd.id
-
-				left join subcompetencias_mdl_gradingform_rubric_criteria sgrc on id_mdl_gradingform_rubric_criteria = grc.id
-				left join subcompetencias scmp on scmp.id = sgrc.id_subcompetencia
-				left join competencias cmp on cmp.id = scmp.id_competencia
-				left join lmsinfne_mdl.mdl_assign_submission sub on sub.assignment = asg.id
-					and sub.userid = usr.id
-					and sub.status = 'submitted'
-					and sub.attemptnumber = (
-						select MAX(sub2.attemptnumber)
-						from lmsinfne_mdl.mdl_assign_submission sub2
-						where sub2.assignment = asg.id
-							and sub2.userid = usr.id
-							and sub2.status = 'submitted'
-					)
-				left join (
-					select grl.id,
-						gin.id id_mdl_grading_instances,
-						grl.score,
-						ag.userid,
-						ag.attemptnumber,
-						gin.definitionid,
-						gin.status,
-						grf.criterionid
-					from (lmsinfne_mdl.mdl_gradingform_rubric_levels grl,
-						lmsinfne_mdl.mdl_grading_instances gin)
-						join lmsinfne_mdl.mdl_assign_grades ag on ag.id = gin.itemid
-						join lmsinfne_mdl.mdl_gradingform_rubric_fillings grf on grf.instanceid = gin.id
-							and grf.levelid = grl.id
-					where gin.status = 1
-				) grl on grl.definitionid = gd.id
-					and grl.criterionid = grc.id
-					and grl.userid = usr.id
-					and grl.id_mdl_grading_instances = (
-						select gin2.id
-						from lmsinfne_mdl.mdl_grading_definitions gd2
-							join lmsinfne_mdl.mdl_grading_instances gin2 on gin2.definitionid = gd2.id
-							join lmsinfne_mdl.mdl_assign_grades ag2 on ag2.id = gin2.itemid
-							join lmsinfne_mdl.mdl_gradingform_rubric_fillings grf2 on grf2.instanceid = gin2.id
-						where gd2.id = gd.id
-							and gin2.status = grl.status
-							and ag2.userid = usr.id
-							and grf2.criterionid = grc.id
-							and grf2.levelid = grl.id
-						order by ag2.attemptnumber desc
-						limit 1
-					)
-			where a.id_disciplina_turma = ?
-			order by case when nome_avaliacao = 'Assessment final' then 1 else 0 end, nome_avaliacao, nome_completo, grc.sortorder
-			;
+				sgrc.id_mdl_gradingform_rubric_criteria,
+				case when grl.score > 0 then 1 else 0 end demonstrada
+			from v_rubricas_avaliacoes vra
+				join subcompetencias_mdl_gradingform_rubric_criteria sgrc on sgrc.id_mdl_gradingform_rubric_criteria = vra.id_mdl_gradingform_rubric_criteria
+				join lmsinfne_mdl.mdl_gradingform_rubric_criteria grc on grc.id = sgrc.id_mdl_gradingform_rubric_criteria
+				join lmsinfne_mdl.mdl_grading_definitions gd on gd.id = grc.definitionid
+				join lmsinfne_mdl.mdl_gradingform_rubric_levels grl on grl.criterionid = sgrc.id_mdl_gradingform_rubric_criteria
+				join lmsinfne_mdl.mdl_grading_instances gin on gin.definitionid = gd.id
+				join lmsinfne_mdl.mdl_assign_grades ag on ag.id = gin.itemid
+				join lmsinfne_mdl.mdl_user usr on usr.id = ag.userid
+				join lmsinfne_mdl.mdl_gradingform_rubric_fillings as grf on grf.instanceid = gin.id
+					and grf.criterionid = grc.id
+					and grf.levelid = grl.id
+			where vra.id_disciplina_turma = ?
+				and gin.status = 1
+				and gin.id = (
+					select gin2.id
+					from lmsinfne_mdl.mdl_grading_definitions as gd2
+						join lmsinfne_mdl.mdl_grading_instances as gin2 on gin2.definitionid = gd2.id
+						join lmsinfne_mdl.mdl_assign_grades as ag2 on ag2.id = gin2.itemid
+						join lmsinfne_mdl.mdl_gradingform_rubric_fillings as grf2 on grf2.instanceid = gin2.id
+					where gd2.id = gd.id
+						and gin2.status = gin.status
+						and ag2.userid = ag.userid
+						and grf2.criterionid = grc.id
+						and grf2.levelid = grl.id
+					order by ag2.timecreated desc
+					limit 1
+				);
 		";
 	}
 }

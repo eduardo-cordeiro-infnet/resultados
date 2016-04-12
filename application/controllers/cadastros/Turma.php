@@ -155,8 +155,8 @@ class Turma extends CI_Controller {
 		$crud->set_subject('avaliação')
 			->set_table('avaliacoes')
 
-			->columns('id_disciplina_turma', 'nome', 'links_moodle', 'ativa')
-			->fields('id_disciplina_turma', 'nome', 'ativa', 'atividades_moodle')
+			->columns('id_disciplina_turma', 'nome', 'links_moodle', 'avaliacao_final', 'ativa')
+			->fields('id_disciplina_turma', 'nome', 'avaliacao_final', 'ativa', 'atividades_moodle')
 
 			->set_relation_n_n(
 				'atividades_moodle',
@@ -170,6 +170,7 @@ class Turma extends CI_Controller {
 			)
 
 			->field_type('id_disciplina_turma', 'dropdown', $this->Turma_crud_model->obter_disciplinas_turmas($id_disciplina_turma))
+			->field_type('avaliacao_final', 'dropdown', array('Não', 'Sim'))
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 
 			->callback_column('links_moodle', array($this->Turma_crud_model, 'obter_links_avaliacoes_moodle'))
@@ -178,6 +179,7 @@ class Turma extends CI_Controller {
 
 			->display_as('id_disciplina_turma', 'Disciplina')
 			->display_as('links_moodle', 'Acessar Moodle')
+			->display_as('avaliacao_final', 'Avaliação final')
 			->display_as('atividades_moodle', 'Atividades no Moodle')
 
 			->add_action('Associar competências a rubricas', base_url('assets/img/prancheta-correto.png'), 'cadastros/turma/rubricas')
@@ -193,14 +195,16 @@ class Turma extends CI_Controller {
 		$crud->unset_jquery();
 		$output = $crud->render();
 
-
 		$output->title = 'Cadastro de avaliações da disciplina';
-		$output->mensagem_informativa = 'Nesta tela são cadastradas as avaliações de cada disciplina.</p><p>
-			Se for associada uma ou mais atividades no Moodle à avaliação (ou seja, a página do Moodle correspondente à tarefa), é exibido um link para o Moodle na lista.</p><p>
-			Caso seja associada mais de uma tarefa do Moodle, o resultado será compilado considerando todas as rubricas das tarefas como se estivessem em uma única avaliação. Por exemplo, se o TP1 estiver dividido no Moodle em "Parte 1" e "Parte 2", basta criar um registro nesta tela chamado "TP1", associando as duas tarefas à mesma avaliação.</p><p>
-			É necessário associar pelo menos uma tarefa do Moodle para que as suas rubricas possam ser associadas a competências.</p><p>
-			É possível associar as competências da disciplina a cada avaliação clicando no ícone "<i>Associar competências a rubricas</i>" ' . img(base_url('assets/img/prancheta-correto.png'), '', array('title' => 'Associar competências a rubricas')) . ', na coluna "Ações".'
-		;
+
+		$output->mensagem_informativa = implode('</p><p>', array(
+			'Nesta tela são cadastradas as avaliações de cada disciplina.',
+			'Se for associada uma ou mais atividades no Moodle à avaliação (ou seja, a página do Moodle correspondente à tarefa), é exibido um link para o Moodle na lista.',
+			'Caso seja associada mais de uma tarefa do Moodle, o resultado será compilado considerando todas as rubricas das tarefas como se estivessem em uma única avaliação. Por exemplo, se o TP1 estiver dividido no Moodle em "Parte 1" e "Parte 2", basta criar um registro nesta tela chamado "TP1", associando as duas tarefas à mesma avaliação.',
+			'É necessário associar pelo menos uma tarefa do Moodle para que as suas rubricas possam ser associadas a competências.',
+			'É possível associar as competências da disciplina a cada avaliação clicando no ícone "<em>Associar competências a rubricas</em>", na coluna "Ações": ' . img(base_url('assets/img/prancheta-correto.png'), '', array('title' => 'Associar competências a rubricas')),
+			'Se uma avaliação estiver definida como "Avaliação final", qualquer subcompetência que seja avaliada como "Não Demonstrada" nesta avaliação ficará automaticamente como "ND" na subcompetência da disciplina em geral, independente das demais avaliações.'
+		));
 
 		$this->_output_padrao($output);
 	}

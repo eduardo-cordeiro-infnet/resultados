@@ -2,9 +2,8 @@
 class Estudante_model {
 	public $mdl_userid;
 	public $nome_completo;
-
-	private $email;
-	private $mdl_username;
+	public $email;
+	public $mdl_username;
 
 	public function __construct($dados = null)
 	{
@@ -16,4 +15,5 @@ class Estudante_model {
 			$this->mdl_userid = $dados['mdl_userid'];
 		}
 	}
+
 }

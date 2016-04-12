@@ -194,27 +194,12 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	 */
 	public function obter_links_avaliacoes_moodle($valor, $linha)
 	{
-		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->mdl_modulos_avaliacoes(), array($linha->id));
+		$this->load->helper('class_helper');
+		carregar_classe('models/Avaliacao_model');
 
-		$links = '';
+		$avaliacao = new Avaliacao_model();
 
-		foreach ($consulta->result() as $lin)
-		{
-			$links .= anchor_popup(
-				URL_BASE_LMS . '/mod/assign/view.php?id=' . $lin->id,
-				img(
-					array(
-						'src' => base_url('assets/img/moodle-m-65x46.png'),
-						'alt' => $lin->name,
-						'title' => $lin->name,
-						'class' => 'tamanho-icone'
-					)
-				)
-			);
-		}
-
-		return $links;
+		return $avaliacao->obter_links_moodle($linha->id);
 	}
 
 	/**

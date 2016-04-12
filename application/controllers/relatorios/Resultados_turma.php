@@ -12,10 +12,13 @@ class Resultados_turma extends CI_Controller {
 
 	private function _output_padrao($data = null)
 	{
+		$data['title'] = 'Resultados de competências por turma';
+		$data['css_files'] = array(base_url('assets/grocery_crud/themes/flexigrid/css/flexigrid.css'));
+
 		$this->load->view('templates/cabecalho', $data);
 		$this->load->view('templates/padrao', $data);
 
-		if (isset($data['dados_relatorio']))
+		if (isset($data['avaliacoes']))
 		{
 			$this->load->view('pages/relatorios/resultados_turma', $data);
 		}
@@ -24,14 +27,13 @@ class Resultados_turma extends CI_Controller {
 			$this->load->view('pages/relatorios/selecionar_turma', $data);
 		}
 
-		$this->load->view('templates/rodape');
+		$this->load->view('templates/rodape', $data);
 	}
 
 	public function selecionar_turma()
 	{
 		$this->load->helper('form');
 
-		$data['title'] = 'Resultados de competências por turma';
 		$data['disciplinas_turmas'] = $this->Resultados_turma_model->obter_disciplinas_turmas_com_resultados();
 
 		$this->_output_padrao($data);
@@ -47,10 +49,9 @@ class Resultados_turma extends CI_Controller {
 		}
 		else
 		{
-			$data['id_disciplina_turma'] = $id_disciplina_turma;
-			$data['dados_relatorio'] = $this->Resultados_turma_model->obter_dados_relatorio($id_disciplina_turma);
+			$this->load->helper('date');
 
-			$this->_output_padrao($data);
+			$this->_output_padrao($this->Resultados_turma_model->obter_dados_relatorio($id_disciplina_turma));
 		}
 	}
 }

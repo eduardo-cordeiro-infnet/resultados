@@ -1,5 +1,15 @@
-    <div id='list-report-info' class='report-div info' <?php if (isset($mensagem_informativa)) {?>style="display:block"}<?php } ?>>
-        <?php if (isset($mensagem_informativa)): ?>
+    <div id='list-report-info' class='report-div error' <?php if (!empty($mensagem_erro)) {?>style="display:block"}<?php } ?>>
+        <?php if (!empty($mensagem_erro)): ?>
+        <p><?php echo $mensagem_erro; ?></p>
+        <?php endif; ?>
+    </div>
+    <div id='list-report-info' class='report-div alerta' <?php if (!empty($mensagem_alerta)) {?>style="display:block"}<?php } ?>>
+        <?php if (!empty($mensagem_alerta)): ?>
+        <p><?php echo $mensagem_alerta; ?></p>
+        <?php endif; ?>
+    </div>
+    <div id='list-report-info' class='report-div info' <?php if (!empty($mensagem_informativa)) {?>style="display:block"}<?php } ?>>
+        <?php if (!empty($mensagem_informativa)): ?>
         <p><?php echo $mensagem_informativa; ?></p>
         <?php endif; ?>
     </div>

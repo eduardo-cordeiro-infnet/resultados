@@ -38,95 +38,53 @@ class Resultados_turma_model extends CI_Model {
 	 */
 	public function obter_dados_relatorio($id_disciplina_turma)
 	{
-		$dados_relatorio = $this->db->query($this->consultas_sql->resultados_avaliacoes_disciplina_turma(), array($id_disciplina_turma))->result();
+		carregar_classe('models/Disciplina_turma_model');
 
-		$dados['estudantes'] = $this->obter_estudantes_turma($dados_relatorio);
-		$dados['avaliacoes'] = $this->obter_avaliacoes_disciplina($dados_relatorio);
+		$disciplina_turma = new Disciplina_turma_model($id_disciplina_turma);
+		$disciplina_turma->popular();
 
-		return $dados;
-	}
-
-	/**
-	 * Obter estudantes de turma
-	 *
-	 * Retorna todos os estudantes inscritos no Moodle em uma disciplina de uma turma
-	 * @return array
-	 */
-	private function obter_estudantes_turma($dados_relatorio)
-	{
-		carregar_classe('models/Estudante_model');
-
-		$estudantes = array();
-
-		foreach ($dados_relatorio as $linha)
+		$erros = array();
+		if ($disciplina_turma->avaliacao_final_inexistente)
 		{
-			$item_existente = false;
-
-			foreach ($estudantes as $estudante)
-			{
-				if ($linha->mdl_userid == $estudante->mdl_userid)
-				{
-					$item_existente = true;
-					break;
-				}
-			}
-
-			if (!$item_existente)
-			{
-				$estudantes[] = new Estudante_model(array(
-					'nome_completo' => $linha->nome_completo,
-					'email' => $linha->email,
-					'mdl_username' => $linha->mdl_username,
-					'mdl_userid' => $linha->mdl_userid
-				));
-			}
+			$erros[] = 'Não há nenhuma avaliação definida como "Avaliação final", portanto não é possível calcular os resultados finais da disciplina.';
+		}
+		else if ($disciplina_turma->avaliacao_final_sem_rubricas)
+		{
+			$erros[] = 'A avaliação final não possui rubricas, portanto não é possível calcular os resultados finais da disciplina.';
 		}
 
-		return $estudantes;
-	}
+		$info = array();
 
-
-	/**
-	 * Obter avaliações de disciplina
-	 *
-	 * Retorna todas as avaliações ativas cadastradas em uma disciplina de uma turma,
-	 * inclusive rubricas e subcompetências associadas
-	 * @return array
-	 */
-	private function obter_avaliacoes_disciplina($dados_relatorio)
-	{
-		carregar_classe(array(
-			'models/Avaliacao_model',
-			'models/Rubrica_model',
-			'models/Competencia_model',
-			'models/Subcompetencia_model'
-		));
-
-		$avaliacoes = array();
-
-		foreach ($dados_relatorio as $linha) {
-			$item_existente = false;
-
-			foreach ($estudantes as $estudante)
-			{
-				if ($linha->mdl_userid == $estudante->mdl_userid)
-				{
-					$item_existente = true;
-					break;
-				}
-			}
-
-			if (!$item_existente)
-			{
-				$estudantes[] = new Estudante_model(array(
-					'nome_completo' => $linha->nome_completo,
-					'email' => $linha->email,
-					'mdl_username' => $linha->mdl_username,
-					'mdl_userid' => $linha->mdl_userid
-				));
-			}
+		foreach ($disciplina_turma->avaliacoes_sem_rubrica as $avaliacao)
+		{
+			$info[] = 'A avaliação <strong>' . $avaliacao->nome . '</strong> não possui rubricas e foi desconsiderada neste relatório.';
 		}
 
-		return $avaliacoes;
+		foreach ($disciplina_turma->rubricas_sem_subcompetencias as $avaliacao_rubrica)
+		{
+			$info[] = 'Na avaliação <strong>' . $avaliacao_rubrica['avaliacao']->nome . '</strong>, a seguinte rubrica não possui subcompetências associadas e foi desconsiderada neste relatório: <em>' . $avaliacao_rubrica['rubrica']->descricao . '</em>';
+		}
+
+		foreach ($disciplina_turma->correcoes_nao_estudantes as $correcao) {
+			$msg = 'Na avaliação <strong>' . $correcoes['avaliacao']->nome . '</strong>, os seguintes usuários tiveram entregas corrigidas, mas não estão inscritos como estudantes no Moodle:<ul>';
+			foreach ($correcoes->nomes as $nome) {
+				$msg .= '<li>' . $nome . '</li>';
+			}
+
+			$msg .= '</ul>';
+
+			$info[] = $msg;
+		}
+
+		return array(
+			'disciplina_turma' => $disciplina_turma,
+			'estudantes' => $disciplina_turma->estudantes,
+			'avaliacoes' => $disciplina_turma->avaliacoes,
+			'resultados_avaliacoes' => $disciplina_turma->resultados_avaliacoes,
+			'resultados_gerais' => $disciplina_turma->resultados_gerais,
+			'mensagem_erro' => implode('</p><p>', $erros),
+			'mensagem_informativa' => implode('</p><p>', $info)
+		);
 	}
+
 }
