@@ -118,3 +118,7 @@ CREATE TRIGGER `turmas_before_update` BEFORE UPDATE ON `turmas` FOR EACH ROW BEG
 	);
 END//
 DELIMITER ;
+
+INSERT INTO alteracoes_base
+(versao_primaria, versao_secundaria, versao_terciaria, nome_script, data_execucao)
+values ('01', '00', '0002', '01.00.0002.sql', NOW());

@@ -9,10 +9,10 @@ class Consultas_SQL {
 	}
 
 	/**
-	 * Retorna todas as categorias do Moodle com o caminho hierárquico
+	 * Retorna todas as categorias de turma do Moodle com o caminho hierárquico
 	 * @return string
 	 */
-	public function mdl_categorias_com_caminho()
+	public function turmas_mdl_categorias_com_caminho()
 	{
 		return "
 			select c.id,
@@ -23,6 +23,7 @@ class Consultas_SQL {
 				left join lmsinfne_mdl.mdl_course_categories c4 on c4.id = c3.parent
 				left join lmsinfne_mdl.mdl_course_categories c5 on c5.id = c4.parent
 				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
+			where c.depth = 4
 			order by c.path;
 		";
 	}

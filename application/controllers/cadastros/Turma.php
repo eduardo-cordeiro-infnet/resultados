@@ -223,7 +223,7 @@ class Turma extends CI_Controller {
 			->set_primary_key('id_mdl_gradingform_rubric_criteria')
 
 			->columns('id_disciplina_turma', 'id_avaliacao', 'rubrica', 'subcompetencias')
-			->fields('id_mdl_gradingform_rubric_criteria', 'id_disciplina_turma', 'id_avaliacao', 'rubrica', 'subcompetencias')
+			->fields('id_disciplina_turma', 'id_avaliacao', 'rubrica', 'subcompetencias')
 
 			->set_relation_n_n(
 				'subcompetencias',
@@ -236,8 +236,6 @@ class Turma extends CI_Controller {
 				array('id_disciplina_turma_red' => $id_disciplina_turma)
 			)
 
-			# Campo chave incluído para haver algum campo na operação update
-			->field_type('id_mdl_gradingform_rubric_criteria', 'hidden')
 			->field_type('rubrica', 'readonly')
 
 			->callback_column('id_disciplina_turma', array($this->Turma_crud_model, 'obter_disciplina_turma'))
@@ -252,6 +250,8 @@ class Turma extends CI_Controller {
 			->unset_add()
 			->unset_delete()
 			->unset_read()
+
+			->callback_update(array($this->Turma_crud_model, 'salvar_rubricas_subcompetencias'))
 		;
 
 		if (intval($id_avaliacao) > 0)
@@ -270,4 +270,5 @@ class Turma extends CI_Controller {
 
 		$this->_output_padrao($output);
 	}
+
 }

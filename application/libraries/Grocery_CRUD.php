@@ -5725,5 +5725,4 @@ class UploadHandler
 		header('Content-type: application/json');
 		echo json_encode($success);
 	}
-
 }

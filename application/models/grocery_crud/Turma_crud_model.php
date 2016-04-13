@@ -75,7 +75,7 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	public function obter_categorias_moodle()
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->mdl_categorias_com_caminho());
+		$consulta = $this->db->query($this->consultas_sql->turmas_mdl_categorias_com_caminho());
 
 		$categorias_moodle = array();
 
@@ -282,4 +282,57 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 
 		return isset($resultado[0]) ? $resultado[0]->nome_avaliacao : null;
 	}
+
+	/**
+	 * Salvar rubricas e subcompetências
+	 *
+	 * Baseado em `Grocery_crud_model->db_relation_n_n_update`
+	 * Grava a relação n-n de rubricas e subcompetências, sem validar
+	 * nem enviar o formulário
+	 */
+	public function salvar_rubricas_subcompetencias($post_array, $primary_key)
+	{
+		$field_name = 'subcompetencias';
+		$field_info = new stdClass();
+		$field_info->primary_key_alias_to_this_table = 'id_mdl_gradingform_rubric_criteria';
+		$field_info->primary_key_alias_to_selection_table = 'id_subcompetencia';
+		$field_info->relation_table = 'subcompetencias_mdl_gradingform_rubric_criteria';
+
+		$post_data = $post_array[$field_name];
+
+		$this->db->where($field_info->primary_key_alias_to_this_table, $primary_key);
+		if(!empty($post_data))
+			$this->db->where_not_in($field_info->primary_key_alias_to_selection_table , $post_data);
+		$this->db->delete($field_info->relation_table);
+
+		$counter = 0;
+		if(!empty($post_data))
+		{
+			foreach($post_data as $primary_key_value)
+			{
+				$where_array = array(
+					$field_info->primary_key_alias_to_this_table => $primary_key,
+					$field_info->primary_key_alias_to_selection_table => $primary_key_value,
+				);
+
+				$this->db->where($where_array);
+				$count = $this->db->from($field_info->relation_table)->count_all_results();
+
+				if($count == 0)
+				{
+					if(!empty($field_info->priority_field_relation_table))
+						$where_array[$field_info->priority_field_relation_table] = $counter;
+
+					$this->db->insert($field_info->relation_table, $where_array);
+
+				}elseif($count >= 1 && !empty($field_info->priority_field_relation_table))
+				{
+					$this->db->update( $field_info->relation_table, array($field_info->priority_field_relation_table => $counter) , $where_array);
+				}
+
+				$counter++;
+			}
+		}
+	}
+
 }
