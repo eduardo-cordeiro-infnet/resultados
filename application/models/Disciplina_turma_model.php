@@ -424,4 +424,62 @@ class Disciplina_turma_model extends CI_Model {
 		return $subcompetencias;
 	}
 
+	/**
+	 * Obter quantidades de avaliações por subcompetências
+	 *
+	 * Retorna a quantidade de avaliações em que cada subcompetência é verificada,
+	 * desconsiderando a avaliação final
+	 * @return array
+	 */
+	public function obter_qtd_avaliacoes_subcompetencias()
+	{
+		$qtd_avaliacoes_subcompetencia = array();
+
+		foreach ($this->obter_subcompetencias() as $subcompetencia)
+		{
+			$codigo_subcompetencia = $subcompetencia->obter_codigo_sem_obrigatoriedade();
+
+			$qtd_avaliacoes_subcompetencia[$codigo_subcompetencia] = count(
+				array_filter($this->avaliacoes,
+					function($av) use ($codigo_subcompetencia) {
+						return $av->avaliacao_final === false
+							&& array_search($codigo_subcompetencia,
+								array_map(
+									function($scmp) {
+										return $scmp->obter_codigo_sem_obrigatoriedade();
+									}, $av->obter_subcompetencias()
+								)
+							) !== false;
+					}
+				)
+			);
+		}
+
+		return $qtd_avaliacoes_subcompetencia;
+	}
+
+	/**
+	 * Obter avaliação final
+	 *
+	 * Retorna a avaliação final da disciplina, se houver
+	 * @return Avaliacao_model
+	 */
+	public function obter_avaliacao_final()
+	{
+		$avaliacao = null;
+
+		if (!$this->avaliacao_final_inexistente)
+		{
+			foreach ($this->avaliacoes as $av)
+			{
+				if ($av->avaliacao_final)
+				{
+					$avaliacao = $av;
+					break;
+				}
+			}
+		}
+
+		return $avaliacao;
+	}
 }

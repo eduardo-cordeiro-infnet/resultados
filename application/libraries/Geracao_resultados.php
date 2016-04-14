@@ -103,26 +103,128 @@ class Geracao_resultados {
 			}
 		}
 
+		$qtd_avaliacoes_subcompetencia = $disciplina_turma->obter_qtd_avaliacoes_subcompetencias();
+		$avaliacao_final = $disciplina_turma->obter_avaliacao_final();
+		$avaliacao_final_subcompetencias_codigos = array_map(
+			function($scmp)
+			{
+				return $scmp->obter_codigo_sem_obrigatoriedade();
+			}, $avaliacao_final->obter_subcompetencias()
+		);
+
 		foreach ($resultados_avaliacoes as $mdl_userid => $avaliacoes_por_id)
 		{
+			if (!isset($resultados_gerais[$mdl_userid]))
+			{
+				$resultados_gerais[$mdl_userid] = array();
+			}
+
 			foreach ($avaliacoes_por_id as $id_avaliacao => $subcompetencias_por_codigo)
 			{
-				if (!isset($resultados_gerais[$mdl_userid]))
+				if ($id_avaliacao != $avaliacao_final->id)
 				{
-					$resultados_gerais[$mdl_userid] = array();
+					foreach ($subcompetencias_por_codigo as $subcompetencia_codigo => $resultados_subcompetencia)
+					{
+						$competencia_codigo = explode('.', $subcompetencia_codigo)[0];
+
+						if (!isset($resultados_gerais[$mdl_userid][$competencia_codigo]))
+						{
+							$resultados_gerais[$mdl_userid][$competencia_codigo] = array();
+						}
+						if (!isset($resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]))
+						{
+							$resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo] = array('qtd_avaliacoes_demonstrada' => 0);
+						}
+
+						if ($resultados_subcompetencia['demonstrada'])
+						{
+							$resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['qtd_avaliacoes_demonstrada']++;
+						}
+					}
+				}
+			}
+
+			foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia)
+			{
+				$subcompetencia_codigo = $subcompetencia->obter_codigo_sem_obrigatoriedade();
+				$competencia_codigo = $subcompetencia->obter_codigo_competencia();
+
+				if (!isset($resultados_gerais[$mdl_userid][$competencia_codigo]))
+				{
+					$resultados_gerais[$mdl_userid][$competencia_codigo] = array();
+				}
+				if (!isset($resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]))
+				{
+					$resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo] = array('qtd_avaliacoes_demonstrada' => 0);
 				}
 
-				foreach ($subcompetencias_por_codigo as $subcompetencia_codigo => $resultados_subcompetencia)
-				{
-					$competencia_codigo = explode('.', $subcompetencia_codigo)[0];
+				$resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['demonstrada'] = (
+						(
+							!isset($avaliacao_final)
+							|| array_search($subcompetencia_codigo, $avaliacao_final_subcompetencias_codigos) === false
+							|| (
+								isset($resultados_avaliacoes[$mdl_userid][$avaliacao_final->id][$subcompetencia_codigo])
+								&& $resultados_avaliacoes[$mdl_userid][$avaliacao_final->id][$subcompetencia_codigo]['demonstrada']
+							)
+						)
+						&& $resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['qtd_avaliacoes_demonstrada'] >= $qtd_avaliacoes_subcompetencia[$subcompetencia_codigo] - 1
+				);
+			}
 
-					if (!isset($resultados_gerais[$mdl_userid][$competencia_codigo]))
+			$numerador_grau = 0;
+
+			foreach ($disciplina_turma->competencias as $competencia)
+			{
+				$resultado = null;
+				$qtd_subcompetencias_nao_demonstradas = 0;
+				$competencia_codigo = strval($competencia->codigo);
+
+				foreach ($competencia->subcompetencias as $subcompetencia)
+				{
+					$subcompetencia_codigo = $subcompetencia->obter_codigo_sem_obrigatoriedade();
+
+					if ($resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['demonstrada'] === false)
 					{
-						$resultados_gerais[$mdl_userid][$competencia_codigo] = array();
+						if ($subcompetencia->obrigatoria)
+						{
+							$resultado = 'ND';
+							$resultados_gerais[$mdl_userid]['aprovacao'] = false;
+							break;
+						}
+						else
+						{
+							$qtd_subcompetencias_nao_demonstradas++;
+						}
 					}
 				}
 
+				if (!isset($resultado))
+				{
+					if ($qtd_subcompetencias_nao_demonstradas === 0)
+					{
+						$resultado = 'DL';
+						$numerador_grau += 9;
+					}
+					else
+					{
+						$resultado = 'D';
+						$numerador_grau += 7;
+					}
+				}
+
+				$resultados_gerais[$mdl_userid][$competencia_codigo]['resultado'] = $resultado;
 			}
+
+			if (!isset($resultados_gerais[$mdl_userid]['aprovacao']))
+			{
+				$resultados_gerais[$mdl_userid]['aprovacao'] = true;
+			}
+			else
+			{
+				$numerador_grau *= 0.4;
+			}
+
+			$resultados_gerais[$mdl_userid]['grau'] = $numerador_grau / count($disciplina_turma->competencias);
 		}
 
 		return array(

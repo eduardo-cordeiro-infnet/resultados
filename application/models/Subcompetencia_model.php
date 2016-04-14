@@ -26,4 +26,15 @@ class Subcompetencia_model {
 		return str_replace(SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE, '', $this->codigo_completo);
 	}
 
+	/**
+	 * Obter código da competência
+	 *
+	 * Retorna o código da competência da qual esta subcompetência faz parte
+	 * @return string
+	 */
+	public function obter_codigo_competencia()
+	{
+		return explode('.', $this->codigo_completo)[0];
+	}
+
 }

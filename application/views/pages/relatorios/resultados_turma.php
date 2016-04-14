@@ -28,33 +28,46 @@
 				<th></th>
 				<th></th>
 				<th>Avaliação</th>
-	<?php foreach($avaliacoes as $avaliacao): ?>
+	<?php
+	foreach($avaliacoes as $avaliacao):
+		if (count($avaliacao->obter_subcompetencias()) > 0):
+	?>
 				<th colspan="<?php echo count($avaliacao->obter_subcompetencias()); ?>">
 					<?php echo $avaliacao->nome . $avaliacao->obter_links_moodle()?>
 				</th>
 				<th></th>
-	<?php endforeach; ?>
+	<?php
+		endif;
+	endforeach;
+	?>
 				<th colspan="<?php echo count($disciplina_turma->obter_subcompetencias()); ?>">Resultados por subcompetência</th>
 				<th></th>
 				<th colspan="<?php echo count($disciplina_turma->competencias) ?>">Resultados por competência</th>
 				<th rowspan="4">Aprovação por aproveitamento na disciplina</th>
-				<th rowspan="3" colspan="5">Rendimento para fins externos</th>
+				<th rowspan="4">Grau (rendimento para fins externos)</th>
+				<!-- <th rowspan="3" colspan="5">Rendimento para fins externos</th> -->
 			</tr>
 			<tr>
 				<th></th>
 				<th></th>
 				<th>Competências</th>
-	<?php foreach($avaliacoes as $avaliacao): ?>
-		<?php foreach($avaliacao->competencias as $competencia): ?>
+	<?php
+	foreach($avaliacoes as $avaliacao):
+		if (count($avaliacao->obter_subcompetencias()) > 0):
+	?>
+			<?php foreach($avaliacao->competencias as $competencia): ?>
 				<th
 					colspan="<?php echo count($competencia->subcompetencias); ?>"
 					title="<?php echo $competencia->nome; ?>"
 				>
 					<?php echo $competencia->codigo; ?>
 				</th>
-		<?php endforeach; ?>
+			<?php endforeach; ?>
 				<th></th>
-	<?php endforeach; ?>
+	<?php
+		endif;
+	endforeach;
+	?>
 	<?php foreach ($disciplina_turma->competencias as $competencia): ?>
 				<th
 					colspan="<?php echo count($competencia->subcompetencias); ?>"
@@ -72,41 +85,54 @@
 				<th></th>
 				<th></th>
 				<th>Subcompetências</th>
-	<?php foreach($avaliacoes as $avaliacao): ?>
-		<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
+	<?php
+	foreach($avaliacoes as $avaliacao):
+		if (count($avaliacao->obter_subcompetencias()) > 0):
+	?>
+			<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
 				<th title="<?php echo $subcompetencia->nome; ?>">
-					<?php echo $subcompetencia->obter_codigo_sem_obrigatoriedade(); ?>
+				<?php echo $subcompetencia->obter_codigo_sem_obrigatoriedade(); ?>
 				</th>
-		<?php endforeach; ?>
+			<?php endforeach; ?>
 				<th></th>
-	<?php endforeach; ?>
+	<?php
+		endif;
+	endforeach;
+	?>
 	<?php foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
 				<th title="<?php echo $subcompetencia->nome; ?>"><?php echo $subcompetencia->obter_codigo_sem_obrigatoriedade(); ?></th>
 	<?php endforeach ?>
+				<th></th>
 			</tr>
 			<tr>
 				<th>#</th>
 				<th>Estudante</th>
 				<th>Obrigatória?</th>
-	<?php foreach($avaliacoes as $avaliacao): ?>
-		<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
+	<?php
+	foreach($avaliacoes as $avaliacao):
+		if (count($avaliacao->obter_subcompetencias()) > 0):
+	?>
+			<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
 				<th>
 					<?php if($subcompetencia->obrigatoria) { echo SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE; } ?>
 				</th>
-		<?php endforeach; ?>
+			<?php endforeach; ?>
 				<th></th>
+	<?php
+		endif;
+	endforeach;
+	?>
+	<?php foreach($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
+				<th>
+					<?php if($subcompetencia->obrigatoria) { echo SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE; } ?>
+				</th>
 	<?php endforeach; ?>
 				<th></th>
-		<?php foreach($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
-				<th>
-					<?php if($subcompetencia->obrigatoria) { echo SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE; } ?>
-				</th>
-		<?php endforeach; ?>
-				<th>ND</th>
+				<!-- <th>ND</th>
 				<th>D</th>
 				<th>DL</th>
 				<th>DML</th>
-				<th>Grau</th>
+				<th>Grau</th> -->
 			</tr>
 		</thead>
 		<tbody>
@@ -114,8 +140,11 @@
 			<tr>
 				<td><?php echo $index + 1; ?></td>
 				<td colspan="2"><?php echo $estudante->nome_completo; ?></td>
-		<?php foreach($avaliacoes as $avaliacao): ?>
-			<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
+		<?php
+		foreach($avaliacoes as $avaliacao):
+			if (count($avaliacao->obter_subcompetencias()) > 0):
+		?>
+				<?php foreach($avaliacao->obter_subcompetencias() as $subcompetencia): ?>
 				<td>
 					<?php
 					if (isset($resultados_avaliacoes[$estudante->mdl_userid][$avaliacao->id][$subcompetencia->obter_codigo_sem_obrigatoriedade()]))
@@ -124,27 +153,68 @@
 					}
 					?>
 				</td>
-			<?php endforeach; ?>
+				<?php endforeach; ?>
 				<td></td>
-		<?php endforeach; ?>
+		<?php
+			endif;
+		endforeach;
+		?>
+		<?php foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
+				<td>
+					<?php
+					if (isset($resultados_gerais[$estudante->mdl_userid]))
+					{
+						if ($subcompetencia->obrigatoria)
+						{
+							echo SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE;
+						}
+						echo (
+							isset($resultados_gerais[$estudante->mdl_userid][$subcompetencia->obter_codigo_competencia()][$subcompetencia->obter_codigo_sem_obrigatoriedade()])
+							&& $resultados_gerais[$estudante->mdl_userid][$subcompetencia->obter_codigo_competencia()][$subcompetencia->obter_codigo_sem_obrigatoriedade()]['demonstrada']
+						) ? 'D' : 'ND';
+					}
+					?>
+				</td>
+		<?php endforeach ?>
 				<td></td>
-	<?php foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
+		<?php foreach ($disciplina_turma->competencias as $competencia): ?>
+				<td>
+					<?php
+					if (isset($resultados_gerais[$estudante->mdl_userid][$competencia->codigo]))
+					{
+						echo $resultados_gerais[$estudante->mdl_userid][$competencia->codigo]['resultado'];
+					}
+					?>
+				</td>
+		<?php endforeach ?>
+				<td>
+					<?php
+					if (isset($resultados_gerais[$estudante->mdl_userid]))
+					{
+						echo ($resultados_gerais[$estudante->mdl_userid]['aprovacao']) ? 'Sim' : 'Não';
+					}/*
+					else
+					{
+						echo 'N/D';
+					}*/
+					?>
+				</td>
+				<!-- <td></td>
 				<td></td>
-	<?php endforeach ?>
 				<td></td>
-	<?php foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
-				<td></td>
-	<?php endforeach ?>
-				<td></td>
-	<?php foreach ($disciplina_turma->competencias as $competencia): ?>
-				<td></td>
-	<?php endforeach ?>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td></td> -->
+				<td>
+					<?php
+					if (isset($resultados_gerais[$estudante->mdl_userid]))
+					{
+						echo number_format($resultados_gerais[$estudante->mdl_userid]['grau'], 2, ',', null);
+					}/*
+					else
+					{
+						echo 'N/D';
+					}*/
+					?>
+				</td>
 			</tr>
 	<?php endforeach; ?>
 		</tbody>
