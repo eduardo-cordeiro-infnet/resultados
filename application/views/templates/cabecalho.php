@@ -11,27 +11,23 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <title>
-    <?php echo isset($title) ? $title . ' - ' : '' ?>
-        Sistema de Resultados do Modelo de Bloco - Instituto Infnet
+        <?php echo isset($title) ? $title . ' - ' : '' ?>
+        Sistema de Resultados de Competências - Instituto Infnet
     </title>
+
     <?php echo link_tag('assets/img/favicon.ico', 'shortcut icon', 'image/ico'); ?>
 
-    <?php
-    foreach($css_files as $file): ?>
-        <link rel="stylesheet" href="<?php echo $file; ?>" type="text/css"/>
-    <?php endforeach; ?>
+    <?php if (isset($css_files)): ?>
+        <?php foreach($css_files as $file): ?>
+    <link rel="stylesheet" href="<?php echo $file; ?>" type="text/css"/>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <?php
-    //echo link_tag('css/mystyles.css');
     echo link_tag('assets/css/vendor/bootstrap.css');
     echo link_tag('assets/css/vendor/animate.css');
     echo link_tag('assets/css/vendor/jquery.mmenu.all.css');
     echo link_tag('assets/css/estilo.css');
-
-    //$this->load->spark('cssmin/1.0.0');
-    //$source = array('assets/css/vendor/bootstrap.css', 'assets/css/vendor/animate.css', 'assets/css/estilo.css');
-    //$minified = minifycss($source);
-    //print_r($minified);
     ?>
 
 </head>

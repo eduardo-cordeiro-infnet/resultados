@@ -9,3 +9,6 @@ application/logs/
 assets/uploads/images/
 index.php
 ftpsync.settings
+*.tar
+*.tgz
+*[css|js]min*
