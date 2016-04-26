@@ -17,19 +17,15 @@ $(document).ready(function() {
     switch (rel) {
       case "linha":
         $(".dashboard .area").removeClass("coluna");
-        console.log("linha");
         break;
       case "coluna":
         $(".dashboard .area").addClass("coluna");
-        console.log("coluna");
         break;
       case "grid":
         $(".dashboard .area").removeClass("lista");
-        console.log("grid");
         break;
       case "lista":
         $(".dashboard .area").addClass("lista");
-        console.log("lista");
         break;
       default:
         console.log("Nada");

@@ -258,12 +258,15 @@ li.mm-vertical.mm-opened>.mm-panel {
 .mm-listview>li {
     position: relative;
     text-transform: uppercase;
-    font-weight: 300px;
+    font-weight: 300;
     letter-spacing: .5px;
 }
 
 .mm-listview>li.divider {
-    padding: 16px 0;
+    padding: 16px 0 8px 0;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255, 0.2);
+    margin-bottom: 8px;
 }
 
 .mm-listview>li,

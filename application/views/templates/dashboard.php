@@ -45,7 +45,7 @@
             </div>
             <div class="col-md-3">
               <div class="card card-lvl1">
-              <h3 class="text-center">Histórico Indiviudal</h3>
+              <h3 class="text-center">Histórico<br>Indiviudal</h3>
               <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 332.921 332.921" style="enable-background:new 0 0 332.921 332.921;" xml:space="preserve">
               <path d="M324.921,286.652H8.002c-4.418,0-8-3.582-8-8v-4.484c-0.003-0.121-0.003-0.243,0-0.364V54.269c0-4.418,3.582-8,8-8h316.919
                 c4.418,0,8,3.582,8,8v224.383C332.921,283.071,329.339,286.652,324.921,286.652z M181.616,270.652h135.305V62.269H181.616V270.652z
@@ -67,7 +67,7 @@
             </div>
             <div class="col-md-3">
               <div class="card card-lvl1">
-              <h3 class="text-center">Resumo de Conceitos Individuais</h3>
+              <h3 class="text-center">Resumo de<br>Conceitos Individuais</h3>
               <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 388.227 388.227" style="enable-background:new 0 0 388.227 388.227;" xml:space="preserve">
                 <g>
                   <path d="M362.953,271.075l-22.71-60.84v-94.76h-0.001c-0.031-2.378-1.189-4.6-3.119-5.988L187.067,1.533

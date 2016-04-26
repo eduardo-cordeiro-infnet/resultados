@@ -9,6 +9,7 @@ application/logs/
 assets/uploads/images/
 index.php
 ftpsync.settings
+sftp-config.json
 *.tar
 *.tgz
 *[css|js]min*

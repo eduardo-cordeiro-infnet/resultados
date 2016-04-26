@@ -29,7 +29,7 @@
 	$config['grocery_crud_paging_options'] = array('25','50','100');
 
     //Default theme for grocery CRUD
-    $config['grocery_crud_default_theme'] = 'flexigrid';
+    $config['grocery_crud_default_theme'] = 'struct';
 
     //The environment is important so we can have specific configurations for specific environments
     $config['grocery_crud_environment'] = 'production';
