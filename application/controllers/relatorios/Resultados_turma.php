@@ -13,9 +13,13 @@ class Resultados_turma extends CI_Controller {
 	private function _output_padrao($data = null)
 	{
 		$data['title'] = 'Resultados de competências por turma';
-		$data['css_files'] = array(base_url('assets/grocery_crud/themes/flexigrid/css/flexigrid.css'));
-		$data['js_files'] = array(base_url('assets/js/vendor/wholly.js'),
-			'https://rawgit.com/ryandoom/jquery-plugin-table-to-div/master/jquery.table_to_div.js'
+		$data['css_files'] = array(
+			base_url('assets/grocery_crud/themes/struct/css/struct.css'),
+			base_url('assets/css/relatorio_turma.css')
+		);
+		$data['js_files'] = array(
+			base_url('assets/js/vendor/wholly.js'),
+			base_url('assets/js/vendor/jquery.battatech.excelexport.min.js')
 		);
 
 		$this->load->view('templates/cabecalho', $data);
@@ -27,7 +31,7 @@ class Resultados_turma extends CI_Controller {
 	<script>
 	$(function() {
 		RelatorioTurma.formatarTabela();
-		$('.relatorio').table_to_div();
+		$('.link-exportar-excel').click(RelatorioTurma.exportarExcel);
 	});
 	</script>
 			";
@@ -63,4 +67,5 @@ class Resultados_turma extends CI_Controller {
 			$this->_output_padrao($this->Resultados_turma_model->obter_dados_relatorio($id_disciplina_turma));
 		}
 	}
+
 }

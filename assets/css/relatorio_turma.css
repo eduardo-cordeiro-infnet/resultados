@@ -1,0 +1,108 @@
+.destaque {
+  background-color: #ffa !important;
+}
+
+div.relatorio_container {
+	overflow-x:scroll;
+	margin-left:25em;
+	overflow-y:visible;
+}
+
+table.relatorio th:first-child, table.relatorio td:first-child {
+	position:absolute !important;
+	left:0;
+	width:25em;
+}
+
+table.relatorio th, table.relatorio td {
+	text-align: center;
+	color: #444;
+	border: 1px solid #999 !important;
+}
+
+table.relatorio th:first-child {
+	text-align: right;
+}
+
+table.relatorio td:first-child {
+	text-align: left;
+	font-weight: bold;
+}
+
+table.relatorio th {
+	background-color: #CFE2F3;
+}
+
+table.relatorio td {
+	background-color: #DAEEF3;
+}
+
+table.relatorio tr:nth-child(even) td {
+	background-color: #B6DDE8;
+}
+
+table.relatorio colgroup {
+	border-right: 2px solid;
+}
+
+table.relatorio thead {
+	border-bottom: 2px solid;
+}
+
+table.relatorio .av-final {
+	background-color: #FDE9D9;
+}
+
+table.relatorio .demonstrada {
+	color: green;
+}
+
+table.relatorio .nao_demonstrada {
+	color: #E44;
+}
+
+table.relatorio tr td.aprovacao {
+	background-color: #D6E3BC;
+}
+
+table.relatorio tr td.nao_aprovacao {
+	background-color: #D99594;
+}
+
+table.relatorio div.numero_linha {
+	width: 2em;
+	float: left;
+	padding-right: 0.5em;
+	margin-right: 0.5em;
+	border-right: 1px solid #999;
+	text-align: right;
+}
+
+div.barra_rolagem_container {
+	overflow-x:scroll;
+	overflow-y:hidden;
+	height: 20px;
+	margin-left: 25em;
+}
+
+div.barra_rolagem_div_interna {
+	height: 20px;
+}
+
+div.relatorio_exportar_container {
+	display: none;
+}
+
+.mensagem_carregando {
+    background-color: rgba( 0, 0, 0, .6 );
+    color: #EEE;
+    display: none;
+    height: 100%;
+    left: 0;
+    padding-top: 10em;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
