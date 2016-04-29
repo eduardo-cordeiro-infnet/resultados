@@ -42,7 +42,7 @@ class Modalidade extends CI_Controller {
 
 		$output->title = 'Cadastro de modalidades';
 		$output->mensagem_informativa = 'Nesta tela são cadastradas as modalidades em que são oferecidos os programas do Instituto.</p><p>
-			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/turma'), 'cadastro de turmas') . ' para definir a modalidade de cada turma.'
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/classe'), 'cadastro de classes') . ' para definir a modalidade de cada classe.'
 		;
 
 		$this->_output_padrao($output);

@@ -52,9 +52,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['cadastros/turma/disciplinas(.*)'] = 'cadastros/turma/disciplinas$1';
-$route['cadastros/turma/avaliacoes(.*)'] = 'cadastros/turma/avaliacoes$1';
-$route['cadastros/turma/rubricas(.*)'] = 'cadastros/turma/rubricas$1';
+$route['cadastros/classe/turmas(.*)'] = 'cadastros/classe/turmas$1';
+$route['cadastros/classe/avaliacoes(.*)'] = 'cadastros/classe/avaliacoes$1';
+$route['cadastros/classe/rubricas(.*)'] = 'cadastros/classe/rubricas$1';
 $route['cadastros/competencia/subcompetencias(.*)'] = 'cadastros/competencia/subcompetencias$1';
 
 $route['cadastros/(:any)/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2/$3$4';

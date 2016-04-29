@@ -44,8 +44,8 @@ class Programa extends CI_Controller {
 		$crud->unset_jquery();
 		$output = $crud->render();
 
-		$output->title = 'Cadastro de escolas';
-		$output->mensagem_informativa = 'Nesta tela são cadastrados os programas do Instituto, independente de serem oferecidas de forma presencial, à distância ou em qualquer modalidade.</p><p>
+		$output->title = 'Cadastro de programas';
+		$output->mensagem_informativa = 'Nesta tela são cadastrados os programas do Instituto, independente de serem oferecidos de forma presencial, à distância ou em qualquer modalidade.</p><p>
 			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/bloco'), 'cadastro de blocos') . ' para associar blocos a cada programa.'
 		;
 

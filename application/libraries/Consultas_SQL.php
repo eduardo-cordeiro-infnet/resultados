@@ -9,10 +9,10 @@ class Consultas_SQL {
 	}
 
 	/**
-	 * Retorna todas as categorias de turma do Moodle com o caminho hierárquico
+	 * Retorna todas as categorias de classe do Moodle com o caminho hierárquico
 	 * @return string
 	 */
-	public function turmas_mdl_categorias_com_caminho()
+	public function classes_mdl_categorias_com_caminho()
 	{
 		return "
 			select c.id,
@@ -38,7 +38,7 @@ class Consultas_SQL {
 		return "
 			select crs.id,
 				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname) curso_com_caminho,
-				case when ? in (select id from turmas where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end disciplina_turma
+				case when ? in (select id from classes where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end turma
 			from lmsinfne_mdl.mdl_course crs
 				left join lmsinfne_mdl.mdl_course_categories c on c.id = crs.category
 				left join lmsinfne_mdl.mdl_course_categories c2 on c2.id = c.parent
@@ -46,80 +46,80 @@ class Consultas_SQL {
 				left join lmsinfne_mdl.mdl_course_categories c4 on c4.id = c3.parent
 				left join lmsinfne_mdl.mdl_course_categories c5 on c5.id = c4.parent
 				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
-			order by disciplina_turma desc, c.path;
+			order by turma desc, c.path;
 		";
 	}
 
 	/**
 	 * Retorna todas as disciplinas, com o nome do bloco, se houver
-	 * Disciplinas de blocos que estejam associados à turma especificada são ordenadas no início
-	 * @param boolean apenas_sem_turma não retornar disciplinas já associadas a esta turma
+	 * Disciplinas de blocos que estejam associados à classe especificada são ordenadas no início
+	 * @param boolean apenas_sem_classe não retornar disciplinas já associadas a esta classe
 	 * @return string
 	 */
-	public function disciplinas_blocos_turma($apenas_sem_turma)
+	public function disciplinas_blocos_classe($apenas_sem_classe)
 	{
 		$sql = "
 			select d.id,
 				CONCAT(d.nome, case when b.id is not null then CONCAT(' (', b.nome, ')') end) disciplina_bloco,
 				case when b.id
-					in (select id_bloco_red from disciplinas_turmas where id_turma = ?)
-				then 1 else 0 end bloco_turma
+					in (select id_bloco_red from turmas where id_classe = ?)
+				then 1 else 0 end bloco_classe
 			from disciplinas d
 				left join blocos b on b.id = d.id_bloco
-				left join disciplinas_turmas dt on dt.id_turma = ?
-					and dt.id_disciplina = d.id
-					and dt.id <> ?";
+				left join turmas t on t.id_classe = ?
+					and t.id_disciplina = d.id
+					and t.id <> ?";
 
-		if ($apenas_sem_turma)
+		if ($apenas_sem_classe)
 		{
 			$sql .= "
-			where dt.id is null";
+			where t.id is null";
 		}
 
 		$sql .= "
-			order by bloco_turma desc, b.id, d.nome;
+			order by bloco_classe desc, b.id, d.nome;
 		";
 
 		return $sql;
 	}
 
 	/**
-	 * Retorna disciplinas que estão associadas a turmas no seguinte formato:
-	 * {Sigla da escola} > {Programa} > {Turma} > {Bloco} > {Disciplina}
+	 * Retorna disciplinas que estão associadas a classes no seguinte formato:
+	 * {Sigla da escola} > {Programa} > {Classe} > {Bloco} > {Disciplina}
 	 * @return string
 	 */
-	public function disciplinas_turmas_com_caminho($disciplina_turma_especifica = false, $apenas_com_rubricas_subcompetencias = false, $sem_disciplina_turma_selecionada = false)
+	public function turmas_com_caminho($turma_especifica = false, $apenas_com_rubricas_subcompetencias = false, $sem_turma_selecionada = false)
 	{
 		$db = $this->CI->db;
 
-		$db->select("dt.id,
+		$db->select("t.id,
 			CONCAT(
-				CONCAT_WS(' > ', e.sigla, p.nome, t.nome, b.nome, d.nome),
+				CONCAT_WS(' > ', e.sigla, p.nome, c.nome, b.nome, d.nome),
 					case
 						when d.denominacao_bloco is not null then CONCAT(' (', d.denominacao_bloco, ')')
 						else ''
 					end
-			) disciplina_turma_com_caminho,
-			CONCAT(e.sigla, p.nome, t.nome, b.nome) bloco_com_caminho,
+			) turma_com_caminho,
+			CONCAT(e.sigla, p.nome, c.nome, b.nome) bloco_com_caminho,
 			d.denominacao_bloco"
 		);
 
 		$db
-			->from('disciplinas_turmas dt')
-			->join('disciplinas d', 'd.id = dt.id_disciplina')
+			->from('turmas t')
+			->join('disciplinas d', 'd.id = t.id_disciplina')
 			->join('blocos b', 'b.id = d.id_bloco')
-			->join('turmas t', 't.id = dt.id_turma')
-			->join('programas p', 'p.id = t.id_programa')
+			->join('classes c', 'c.id = t.id_classe')
+			->join('programas p', 'p.id = c.id_programa')
 			->join('escolas e', 'e.id = p.id_escola')
 		;
 
 
-		//Se for informada uma disciplina específica, o campo de disciplina selecionada é necessário
-		if (!$sem_disciplina_turma_selecionada || $disciplina_turma_especifica)
+		//Se for informada uma turma específica, o campo de turma selecionada é necessário
+		if (!$sem_turma_selecionada || $turma_especifica)
 		{
 			$db
-				->select('case when dt.id = ? then 1 else 0 end disciplina_turma_selecionada', false)
-				->order_by('disciplina_turma_selecionada', 'desc')
+				->select('case when t.id = ? then 1 else 0 end turma_selecionada', false)
+				->order_by('turma_selecionada', 'desc')
 			;
 		}
 
@@ -134,31 +134,31 @@ class Consultas_SQL {
 					select 1 from subcompetencias_mdl_gradingform_rubric_criteria sgrc
 						join subcompetencias scmp on scmp.id = sgrc.id_subcompetencia
 						join competencias cmp on cmp.id = scmp.id_competencia
-					where cmp.id_disciplina_turma = dt.id
+					where cmp.id_turma = t.id
 				)'
 			);
 		}
 
-		if ($disciplina_turma_especifica)
+		if ($turma_especifica)
 		{
-			$db->having('disciplina_turma_selecionada', 1);
+			$db->having('turma_selecionada', 1);
 		}
 
 		return $db->get_compiled_select();
 	}
 
 	/**
-	 * Retorna competências de uma disciplinas associada a uma turma específica
+	 * Retorna competências de uma turma específica
 	 * @return string
 	 */
-	public function competencias_disciplina_turma()
+	public function competencias_turma()
 	{
 		return "
 			select cmp.id,
 				CONCAT_WS(' - ', cmp.codigo, cmp.nome) nome_com_codigo
 			from competencias cmp
-				join disciplinas_turmas dt on dt.id = cmp.id_disciplina_turma
-			where dt.id = ?;
+				join turmas t on t.id = cmp.id_turma
+			where t.id = ?;
 		";
 	}
 
@@ -201,10 +201,10 @@ class Consultas_SQL {
 	}
 
 	/**
-	 * Retorna dados de uma disciplina em uma turma específica
+	 * Retorna dados de uma turma específica
 	 * @return string
 	 */
-	public function disciplina_disciplina_turma()
+	public function disciplina_turma()
 	{
 		return "
 			select d.id,
@@ -212,25 +212,25 @@ class Consultas_SQL {
 				d.denominacao_bloco,
 				b.id id_bloco,
 				b.nome nome_bloco
-			from disciplinas_turmas dt
-				join disciplinas d on d.id = dt.id_disciplina
+			from turmas t
+				join disciplinas d on d.id = t.id_disciplina
 				join blocos b on b.id = d.id_bloco
-			where dt.id = ?;
+			where t.id = ?;
 		";
 	}
 
 	/**
-	 * Retorna dados da turma a partir de uma disciplina da própria turma
+	 * Retorna dados da classe a partir de uma turma
 	 * @return string
 	 */
-	public function turma_disciplina_turma()
+	public function classe_turma()
 	{
 		return "
-			select t.id,
-				t.nome,
-				t.trimestre,
-				t.ano,
-				t.id_mdl_course_category,
+			select c.id,
+				c.nome,
+				c.trimestre,
+				c.ano,
+				c.id_mdl_course_category,
 				p.id id_programa,
 				p.nome nome_programa,
 				p.sigla sigla_programa,
@@ -239,20 +239,20 @@ class Consultas_SQL {
 				e.id id_escola,
 				e.nome nome_escola,
 				e.sigla sigla_escola
-			from disciplinas_turmas dt
-				join turmas t on t.id = dt.id_turma
-				join programas p on p.id = t.id_programa
-				join modalidades m on m.id = t.id_modalidade
+			from turmas t
+				join classes c on c.id = t.id_classe
+				join programas p on p.id = c.id_programa
+				join modalidades m on m.id = c.id_modalidade
 				join escolas e on e.id = p.id_escola
-			where dt.id = ?;
+			where t.id = ?;
 		";
 	}
 
 	/**
-	 * Retorna estudantes integrantes de uma disciplina em uma turma
+	 * Retorna estudantes de uma turma
 	 * @return string
 	 */
-	public function estudantes_disciplina_turma()
+	public function estudantes_turma()
 	{
 		return "
 			select CONCAT_WS(' ', usr.firstname, usr.lastname) nome_completo,
@@ -263,19 +263,19 @@ class Consultas_SQL {
 				join lmsinfne_mdl.mdl_role_assignments ra on ra.userid = usr.id
 				join lmsinfne_mdl.mdl_role r on r.id = ra.roleid
 				join lmsinfne_mdl.mdl_context cx on cx.id = ra.contextid
-				join disciplinas_turmas dt on dt.id_mdl_course = cx.instanceid
+				join turmas t on t.id_mdl_course = cx.instanceid
 			where r.archetype = 'student'
-				and dt.id = ?
+				and t.id = ?
 			order by nome_completo;
 		";
 	}
 
 	/**
-	 * Retorna avaliações de uma disciplina em uma turma,
-	 * com informações sobre competências e subcompetências
+	 * Retorna avaliações de uma turma, com informações
+	 * sobre competências e subcompetências
 	 * @return string
 	 */
-	public function avaliacoes_disciplina_turma()
+	public function avaliacoes_turma()
 	{
 		return "
 			select a.id id_avaliacao,
@@ -294,17 +294,17 @@ class Consultas_SQL {
 				left join subcompetencias_mdl_gradingform_rubric_criteria sgrc on sgrc.id_mdl_gradingform_rubric_criteria = vra.id_mdl_gradingform_rubric_criteria
 				left join subcompetencias scmp on scmp.id = sgrc.id_subcompetencia
 				left join competencias cmp on cmp.id = scmp.id_competencia
-			where a.id_disciplina_turma = ?
+			where a.id_turma = ?
 			order by a.avaliacao_final, a.nome, scmp.codigo_completo_calc, vra.ordem_rubrica;
 		";
 	}
 
 	/**
-	 * Retorna os resultados de todas as avaliações ativas cadastradas
-	 * em uma disciplina de uma turma, por estudante e rubrica
+	 * Retorna os resultados de todas as avaliações ativas
+	 * cadastradas em uma turma, por estudante e rubrica
 	 * @return string
 	 */
-	public function resultados_avaliacoes_disciplina_turma()
+	public function resultados_avaliacoes_turma()
 	{
 		return "
 			select vra.id_avaliacao,
@@ -323,7 +323,7 @@ class Consultas_SQL {
 				join lmsinfne_mdl.mdl_gradingform_rubric_fillings as grf on grf.instanceid = gin.id
 					and grf.criterionid = grc.id
 					and grf.levelid = grl.id
-			where vra.id_disciplina_turma = ?
+			where vra.id_turma = ?
 				and gin.status = 1
 				and gin.id = (
 					select gin2.id

@@ -2,23 +2,23 @@
 	<table class="relatorio_cabecalho_linha">
 		<tr>
 			<th>Curso:</th>
-			<td><?php echo $disciplina_turma->turma->programa->nome; ?></td>
+			<td><?php echo $turma->classe->programa->nome; ?></td>
 		</tr>
 		<tr>
 			<th>Trimestre:</th>
-			<td><?php echo $disciplina_turma->obter_periodo(); ?></td>
+			<td><?php echo $turma->obter_periodo(); ?></td>
 		</tr>
 		<tr>
-			<th>Turma:</th>
-			<td><?php echo $disciplina_turma->turma->nome; ?></td>
+			<th>Classe:</th>
+			<td><?php echo $turma->classe->nome; ?></td>
 		</tr>
 		<tr>
 			<th>Bloco:</th>
-			<td><?php echo $disciplina_turma->disciplina->bloco->nome; ?></td>
+			<td><?php echo $turma->disciplina->bloco->nome; ?></td>
 		</tr>
 		<tr>
 			<th>Disciplina:</th>
-			<td><?php echo $disciplina_turma->disciplina->nome; ?></td>
+			<td><?php echo $turma->disciplina->nome; ?></td>
 		</tr>
 	</table>
 
@@ -40,8 +40,8 @@
 		endif;
 	endforeach;
 	?>
-		<colgroup span="<?php echo count($disciplina_turma->obter_subcompetencias()); ?>"></colgroup>
-		<colgroup span="<?php echo count($disciplina_turma->competencias) ?>"></colgroup>
+		<colgroup span="<?php echo count($turma->obter_subcompetencias()); ?>"></colgroup>
+		<colgroup span="<?php echo count($turma->competencias) ?>"></colgroup>
 		<colgroup></colgroup>
 		<colgroup></colgroup>
 		<thead>
@@ -61,9 +61,9 @@
 		endif;
 	endforeach;
 	?>
-				<th colspan="<?php echo count($disciplina_turma->obter_subcompetencias()); ?>">Resultados por subcompetência</th>
+				<th colspan="<?php echo count($turma->obter_subcompetencias()); ?>">Resultados por subcompetência</th>
 				<th
-					colspan="<?php echo count($disciplina_turma->competencias) ?>"
+					colspan="<?php echo count($turma->competencias) ?>"
 					rowspan="2"
 				>
 					Resultados por competência
@@ -90,7 +90,7 @@
 		endif;
 	endforeach;
 	?>
-	<?php foreach ($disciplina_turma->competencias as $competencia): ?>
+	<?php foreach ($turma->competencias as $competencia): ?>
 				<th
 					colspan="<?php echo count($competencia->subcompetencias); ?>"
 					title="<?php echo $competencia->nome; ?>"
@@ -117,10 +117,10 @@
 		endif;
 	endforeach;
 	?>
-	<?php foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia): ?>
+	<?php foreach ($turma->obter_subcompetencias() as $subcompetencia): ?>
 				<th title="<?php echo $subcompetencia->nome; ?>"><?php echo $subcompetencia->codigo_completo; ?></th>
 	<?php endforeach ?>
-	<?php foreach ($disciplina_turma->competencias as $competencia): ?>
+	<?php foreach ($turma->competencias as $competencia): ?>
 				<th title="<?php echo $competencia->nome; ?>"><?php echo $competencia->codigo; ?></th>
 	<?php endforeach ?>
 				<!--
@@ -168,7 +168,7 @@
 		endforeach;
 		?>
 		<?php
-		foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia):
+		foreach ($turma->obter_subcompetencias() as $subcompetencia):
 			$demonstrada = (
 				isset($resultados_gerais[$estudante->mdl_userid][$subcompetencia->obter_codigo_competencia()][$subcompetencia->obter_codigo_sem_obrigatoriedade()])
 				&& $resultados_gerais[$estudante->mdl_userid][$subcompetencia->obter_codigo_competencia()][$subcompetencia->obter_codigo_sem_obrigatoriedade()]['demonstrada']
@@ -191,7 +191,7 @@
 				</td>
 		<?php endforeach; ?>
 		<?php
-		foreach ($disciplina_turma->competencias as $competencia):
+		foreach ($turma->competencias as $competencia):
 			$demonstrada = (
 				isset($resultados_gerais[$estudante->mdl_userid][$competencia->codigo])
 				&& $resultados_gerais[$estudante->mdl_userid][$competencia->codigo]['resultado'] !== 'ND'
@@ -223,7 +223,7 @@
 					<?php
 					if (isset($resultados_gerais[$estudante->mdl_userid]))
 					{
-						if ($disciplina_turma->avaliacao_final_inexistente)
+						if ($turma->avaliacao_final_inexistente)
 						{
 							echo 'N/D';
 						}
@@ -241,7 +241,7 @@
 					<?php
 					if (isset($resultados_gerais[$estudante->mdl_userid]))
 					{
-						if ($disciplina_turma->avaliacao_final_inexistente)
+						if ($turma->avaliacao_final_inexistente)
 						{
 							echo 'N/D';
 						}

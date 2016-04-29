@@ -11,22 +11,22 @@ begin
 
 	set secao = 'Consistência com Moodle';
 
-		select secao, 'disciplinas_turmas.id_mdl_course = cursos inexistentes no Moodle';
-		select *
-		from disciplinas_turmas dt
-		where dt.id_mdl_course is not null
-			and not exists (
-				select 1 from lmsinfne_mdl.mdl_course crs
-				where crs.id = dt.id_mdl_course
-			);
-
-		select secao, 'turmas.id_mdl_course_category = categorias inexistentes no Moodle';
+		select secao, 'turmas.id_mdl_course = cursos inexistentes no Moodle';
 		select *
 		from turmas t
-		where t.id_mdl_course_category is not null
+		where t.id_mdl_course is not null
 			and not exists (
-				select 1 from lmsinfne_mdl.mdl_course_categories c
-				where c.id = t.id_mdl_course_category
+				select 1 from lmsinfne_mdl.mdl_course crs
+				where crs.id = t.id_mdl_course
+			);
+
+		select secao, 'classes.id_mdl_course_category = categorias inexistentes no Moodle';
+		select *
+		from classes c
+		where c.id_mdl_course_category is not null
+			and not exists (
+				select 1 from lmsinfne_mdl.mdl_course_categories cc
+				where cc.id = c.id_mdl_course_category
 			);
 
 		select secao, 'avaliacoes_mdl_course_modules.instance_mdl_course_modules = módulos inexistentes no Moodle';
@@ -47,16 +47,16 @@ begin
 
 	set secao = 'Consistência de campos atualizados por trigger';
 
-		select secao, 'turmas.qtd_disciplinas_calc';
-		select t.*
-		from turmas t
+		select secao, 'classes.qtd_disciplinas_calc';
+		select c.*
+		from classes c
 			left join (
-				select id_turma,
+				select id_classe,
 					COUNT(1) cnt
-	            from disciplinas_turmas
-	        	group by id_turma
-			) dt on dt.id_turma = t.id
-		where t.qtd_disciplinas_calc <> COALESCE(dt.cnt, 0);
+	            from turmas
+	        	group by id_classe
+			) t on t.id_classe = c.id
+		where c.qtd_disciplinas_calc <> COALESCE(t.cnt, 0);
 
 		select secao, 'subcompetencias.codigo_completo_calc';
 		select *
@@ -64,24 +64,24 @@ begin
 			join competencias cmp on cmp.id = scmp.id_competencia
 		where scmp.codigo_completo_calc <> CONCAT(cmp.codigo, '.', scmp.codigo, case when scmp.obrigatoria = 1 then '*' else '' end);
 
-		select secao, 'disciplinas_turmas.id_bloco_red';
-		select *
-		from disciplinas_turmas dt
-			join disciplinas d on d.id = dt.id_disciplina
-			left join blocos b on b.id = d.id_bloco
-		where b.id <> dt.id_bloco_red;
-
-		select secao, 'turmas.id_escola_red';
+		select secao, 'turmas.id_bloco_red';
 		select *
 		from turmas t
-			join programas p on p.id = t.id_programa
-			join escolas e on e.id = p.id_escola
-		where e.id <> t.id_escola_red;
+			join disciplinas d on d.id = t.id_disciplina
+			left join blocos b on b.id = d.id_bloco
+		where b.id <> t.id_bloco_red;
 
-		select secao, 'subcompetencias.id_disciplina_turma_red';
+		select secao, 'classes.id_escola_red';
+		select *
+		from classes c
+			join programas p on p.id = c.id_programa
+			join escolas e on e.id = p.id_escola
+		where e.id <> c.id_escola_red;
+
+		select secao, 'subcompetencias.id_turma_red';
 		select *
 		from subcompetencias scmp
 			join competencias cmp on cmp.id = scmp.id_competencia
-		where scmp.id_disciplina_turma_red <> cmp.id_disciplina_turma;
+		where scmp.id_turma_red <> cmp.id_turma;
 end//
 delimiter ;

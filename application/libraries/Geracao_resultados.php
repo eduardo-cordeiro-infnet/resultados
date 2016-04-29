@@ -10,20 +10,20 @@ class Geracao_resultados {
 	}
 
 	/**
-	 * Retorna os resultados de uma disciplina em uma turma por estudante, avaliação e subcompetência
+	 * Retorna os resultados de uma turma por estudante, avaliação e subcompetência
 	 * @return array
 	 */
-	public function obter_resultados_disciplina_turma($disciplina_turma)
+	public function obter_resultados_turma($turma)
 	{
 		$CI = $this->CI;
 
 		$CI->load->library('Consultas_SQL');
 
-		$id_disciplina_turma = $disciplina_turma->id;
-		$estudantes = $disciplina_turma->estudantes;
-		$avaliacoes = $disciplina_turma->avaliacoes;
+		$id_turma = $turma->id;
+		$estudantes = $turma->estudantes;
+		$avaliacoes = $turma->avaliacoes;
 
-		$dados_resultados = $CI->db->query($CI->consultas_sql->resultados_avaliacoes_disciplina_turma(), array($id_disciplina_turma))->result();
+		$dados_resultados = $CI->db->query($CI->consultas_sql->resultados_avaliacoes_turma(), array($id_turma))->result();
 
 		$estudantes_userid =  array_map(function($est) {return $est->mdl_userid;}, $estudantes);
 		$avaliacoes_id =  array_map(function($av) {return $av->id;}, $avaliacoes);
@@ -103,8 +103,8 @@ class Geracao_resultados {
 			}
 		}
 
-		$qtd_avaliacoes_subcompetencia = $disciplina_turma->obter_qtd_avaliacoes_subcompetencias();
-		$avaliacao_final = $disciplina_turma->obter_avaliacao_final();
+		$qtd_avaliacoes_subcompetencia = $turma->obter_qtd_avaliacoes_subcompetencias();
+		$avaliacao_final = $turma->obter_avaliacao_final();
 
 		if (isset($avaliacao_final))
 		{
@@ -148,7 +148,7 @@ class Geracao_resultados {
 				}
 			}
 
-			foreach ($disciplina_turma->obter_subcompetencias() as $subcompetencia)
+			foreach ($turma->obter_subcompetencias() as $subcompetencia)
 			{
 				$subcompetencia_codigo = $subcompetencia->obter_codigo_sem_obrigatoriedade();
 				$competencia_codigo = $subcompetencia->obter_codigo_competencia();
@@ -177,7 +177,7 @@ class Geracao_resultados {
 
 			$numerador_grau = 0;
 
-			foreach ($disciplina_turma->competencias as $competencia)
+			foreach ($turma->competencias as $competencia)
 			{
 				$resultado = null;
 				$qtd_subcompetencias_nao_demonstradas = 0;
@@ -228,7 +228,7 @@ class Geracao_resultados {
 				$numerador_grau *= 0.4;
 			}
 
-			$resultados_gerais[$mdl_userid]['grau'] = $numerador_grau / count($disciplina_turma->competencias);
+			$resultados_gerais[$mdl_userid]['grau'] = $numerador_grau / count($turma->competencias);
 		}
 
 		return array(

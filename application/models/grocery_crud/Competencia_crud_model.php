@@ -1,45 +1,50 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Competencia_crud_model extends Grocery_CRUD_Model {
+
+	public function obter_campo_codigo($valor, $linha) {
+		return '<span style="width: 100px;">' . $valor . '</span>';
+	}
+
 	/**
-	 * Obter disciplinas de turmas
+	 * Obter turmas de classes
 	 *
-	 * Retorna uma lista com as disciplinas que estão associadas a turmas
+	 * Retorna uma lista com as turmas de uma classe específica
 	 * @return array
 	 */
-	public function obter_disciplinas_turmas($id_disciplina_turma)
+	public function obter_turmas($id_turma)
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->disciplinas_turmas_com_caminho(), array($id_disciplina_turma));
+		$consulta = $this->db->query($this->consultas_sql->turmas_com_caminho(), array($id_turma));
 
-		$disciplinas_turmas = array();
+		$turmas = array();
 
 		foreach ($consulta->result() as $linha) {
-			$disciplinas_turmas[$linha->id] = $linha->disciplina_turma_com_caminho;
+			$turmas[$linha->id] = $linha->turma_com_caminho;
 		}
 
-		return $disciplinas_turmas;
+		return $turmas;
 	}
 
 	/**
 	 * Obter caminho do cadastro de subcompetências
 	 *
-	 * Retorna o caminho do cadastro de subcompetências com o id_disciplina_turma
+	 * Retorna o caminho do cadastro de subcompetências com o id_turma
 	 */
 	public function obter_caminho_subcompetencias($valor, $linha)
 	{
-		return site_url('cadastros/competencia/subcompetencias/' . $this->db->select('id_disciplina_turma')->get_where('competencias', 'id = '.$valor)->result()[0]->id_disciplina_turma);
+		return site_url('cadastros/competencia/subcompetencias/' . $this->db->select('id_turma')->get_where('competencias', 'id = '.$valor)->result()[0]->id_turma);
 	}
 
 	/**
-	 * Obter competências de disciplina
+	 * Obter competências de turma
 	 *
-	 * Retorna uma lista com as competências que estão associadas à disciplina da turma
+	 * Retorna as competências de uma turma
 	 * @return array
 	 */
-	public function obter_competencias_disciplina($id_disciplina_turma)
+	public function obter_competencias_turma($id_turma)
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->competencias_disciplina_turma(), array($id_disciplina_turma));
+		$consulta = $this->db->query($this->consultas_sql->competencias_turma(), array($id_turma));
 
 		$competencias_disciplina = array();
 

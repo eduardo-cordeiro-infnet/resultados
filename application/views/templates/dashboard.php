@@ -258,10 +258,10 @@
                 <?php echo anchor(site_url('cadastros/disciplina'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
-            <!-- turmas -->
+            <!-- classes -->
             <div class="col-md-3">
               <div class="card card-lvl1">
-                <h3 class="text-center">Turmas</h3>
+                <h3 class="text-center">Classes</h3>
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
                   <g>
                     <g>
@@ -273,7 +273,7 @@
                   </g>
                 </svg>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <?php echo anchor(site_url('cadastros/turma'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
+                <?php echo anchor(site_url('cadastros/classe'), 'Entrar', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
             <!-- competencias e subcompetencias -->

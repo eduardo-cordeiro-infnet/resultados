@@ -12,7 +12,7 @@
     <li><?php echo anchor(site_url('cadastros/programa'), 'Programas'); ?></li>
     <li><?php echo anchor(site_url('cadastros/bloco'), 'Blocos'); ?></li>
     <li><?php echo anchor(site_url('cadastros/disciplina'), 'Disciplinas'); ?></li>
-    <li><?php echo anchor(site_url('cadastros/turma'), 'Turmas'); ?></li>
+    <li><?php echo anchor(site_url('cadastros/classe'), 'Classes'); ?></li>
     <li><?php echo anchor(site_url('cadastros/competencia'), 'Competências'); ?></li>
     <li><?php echo  anchor('#', 'Usuários'); ?></li>
     <li><?php echo anchor('#', 'Perfis'); ?></li>

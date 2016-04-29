@@ -5,7 +5,7 @@
         <?php echo anchor(site_url('cadastros/programa'), 'Programas') ?> |
         <?php echo anchor(site_url('cadastros/bloco'), 'Blocos') ?> |
         <?php echo anchor(site_url('cadastros/disciplina'), 'Disciplinas') ?> |
-        <?php echo anchor(site_url('cadastros/turma'), 'Turmas') ?> |
+        <?php echo anchor(site_url('cadastros/classe'), 'Classes') ?> |
         <?php echo anchor(site_url('cadastros/competencia'), 'Competências') ?> |
         Usuários |
         Perfis

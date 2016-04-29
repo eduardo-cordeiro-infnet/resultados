@@ -48,7 +48,7 @@ class Disciplina extends CI_Controller {
 		$output->title = 'Cadastro de disciplinas';
 		$output->mensagem_informativa = 'Nesta tela são cadastradas as disciplinas de cada bloco.</p><p>
 			Cada disciplina tem uma denominação no bloco, podendo ser uma das 4 disciplina regulares (DR1, 2, 3 e 4) ou a disciplina do projeto de bloco.</p><p>
-			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/turma'), 'cadastro de turmas') . ' para definir as disciplinas de cada turma.'
+			Os registros deste cadastro são utilizados no ' . anchor(site_url('cadastros/classe'), 'cadastro de classes') . ' para definir as disciplinas de cada classe.'
 		;
 
 		$this->_output_padrao($output);

@@ -37,7 +37,7 @@ class Resultados_turma extends CI_Controller {
 			";
 			$this->load->view('pages/relatorios/resultados_turma', $data);
 		}
-		else if (isset($data['disciplinas_turmas']))
+		else if (isset($data['turmas']))
 		{
 			$this->load->view('pages/relatorios/selecionar_turma', $data);
 		}
@@ -49,22 +49,22 @@ class Resultados_turma extends CI_Controller {
 	{
 		$this->load->helper('form');
 
-		$data['disciplinas_turmas'] = $this->Resultados_turma_model->obter_disciplinas_turmas_com_resultados();
+		$data['turmas'] = $this->Resultados_turma_model->obter_turmas_com_resultados();
 
 		$this->_output_padrao($data);
 	}
 
-	public function relatorio($id_disciplina_turma = null)
+	public function relatorio($id_turma = null)
 	{
-		if (!$id_disciplina_turma)
+		if (!$id_turma)
 		{
-			$uri_ultimo_segmento = ($this->input->post('id_disciplina_turma')) ? $this->input->post('id_disciplina_turma') : 'selecionar_turma';
+			$uri_ultimo_segmento = ($this->input->post('id_turma')) ? $this->input->post('id_turma') : 'selecionar_turma';
 			redirect('relatorios/resultados_turma/' . $uri_ultimo_segmento);
 			die();
 		}
 		else
 		{
-			$this->_output_padrao($this->Resultados_turma_model->obter_dados_relatorio($id_disciplina_turma));
+			$this->_output_padrao($this->Resultados_turma_model->obter_dados_relatorio($id_turma));
 		}
 	}
 

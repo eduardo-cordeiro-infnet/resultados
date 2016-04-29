@@ -7,20 +7,20 @@ create procedure `db_ajustar`()
 	sql security definer
 	comment ''
 begin
-	update turmas t
+	update classes c
 		left join (
-			select dt.id_turma,
+			select t.id_classe,
 				count(1) cnt
-            from disciplinas_turmas dt
-        	group by dt.id_turma
-		) dt on dt.id_turma = t.id
-	set t.qtd_disciplinas_calc = coalesce(dt.cnt, 0)
-	where t.qtd_disciplinas_calc <> coalesce(dt.cnt, 0);
+            from turmas t
+        	group by t.id_classe
+		) t on t.id_classe = c.id
+	set c.qtd_disciplinas_calc = coalesce(t.cnt, 0)
+	where c.qtd_disciplinas_calc <> coalesce(t.cnt, 0);
 
 	update subcompetencias scmp
 		join competencias cmp on cmp.id = scmp.id_competencia
-	set scmp.id_disciplina_turma_red = cmp.id_disciplina_turma
-	where scmp.id_disciplina_turma_red <> cmp.id_disciplina_turma;
+	set scmp.id_turma_red = cmp.id_turma
+	where scmp.id_turma_red <> cmp.id_turma;
 
 	update subcompetencias scmp
 		join competencias cmp on cmp.id = scmp.id_competencia

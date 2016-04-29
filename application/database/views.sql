@@ -1,6 +1,6 @@
 create or replace view v_rubricas_avaliacoes as
 select grc.id id_mdl_gradingform_rubric_criteria,
-       a.id_disciplina_turma id_disciplina_turma,
+       a.id_turma id_turma,
        acm.id_avaliacao id_avaliacao,
        grc.description rubrica,
        grc.sortorder ordem_rubrica

@@ -1,10 +1,10 @@
 <?php
-class Turma_crud_model extends Grocery_CRUD_Model {
+class Classe_crud_model extends Grocery_CRUD_Model {
 
 	/**
 	 * Obter link Moodle
 	 *
-	 * Retorna HTML de um link para a categoria da turma no LMS com o ícone do Moodle
+	 * Retorna HTML de um link para a categoria da classe no LMS com o ícone do Moodle
 	 * @return string
 	 */
 	public function obter_link_moodle($valor, $linha)
@@ -16,8 +16,8 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 				img(
 					array(
 						'src' => base_url('assets/img/moodle-m-65x46.png'),
-						'alt' => 'Acessar turma no Moodle',
-						'title' => 'Acessar turma no Moodle',
+						'alt' => 'Acessar classe no Moodle',
+						'title' => 'Acessar classe no Moodle',
 						'class' => 'tamanho-icone'
 					)
 				)
@@ -26,12 +26,12 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	}
 
 	/**
-	 * Obter link da disciplina Moodle
+	 * Obter link da turma Moodle
 	 *
-	 * Retorna HTML de um link para a disciplina no LMS com o ícone do Moodle
+	 * Retorna HTML de um link para a turma no LMS com o ícone do Moodle
 	 * @return string
 	 */
-	public function obter_link_disciplina_moodle($valor, $linha)
+	public function obter_link_turma_moodle($valor, $linha)
 	{
 		if ($linha->id_mdl_course)
 		{
@@ -40,8 +40,8 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 				img(
 					array(
 						'src' => base_url('assets/img/moodle-m-65x46.png'),
-						'alt' => 'Acessar disciplina no Moodle',
-						'title' => 'Acessar disciplina no Moodle',
+						'alt' => 'Acessar turma no Moodle',
+						'title' => 'Acessar turma no Moodle',
 						'class' => 'tamanho-icone'
 					)
 				)
@@ -75,7 +75,7 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	public function obter_categorias_moodle()
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->turmas_mdl_categorias_com_caminho());
+		$consulta = $this->db->query($this->consultas_sql->classes_mdl_categorias_com_caminho());
 
 		$categorias_moodle = array();
 
@@ -87,16 +87,38 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	}
 
 	/**
+	 * Obter categorias Moodle
+	 *
+	 * Retorna o caminho completo de todas as categorias do Moodle, ordenadas por hierarquia
+	 * @return array
+	 */
+	public function obter_blocos()
+	{
+		$consulta = $this->db
+			->select('blocos.id, blocos.nome')
+			->group_by('blocos.id')
+			->get('blocos');
+
+		$resultado = array();
+
+		foreach ($consulta->result() as $lin) {
+			$resultado[$lin->id] = $lin->nome;
+		}
+
+		return $resultado;
+	}
+
+	/**
 	 * Obter cursos Moodle
 	 *
 	 * Retorna o caminho completo de todos os cursos do Moodle, ordenados por hierarquia
-	 * Se houver turma do moodle associada à turma, os cursos dessa turma são ordenados no início
+	 * Se houver categoria do moodle associada à classe, os cursos dessa classe são ordenados no início
 	 * @return array
 	 */
-	public function obter_cursos_moodle($id_turma = 0)
+	public function obter_cursos_moodle($id_classe = 0)
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->mdl_curso_com_caminho_mdl_categoria(), array($id_turma));
+		$consulta = $this->db->query($this->consultas_sql->mdl_curso_com_caminho_mdl_categoria(), array($id_classe));
 
 		$cursos_moodle = array();
 
@@ -112,15 +134,15 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	 *
 	 * Retorna todas as disciplinas cadastradas, com o nome do bloco associado, se houver
 	 * Nos estados "add" e "edit", não retorna disciplinas já associadas, para impedir duplicidade
-	 * Disciplinas de blocos que estejam associados à turma são exibidas nas primeiras opções
+	 * Disciplinas de blocos que estejam associados à classe são exibidas nas primeiras opções
 	 * @return array
 	 */
-	public function obter_disciplinas_blocos($id_turma = 0, $state = null, $state_info = null)
+	public function obter_disciplinas_blocos($id_classe = 0, $state = null, $state_info = null)
 	{
-		$id_disciplina_turma = (isset($state_info->primary_key)) ? $state_info->primary_key : 0;
+		$id_turma = (isset($state_info->primary_key)) ? $state_info->primary_key : 0;
 
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->disciplinas_blocos_turma(in_array($state, array('add', 'edit'))), array($id_turma, $id_turma, $id_disciplina_turma));
+		$consulta = $this->db->query($this->consultas_sql->disciplinas_blocos_classe(in_array($state, array('add', 'edit'))), array($id_classe, $id_classe, $id_turma));
 
 		$disciplinas_blocos = array();
 
@@ -145,12 +167,12 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	}
 
 	/**
-	 * Obter período da turma
+	 * Obter período da classe
 	 *
-	 * Retorna o período da turma formatado
+	 * Retorna o período da classe formatado
 	 * @return string
 	 */
-	public function obter_periodo_turma($valor, $linha) {
+	public function obter_periodo_classe($valor, $linha) {
 		return implode('T', array_filter(array($linha->trimestre, $linha->ano)));
 	}
 
@@ -176,12 +198,12 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	/**
 	 * Obter ID de curso no Moodle
 	 *
-	 * Retorna o ID do curso no Moodle associado à disciplina de turma informada
+	 * Retorna o ID do curso no Moodle associado à turma informada
 	 * @return string
 	 */
-	public function obter_id_curso_moodle($id_disciplina_turma = null)
+	public function obter_id_curso_moodle($id_turma = null)
 	{
-		$resultado = $this->db->select('id_mdl_course')->get_where('disciplinas_turmas', array('id' => $id_disciplina_turma))->result();
+		$resultado = $this->db->select('id_mdl_course')->get_where('turmas', array('id' => $id_turma))->result();
 
 		return isset($resultado[0]) ? $resultado[0]->id_mdl_course : null;
 	}
@@ -203,60 +225,57 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 	}
 
 	/**
-	 * Obter disciplinas de turmas
+	 * Obter disciplinas de classes
 	 *
-	 * Retorna uma lista com as disciplinas que estão associadas a turmas
+	 * Retorna uma lista com as disciplinas que estão associadas a classes
 	 * @return array
 	 */
-	public function obter_disciplinas_turmas($id_disciplina_turma)
+	public function obter_turmas($id_turma)
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->disciplinas_turmas_com_caminho(), array($id_disciplina_turma));
+		$consulta = $this->db->query($this->consultas_sql->turmas_com_caminho(), array($id_turma));
 
-		//$disciplinas_turmas = array();
+		$turmas = array();
 
 		foreach ($consulta->result() as $linha)
 		{
-			$disciplinas_turmas[$linha->id] = $linha->disciplina_turma_com_caminho;
+			$turmas[$linha->id] = $linha->turma_com_caminho;
 		}
 
-		return $disciplinas_turmas;
+		return $turmas;
 	}
 
 	/**
-	 * Obter ID de disciplina em turma
+	 * Obter ID de turma
 	 *
-	 * Retorna o ID de uma disciplina em uma turma específica,
-	 * a partir do ID de uma avaliação
+	 * Retorna o ID de uma turma, a partir do ID de uma avaliação
 	 * @return string
 	 */
-	public function obter_id_disciplina_turma($id_avaliacao = null)
+	public function obter_id_turma($id_avaliacao = null)
 	{
 		if ($id_avaliacao)
 		{
-			$resultado = $this->db->select('id_disciplina_turma')->get_where('avaliacoes', array('id' => $id_avaliacao))->result();
+			$resultado = $this->db->select('id_turma')->get_where('avaliacoes', array('id' => $id_avaliacao))->result();
 
-			return isset($resultado[0]) ? $resultado[0]->id_disciplina_turma : null;
+			return isset($resultado[0]) ? $resultado[0]->id_turma : null;
 		}
 
 		return null;
 	}
 
 	/**
-	 * Obter disciplina de turma
+	 * Obter caminho de turma
 	 *
-	 * Retorna o caminho de uma disciplina associada a uma turma específica
+	 * Retorna o caminho de uma turma
 	 * @return array
 	 */
-	public function obter_disciplina_turma($id_disciplina_turma)
+	public function obter_caminho_turma($id_turma)
 	{
 		$this->load->library('Consultas_SQL');
-		$consulta = $this->db->query($this->consultas_sql->disciplinas_turmas_com_caminho(true), array($id_disciplina_turma));
-
-		$disciplinas_turmas = array();
+		$consulta = $this->db->query($this->consultas_sql->turmas_com_caminho(true), array($id_turma));
 
 		foreach ($consulta->result() as $linha) {
-			return $linha->disciplina_turma_com_caminho;
+			return $linha->turma_com_caminho;
 		}
 
 		return null;
@@ -277,8 +296,6 @@ class Turma_crud_model extends Grocery_CRUD_Model {
 
 		$this->load->library('Consultas_SQL');
 		$resultado = $this->db->query($this->consultas_sql->nome_avaliacao(), array($id_avaliacao, $id_mdl_gradingform_rubric_criteria))->result();
-
-		$disciplinas_turmas = array();
 
 		return isset($resultado[0]) ? $resultado[0]->nome_avaliacao : null;
 	}

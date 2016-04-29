@@ -1,0 +1,14 @@
+DROP TRIGGER IF EXISTS `turmas_after_delete`;
+DROP TRIGGER IF EXISTS `turmas_after_insert`;
+DROP TRIGGER IF EXISTS `turmas_after_update`;
+DROP TRIGGER IF EXISTS `turmas_before_insert`;
+DROP TRIGGER IF EXISTS `turmas_before_update`;
+DROP TRIGGER IF EXISTS `subcompetencias_before_insert`;
+DROP TRIGGER IF EXISTS `subcompetencias_before_update`;
+DROP TRIGGER IF EXISTS `disciplinas_turmas_after_delete`;
+DROP TRIGGER IF EXISTS `disciplinas_turmas_after_insert`;
+DROP TRIGGER IF EXISTS `disciplinas_turmas_after_update`;
+DROP TRIGGER IF EXISTS `disciplinas_turmas_before_insert`;
+DROP TRIGGER IF EXISTS `disciplinas_turmas_before_update`;
+DROP TRIGGER IF EXISTS `classes_before_insert`;
+DROP TRIGGER IF EXISTS `classes_before_update`;
