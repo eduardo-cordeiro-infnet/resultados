@@ -55,6 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 $route['cadastros/classe/turmas(.*)'] = 'cadastros/classe/turmas$1';
 $route['cadastros/classe/avaliacoes(.*)'] = 'cadastros/classe/avaliacoes$1';
 $route['cadastros/classe/rubricas(.*)'] = 'cadastros/classe/rubricas$1';
+$route['cadastros/classe/preparar_estrutura(.*)'] = 'cadastros/classe/preparar_estrutura$1';
 $route['cadastros/competencia/subcompetencias(.*)'] = 'cadastros/competencia/subcompetencias$1';
 
 $route['cadastros/(:any)/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2/$3$4';
@@ -62,7 +63,6 @@ $route['cadastros/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2$3';
 $route['cadastros/(:any)(.*)'] = 'cadastros/$1/cadastro$2';
 
 $route['relatorios/resultados_turma/(:num)'] = 'relatorios/resultados_turma/relatorio/$1';
-//$route['relatorios/resultados_turma/relatorio(.*)'] = 'relatorios/resultados_turma/relatorio$1';
 $route['relatorios/resultados_turma'] = 'relatorios/resultados_turma/selecionar_turma';
 
 $route['default_controller'] = 'inicio';

@@ -27,6 +27,7 @@
     echo link_tag('assets/css/vendor/bootstrap.css');
     echo link_tag('assets/css/vendor/animate.css');
     echo link_tag('assets/css/vendor/jquery.mmenu.all.css');
+    echo link_tag('assets/css/vendor/tooltipster.css');
     echo link_tag('assets/css/estilo.css');
     ?>
 

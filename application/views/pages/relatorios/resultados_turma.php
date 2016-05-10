@@ -123,10 +123,6 @@
 	<?php foreach ($turma->competencias as $competencia): ?>
 				<th title="<?php echo $competencia->nome; ?>"><?php echo $competencia->codigo; ?></th>
 	<?php endforeach ?>
-				<!--
-				<th></th>
-				<th></th>
-				-->
 			</tr>
 		</thead>
 		<tbody>
@@ -261,5 +257,24 @@
 		</tbody>
 	</table>
 	</div>
-	<p>Relatório gerado em <?php echo date('d/m/Y H:i:s', time()); ?></p>
+	<div class="relatorio_exportar_container"></div>
+	<p>Relatório gerado em <?php
+		echo date('d/m/Y H:i:s', time()) .
+			' | ' .
+			anchor(
+				'',
+				'Exportar para Excel',
+				array(
+					'class' => 'link-exportar-excel',
+					'download' => implode('_', array(
+						'ResultadosCompetencias',
+						$turma->classe->programa->sigla,
+						$turma->classe->nome,
+						$turma->disciplina->nome,
+						date('d_m_Y', time()))
+					) . '.xls'
+				)
+			);
+	?></p>
+	<div class="mensagem_carregando">Exportando dados para Excel...<br />Este processo pode levar alguns minutos, por favor aguarde</div>
 <?php endif; ?>

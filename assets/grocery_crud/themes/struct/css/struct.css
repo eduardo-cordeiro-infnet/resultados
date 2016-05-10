@@ -11,11 +11,12 @@ table th
   /*border: 1px solid rgba(0,0,0,0.2);*/
   overflow: hidden;
   color: #000;
-  margin: 16px;
-  width: calc(100% - 32px) !important;
+  /*margin: 16px;
+  width: calc(100% - 32px) !important;*/
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   transition: all cubic-bezier(.62,.28,.23,.99) .5s;
   border-radius: 3px;
+  background: #fff;
 }
 
 .struct.crud-form
@@ -51,7 +52,7 @@ table th
 	padding-right:40px;
 }
 .struct div.bDiv table {
-	margin-bottom:10px;
+	/*margin-bottom:10px;*/
 	width: 100%;
 }
 .struct div.bDiv table.autoht {
@@ -114,6 +115,7 @@ table th
 	overflow:hidden;
 	white-space:nowrap;
 	position:relative;
+	background: #CFD8DC;
 }
 .struct div.mDiv div {
 	padding:8px;
@@ -121,35 +123,40 @@ table th
 }
 .struct div.mDiv div.ptogtitle {
 	position:absolute;
-	top:4px;
-	right:3px;
+	top:6px;
+	right:8px;
 	padding:0px;
-	height:16px;
-	width:16px;
+	height:24px;
+	width:24px;
 	overflow:hidden;
-	border:1px solid #ccc;
+	/*border:1px solid #ccc;*/
 	cursor:pointer;
 }
+
 .struct div.mDiv div.ptogtitle:hover {
 	background-position:left -2px;
 	border-color:#bbb;
 }
+
 .struct div.mDiv div.ptogtitle span {
 	display:block;
-	border-left:1px solid #eee;
+	/*border-left:1px solid #eee;
 	border-top:1px solid #fff;
-	border-bottom:1px solid #ddd;
-	width:14px;
-	height:14px;
-	background:url(images/uup.png) no-repeat center;
+	border-bottom:1px solid #ddd;*/
+	width:24px;
+	height:24px;
+	background:url(images/ic_arrow_drop_up_black_24px.svg) no-repeat center;
+	background-size: contain;
 }
+
 .struct div.mDiv div.ptogtitle.vsble span {
-	background:url(images/ddn.png) no-repeat center;
+	background:url(images/ic_arrow_drop_down_black_24px.svg) no-repeat center;
+	background-size: contain;
 }
 .struct div.tDiv /*toolbar*/ {
 	/*background:#fafafa url(images/bg.gif) repeat-x top;*/
 	position:relative;
-	border-top:1px solid #ccc;
+	/*border-top:1px solid #ccc;*/
 	border-bottom:0px;
 	overflow:hidden;
 	padding: 8px;
@@ -173,16 +180,21 @@ table th
 	float:left;
 	clear:both;
 	padding:8px;
-	padding-left:5px;
 	width:604px;
 }
+
 .struct div.sDiv2 input,.struct div.sDiv2 select {
 	vertical-align:middle;
+	padding: 5px;
+  border-radius: 2px;
+  border: 1px solid #ccc;
 }
+
 .struct.crud-form select
 {
 	min-width: 200px;
 }
+
 .struct div.btnseparator {
 	float:left;
 	height:22px;
@@ -191,49 +203,73 @@ table th
 	margin:1px;
 }
 .struct div.fbutton {
-	float:left;
-	display:block;
-	cursor:pointer;
-	padding:1px;
+  float: left;
+  display: block;
+  cursor: pointer;
+  letter-spacing: .5px;
+  border: none;
+  border-radius: 2px;
+  line-height: 18px;
+  outline: 0;
+  padding: .5rem 1rem;
+  text-transform: uppercase;
+
+  transition: all .3s ease-out;
+  background: #2196F3;
+  color: #fff;
+  font-size: 12px;
 }
+
 .struct div.fbutton div {
 	float:left;
-	padding:1px 3px;
+	/*padding:1px 3px;*/
 }
 .struct div.fbutton span {
 	float:left;
 	display:block;
 	padding:3px;
 }
+
 .struct div.fbutton span.add {
-	background:url(images/add.png) no-repeat;
-	background-position: 0px 3px;
-	padding-left: 20px;
+	background:url(images/ic_add_circle_black_24px.svg) no-repeat;
+	background-position: 0 center;
+	background-size: contain;
+	padding-left: 30px;
 }
 .struct div.fbutton span.export {
-	background:url(images/export.png) no-repeat;
-	background-position: 0px 3px;
-	padding-left: 20px;
+	background:url(images/ic_file_download_white_24px.svg) no-repeat;
+	background-position: 0 center;
+	background-size: contain;
+	padding-left: 30px;
 }
 .struct div.fbutton span.print {
-	background:url(images/print.png) no-repeat;
-	background-position: 0px 3px;
-	padding-left: 20px;
+	background:url(images/ic_print_white_24px.svg) no-repeat;
+	background-position: 0 center;
+	background-size: contain;
+	padding-left: 30px;
 }
 .struct div.fbutton span.delete {
 	background:url(images/close.png) no-repeat;
-	padding-left: 20px;
+	background-position: 0 center;
+	background-size: contain;
+	padding-left: 30px;
 }
+
+.struct div.fbutton:hover {
+	background:#1E88E5;
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
 .struct div.fbutton:hover,.struct div.fbutton.fbOver {
-	padding:0px;
-	border:1px solid #ccc;
+	/*padding:0px;
+	border:1px solid #ccc;*/
 }
 .struct div.fbutton:hover div,.struct div.fbutton.fbOver div {
-	padding:0px 2px;
+	/*padding:0px 2px;
 	border-left:1px solid #fff;
 	border-top:1px solid #fff;
 	border-right:1px solid #eee;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #eee;*/
 }
 /* end toolbar*/
 .struct div.hDiv table {
@@ -243,9 +279,11 @@ table th
 {
 	/*background:#fafafa url(images/fhbg.gif) repeat-x bottom;*/
 	position:relative;
-	border:1px solid #ccc;
+	/*border-top:1px solid #ccc;*/
 	border-bottom:0px;
 	overflow:hidden;
+	background: #607D8B;
+	color: #fff;
 }
 .struct div.cDrag {
 	float:left;
@@ -376,7 +414,7 @@ div.form-div input.datetime-input
 	margin-left:10px;
 }
 .struct div.bDiv table {
-	border-bottom:1px solid #ccc;
+	/*border-bottom:1px solid #ccc;*/
 }
 .struct div.hGrip {
 	position:absolute;
@@ -412,12 +450,14 @@ div.form-div input.datetime-input
 	border-bottom:1px solid #aaa;
 	background:none;
 }
+
 .struct table tr.hDiv th,.struct div.bDiv td /* common cell properties*/ {
 	text-align:left;
-	border-right:1px solid #ddd;
-	border-left:1px solid #fff;
+	/*border-right:1px solid #ddd;
+	border-left:1px solid #fff;*/
 	overflow:hidden;
 	vertical-align:top !important;
+	font-weight: 400;
 }
 
 .struct table tr.hDiv th:last-child,
@@ -426,7 +466,7 @@ div.form-div input.datetime-input
 }
 
 .struct table tr.hDiv th div,.struct div.bDiv td div,div.colCopy div/* common inner cell properties*/ {
-	padding:5px;
+	padding:8px;
 	border-left:0px solid #fff;
 }
 .struct div.hDiv th,div.colCopy {
@@ -476,9 +516,9 @@ div.colCopy {
 	background:url(images/up.png) no-repeat center top;
 }
 .struct div.bDiv td {
-	border-bottom:1px solid #fff;
+	/*border-bottom:1px solid #fff;*/
 	vertical-align:top;
-	white-space:nowrap;
+	/*white-space:nowrap;*/
 }
 .struct div.hDiv th div {
 	overflow:hidden;
@@ -505,17 +545,22 @@ div.colCopy {
 }
 .struct div.bDiv td div {
 	border-top:0px solid #fff;
-	padding-bottom:4px;
+	/*padding-bottom:4px;*/
 }
+
+.struct div.bDiv td .tools {
+	/*width: 125px;*/
+}
+
 .struct tr td.sorted {
 	background:#f3f3f3;
-	border-right:1px solid #ddd;
-	border-bottom:1px solid #f3f3f3;
+	/*border-right:1px solid #ddd;
+	border-bottom:1px solid #f3f3f3;*/
 }
 .struct tr td.sorted div {
 }
 .struct tr.erow td {
-	background:#f7f7f7;
+	background:#ECEFF1;
 	border-bottom:1px solid #f7f7f7;
 }
 .struct tr.erow td.sorted {
@@ -525,9 +570,9 @@ div.colCopy {
 .struct tr.erow td.sorted div {
 }
 .struct div.bDiv tr:hover td,.struct div.bDiv tr:hover td.sorted,.struct div.bDiv tr.trOver td.sorted,.struct div.bDiv tr.trOver td {
-	background:#d9ebf5;
-	border-left:1px solid #eef8ff;
-	border-bottom:1px dotted #a8d8eb;
+	background: #CFD8DC;
+	/*border-left:1px solid #eef8ff;
+	border-bottom:1px dotted #a8d8eb;*/
 }
 .struct div.bDiv tr.trSelected:hover td,.struct div.bDiv tr.trSelected:hover td.sorted,.struct div.bDiv tr.trOver.trSelected td.sorted,.struct div.bDiv tr.trOver.trSelected td,.struct tr.trSelected td.sorted,.struct tr.trSelected td {
 	background:#d5effc url(images/hl.png) repeat-x top;
@@ -580,7 +625,8 @@ div.colCopy {
 div.pGroup {
 	float:left;
 	background:none;
-	height:24px;
+	height:32px;
+	line-height:24px;
 	margin:0px 5px;
 }
 .struct div.pDiv .pPageStat,.struct div.pDiv .pcontrol {
@@ -594,54 +640,63 @@ div.pGroup {
 	top:-5px;
 }
 .struct div.pDiv input{
-	top:-5px;
+	top:-3px;
+	height: 24px;
+	border-radius: 2px;
+  border: 1px solid #ccc;
+  text-align: center;
 }
 .struct div.pDiv select {
 	top:-3px;
+	height: 24px;
+	border-radius: 2px;
+  border: 1px solid #ccc;
+  text-align: center;
 }
 .struct div.pDiv div.pButton {
 	float:left;
-	width:22px;
-	height:22px;
+	width:24px;
+	height:24px;
 	border:0px;
+	margin:5px 0;
 	cursor:pointer;
 	overflow:hidden;
 }
 .struct div.pDiv div.pButton:hover,.struct div.pDiv div.pButton.pBtnOver {
-	width:20px;
-	height:20px;
-	border:1px solid #ccc;
+	width:24px;
+	height:24px;
+	/*border:1px solid #ccc;*/
 	cursor:pointer;
 }
 .struct div.pDiv div.pButton span {
-	width:20px;
-	height:20px;
+	width:24px;
+	height:24px;
 	display:block;
 	float:left;
 }
 .struct div.pDiv div.pButton:hover span,.struct div.pDiv div.pButton.pBtnOver span {
 	width:19px;
 	height:19px;
-	border-top:1px solid #fff;
-	border-left:1px solid #fff;
+	/*border-top:1px solid #fff;
+	border-left:1px solid #fff;*/
 }
 .struct .pSearch {
 	background:url(images/magnifier.png) no-repeat center;
 }
 .struct .pFirst {
-	background:url(images/first.gif) no-repeat center;
+	background:url(images/ic_first_page_black_24px.svg) no-repeat center;
 }
 .struct .pPrev {
-	background:url(images/prev.gif) no-repeat center;
+	background:url(images/ic_chevron_left_black_24px.svg) no-repeat center;
 }
 .struct .pNext {
-	background:url(images/next.gif) no-repeat center;
+	background:url(images/ic_chevron_right_black_24px.svg) no-repeat center;
 }
 .struct .pLast {
-	background:url(images/last.gif) no-repeat center;
+	background:url(images/ic_last_page_black_24px.svg) no-repeat center;
 }
 .struct .pReload {
-	background:url(images/load.png) no-repeat center;
+	background:url(images/ic_refresh_black_24px.svg) no-repeat center;
 }
 .struct .pReload.loading,.struct .fbutton.loading{
 	background:url(images/load.gif) no-repeat center;
@@ -653,31 +708,84 @@ div.pGroup {
 	width: 16px;
 	height: 16px;
 }
-.struct .search-div-clear-button
-{
-	float:right;
-	padding:8px;
+.struct .search-div-clear-button {
+	float: right;
+	padding: 8px;
 }
+
+.quickSearchBox .sDiv2 input[type="button"] {
+	letter-spacing: .5px;
+  border: 0 !important;
+  border-radius: 2px !important;
+  line-height: 18px;
+  outline: 0;
+  padding: 8px 8px 8px 36px !important;
+  text-transform: uppercase;
+  transition: all .3s ease-out;
+  color: #fff;
+  font-size: 12px;
+  background: url('images/ic_filter_list_white_24px.svg') no-repeat 8px center;
+  background-color: #2196F3;
+}
+
+.quickSearchBox .sDiv2 input[type="button"]:hover{
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+  background-color: #1E88E5;
+}
+
+.struct .search-div-clear-button input {
+	letter-spacing: .5px;
+  border: none;
+  border-radius: 2px;
+  line-height: 18px;
+  outline: 0;
+  padding: 8px 8px 8px 36px;
+  text-transform: uppercase;
+  transition: all .3s ease-out;
+  color: #fff;
+  font-size: 12px;
+  background: url('images/ic_clear_white_24px.svg') no-repeat 8px center;
+  background-color: #2196F3;
+}
+
+.struct .search-div-clear-button input:hover {
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+  background: url('images/ic_clear_white_24px.svg') no-repeat 8px center;
+  background-color: #1E88E5;
+}
+
 .struct .edit-icon
 {
-	background:url(images/edit.png) no-repeat;
+	background:url(images/ic_mode_edit_black_24px.svg) no-repeat;
+	background-size: contain;
 	cursor: pointer;
-	width: 16px;
-	height:16px;
-	float:right;
+	width: 24px;
+	height:24px;
+	/*float:right;*/
 	border: none !important;
 	padding:0px !important;
 	padding-bottom:0px !important;
 	margin-left:5px;
 	display: block;
+	opacity: .87;
 }
+
+.struct .edit-icon:hover {
+	opacity: 1;
+}
+.struct .tools a {
+	display:inline-block;
+	float: right;
+}
+
 .struct .delete-icon
 {
-	background:url(images/close.png) no-repeat;
+	background:url(images/ic_delete_forever_black_24px.svg) no-repeat;
+	background-size: contain;
 	cursor: pointer;
-	width: 16px;
-	height:16px;
-	float:right;
+	width: 24px;
+	height:24px;
+	/*float:right;*/
 	border: none !important;
 	padding:0px !important;
 	padding-bottom:0px !important;
@@ -686,11 +794,11 @@ div.pGroup {
 }
 .struct .read-icon
 {
-	background:url(images/magnifier.png) no-repeat center;
+	background:url(images/ic_pageview_black_24px.svg) no-repeat center;
 	cursor: pointer;
-	width: 16px;
-	height:16px;
-	float:right;
+	width: 24px;
+	height:24px;
+	/*float:right;*/
 	border: none !important;
 	padding:0px !important;
 	padding-bottom:0px !important;

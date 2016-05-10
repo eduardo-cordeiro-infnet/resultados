@@ -26,12 +26,12 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='';
 DELIMITER //
 CREATE TRIGGER `turmas_after_update` AFTER UPDATE ON `turmas` FOR EACH ROW BEGIN
-	update turmas set turmas.qtd_disciplinas_calc = (
+	update classes set qtd_disciplinas_calc = (
 		select COUNT(1) from turmas
 		where id_classe = NEW.id_classe
 	) where id = NEW.id_classe;
 
-	update turmas set turmas.qtd_disciplinas_calc = (
+	update classes set qtd_disciplinas_calc = (
 		select COUNT(1) from turmas
 		where id_classe = OLD.id_classe
 	) where id = OLD.id_classe;

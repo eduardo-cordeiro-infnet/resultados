@@ -1,0 +1,36 @@
+.alteracoes-estrutura td {
+	border: 1px solid;
+}
+
+.alteracoes-estrutura .desmarcado {
+	color: #AAA;
+}
+
+.alteracoes-estrutura .manter {
+	background-color: #9F9;
+}
+
+.alteracoes-estrutura .atualizar {
+	background-color: #FF6;
+}
+.alteracoes-estrutura .atualizar.desmarcado {
+	background-color: #FFC;
+}
+
+.alteracoes-estrutura .cadastrar {
+	background-color: #CDF;
+}
+.alteracoes-estrutura .cadastrar.desmarcado {
+	background-color: #DEF;
+}
+
+.alteracoes-estrutura .remover {
+	background-color: #FAA;
+}
+.alteracoes-estrutura .remover.desmarcado {
+	background-color: #FEE;
+}
+
+.alteracoes-estrutura a > img {
+	float: right;
+}

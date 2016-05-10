@@ -2,6 +2,11 @@
 
 if ( ! function_exists('carregar_classe'))
 {
+	/**
+	 * Carregar classe
+	 *
+	 * Inclui a classe indicada
+	 */
 	function carregar_classe()
 	{
 		foreach (func_get_args() as $param) {

@@ -10,7 +10,7 @@
       </a>
     </div>
     <ul class="navbar-right">
-      <li><?php echo $title; ?></li>
+      <li><?php echo (isset($title) ? $title : ''); ?></li>
       <li><button class="btn btn-primary">Logout</button></li>
     </ul>
   </div>

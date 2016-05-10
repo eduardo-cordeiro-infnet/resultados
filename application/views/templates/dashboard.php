@@ -40,7 +40,7 @@
                   c-3.697,0-6.705-3.002-6.705-6.693C57.525,18.005,60.533,15,64.23,15z M71.727,115.571v-68.5l83.578,34.251L71.727,115.571z"/>
                 </svg>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <?php echo anchor(site_url('/'), 'ENTRAR', array('class' => 'btn btn-link btn-block')); ?>
+                <?php echo anchor(site_url('/resultados_turma'), 'ENTRAR', array('class' => 'btn btn-link btn-block')); ?>
               </div>
             </div>
             <div class="col-md-3">

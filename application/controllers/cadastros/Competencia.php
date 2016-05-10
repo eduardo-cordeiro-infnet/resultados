@@ -13,7 +13,9 @@ class Competencia extends CI_Controller {
 	function _output_padrao($output = null)
 	{
 		$this->load->view('templates/cabecalho', $output);
-		$this->load->view('templates/padrao', $output);
+		$this->load->view('templates/menu', $output);
+		$this->load->view('templates/navbar', $output);
+		$this->load->view('templates/cadastros', $output);
 		$this->load->view('templates/rodape', $output);
 	}
 
@@ -35,12 +37,12 @@ class Competencia extends CI_Controller {
 
 			->set_rules('codigo','código','integer|is_natural')
 
-			->display_as('id_turma', 'Disciplina')
+			->display_as('id_turma', 'Turma')
 			->display_as('codigo', 'Código')
 
-			->callback_column('codigo', array($this->Competencia_crud_model, 'obter_campo_codigo'))
+			->callback_column('id_turma', array($this->Competencia_crud_model, 'obter_coluna_turma'))
 
-			->add_action('Cadastrar subcompetências', base_url('assets/img/lista-num-decimal.png'), '', '', array($this->Competencia_crud_model, 'obter_caminho_subcompetencias'))
+			->add_action('Cadastrar subcompetências', base_url('assets/img/ic_comp_add_black_24px.svg'), '', '', array($this->Competencia_crud_model, 'obter_caminho_subcompetencias'))
 		;
 
 		if (intval($id_turma) > 0)

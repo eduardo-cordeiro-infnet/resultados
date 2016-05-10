@@ -14,7 +14,9 @@ class Programa extends CI_Controller {
 	function _output_padrao($output = null)
 	{
 		$this->load->view('templates/cabecalho', $output);
-		$this->load->view('templates/padrao', $output);
+		$this->load->view('templates/menu', $output);
+		$this->load->view('templates/navbar', $output);
+		$this->load->view('templates/cadastros', $output);
 		$this->load->view('templates/rodape', $output);
 	}
 
@@ -26,9 +28,18 @@ class Programa extends CI_Controller {
 			->set_table('programas')
 
 			->columns('id_escola', 'nome', 'sigla', 'ativa')
-			->fields('id_escola', 'nome', 'sigla', 'ativa')
+			->fields('id_escola', 'nome', 'sigla', 'ativa', 'blocos')
 
 			->set_relation('id_escola','escolas','{sigla} ({nome})')
+
+			->set_relation_n_n(
+				'blocos',
+				'programas_blocos',
+				'blocos',
+				'id_programa',
+				'id_bloco',
+				'nome'
+			)
 
 			->field_type('ativa', 'dropdown', array('Não', 'Sim'))
 

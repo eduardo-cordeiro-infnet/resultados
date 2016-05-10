@@ -69,75 +69,16 @@ class Turma_model extends CI_Model {
 	/**
 	 * Popular
 	 *
-	 * Preenche as propriedades da instância
-	 * com valores obtidos na base a partir do ID
+	 * Preenche as propriedades da instância com valores obtidos na base a partir do ID
+	 * Se $apenas_estrutura === true, preenche apenas as propriedades que não dependem de dados do Moodle (não preenche $estudantes e $resultados)
+	 * Retorna esta própria instância para permitir concatenação de funções ou null se não houver ID definido
+	 * @return Turma_model
 	 */
-	public function popular()
+	public function popular($apenas_estrutura = false)
 	{
 		if (isset($this->id))
 		{
 			$this->load->helper('class_helper');
-
-			if (!isset($this->disciplina))
-			{
-				carregar_classe(array(
-					'models/Bloco_model',
-					'models/Disciplina_model'
-				));
-
-				$dados = $this->db->query($this->consultas_sql->disciplina_turma(), array($this->id))->row();
-
-				$bloco = new Bloco_model(array(
-					'id' => $dados->id_bloco,
-					'nome' => $dados->nome_bloco
-				));
-
-				$this->disciplina = new Disciplina_model(array(
-					'id' => $dados->id,
-					'nome' => $dados->nome,
-					'denominacao_bloco' => $dados->denominacao_bloco,
-					'bloco' => $bloco
-				));
-			}
-			if (!isset($this->classe))
-			{
-				carregar_classe(array(
-					'models/Programa_model',
-					'models/Modalidade_model',
-					'models/Escola_model',
-					'models/Classe_model'
-				));
-
-				$dados = $this->db->query($this->consultas_sql->classe_turma(), array($this->id))->row();
-
-				$programa = new Programa_model(array(
-					'id' => $dados->id_programa,
-					'nome' => $dados->nome_programa,
-					'sigla' => $dados->sigla_programa
-				));
-
-				$modalidade = new Modalidade_model(array(
-					'id' => $dados->id_modalidade,
-					'nome' => $dados->nome_modalidade
-				));
-
-				$escola = new Escola_model(array(
-					'id' => $dados->id_escola,
-					'nome' => $dados->nome_escola,
-					'sigla' => $dados->sigla_escola
-				));
-
-				$this->classe = new Classe_model(array(
-					'id' => $dados->id,
-					'nome' => $dados->nome,
-					'programa' => $programa,
-					'modalidade' => $modalidade,
-					'escola' => $escola,
-					'trimestre' => $dados->trimestre,
-					'ano' => $dados->ano,
-					'id_mdl_course_category' => $dados->id_mdl_course_category
-				));
-			}
 
 			$dados_instancia = $this->db->where('id', $this->id)->get('turmas')->row();
 
@@ -161,10 +102,21 @@ class Turma_model extends CI_Model {
 			{
 				$this->id_mdl_course = $dados_instancia->id_mdl_course;
 			}
-			if (empty($this->estudantes))
+
+			if (!isset($this->disciplina))
 			{
-				$this->popular_estudantes();
+				carregar_classe('models/Disciplina_model');
+				$this->disciplina = new Disciplina_model(array('id' => $dados_instancia->id_disciplina));
 			}
+			$this->disciplina->popular($apenas_estrutura);
+
+			if (!isset($this->classe))
+			{
+				carregar_classe('models/Classe_model');
+				$this->classe = new Classe_model(array('id' => $dados_instancia->id_classe));
+			}
+			$this->classe->popular($apenas_estrutura);
+
 			if (empty($this->avaliacoes))
 			{
 				$this->popular_avaliacoes();
@@ -173,13 +125,25 @@ class Turma_model extends CI_Model {
 			{
 				$this->popular_competencias();
 			}
-			if (empty($this->resultados))
+			if ($apenas_estrutura !== true)
 			{
-				$this->popular_resultados();
+				if (empty($this->estudantes))
+				{
+					$this->popular_estudantes();
+				}
+				if (empty($this->resultados))
+				{
+					$this->popular_resultados();
+				}
 			}
+
+			return $this;
+		}
+		else
+		{
+			return null;
 		}
 	}
-
 
 	/**
 	 * Popular estudantes
@@ -214,7 +178,7 @@ class Turma_model extends CI_Model {
 		$rubricas_sem_subcompetencias = array();
 
 		$avaliacoes = array();
-		$avaliacao_final;
+		$avaliacao_final = null;
 		$avaliacao_final_sem_rubricas = false;
 
 		foreach ($dados_avaliacoes as $idx=>$linha)
@@ -493,4 +457,10 @@ class Turma_model extends CI_Model {
 
 		return $avaliacao;
 	}
+
+	public function obter_link_moodle()
+	{
+		return (isset($this->id_mdl_course)) ? URL_BASE_LMS . '/course/view.php?id=' . $this->id_mdl_course : null;
+	}
+
 }

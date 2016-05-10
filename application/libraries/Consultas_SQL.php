@@ -29,13 +29,15 @@ class Consultas_SQL {
 	}
 
 	/**
-	 * Retorna todos os cursos do Moodle com o caminho hierárquico
+	 * Retorna cursos do Moodle com o caminho hierárquico
 	 * Se for informada categoria do Moodle, os cursos desta categoria são ordenados no início
+	 * Por padrão, retorna todos os cursos do Moodle
+	 * Mas se $curso_por_nome === true, deve ser informado o nome da disciplina para retornar apenas um curso
 	 * @return string
 	 */
-	public function mdl_curso_com_caminho_mdl_categoria()
+	public function mdl_curso_com_caminho_mdl_categoria($curso_por_nome = false, $curso_por_id_mdl = false)
 	{
-		return "
+		$sql = "
 			select crs.id,
 				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname) curso_com_caminho,
 				case when ? in (select id from classes where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end turma
@@ -46,8 +48,30 @@ class Consultas_SQL {
 				left join lmsinfne_mdl.mdl_course_categories c4 on c4.id = c3.parent
 				left join lmsinfne_mdl.mdl_course_categories c5 on c5.id = c4.parent
 				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
-			order by turma desc, c.path;
 		";
+
+		if ($curso_por_nome === true)
+		{
+			$sql .= "
+				where replace(crs.fullname, ' ', '') like replace(?, ' ', '')
+				having turma = 1
+				limit 1
+			";
+		}
+		else if ($curso_por_id_mdl === true)
+		{
+			$sql .= "
+				where crs.id = ?
+			";
+		}
+		else
+		{
+			$sql .= "
+				order by turma desc, c.path;
+			";
+		}
+
+		return $sql;
 	}
 
 	/**
@@ -201,33 +225,13 @@ class Consultas_SQL {
 	}
 
 	/**
-	 * Retorna dados de uma turma específica
-	 * @return string
-	 */
-	public function disciplina_turma()
-	{
-		return "
-			select d.id,
-				d.nome,
-				d.denominacao_bloco,
-				b.id id_bloco,
-				b.nome nome_bloco
-			from turmas t
-				join disciplinas d on d.id = t.id_disciplina
-				join blocos b on b.id = d.id_bloco
-			where t.id = ?;
-		";
-	}
-
-	/**
 	 * Retorna dados da classe a partir de uma turma
 	 * @return string
 	 */
-	public function classe_turma()
+	public function dados_classe()
 	{
 		return "
-			select c.id,
-				c.nome,
+			select c.nome,
 				c.trimestre,
 				c.ano,
 				c.id_mdl_course_category,
@@ -239,12 +243,11 @@ class Consultas_SQL {
 				e.id id_escola,
 				e.nome nome_escola,
 				e.sigla sigla_escola
-			from turmas t
-				join classes c on c.id = t.id_classe
+			from classes c
 				join programas p on p.id = c.id_programa
 				join modalidades m on m.id = c.id_modalidade
 				join escolas e on e.id = p.id_escola
-			where t.id = ?;
+			where c.id = ?;
 		";
 	}
 

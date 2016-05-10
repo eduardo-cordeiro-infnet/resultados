@@ -1,10 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Competencia_crud_model extends Grocery_CRUD_Model {
 
-	public function obter_campo_codigo($valor, $linha) {
-		return '<span style="width: 100px;">' . $valor . '</span>';
-	}
-
 	/**
 	 * Obter turmas de classes
 	 *
@@ -23,6 +19,26 @@ class Competencia_crud_model extends Grocery_CRUD_Model {
 		}
 
 		return $turmas;
+	}
+
+	/**
+	 * Obter coluna turma
+	 *
+	 * Retorna o caminho da turma da linha, formatado para destacar o nome da disciplina
+	 * @return string
+	 */
+	public function obter_coluna_turma($valor, $linha) {
+		$turmas = $this->obter_turmas($valor);
+		foreach ($turmas as $id_turma => $turma_com_caminho_loop) {
+			if ($id_turma == $valor)
+			{
+				$turma_com_caminho = $turma_com_caminho_loop;
+				break;
+			}
+		}
+
+		$this->load->helper('format');
+		return formatar_caminho($turma_com_caminho);
 	}
 
 	/**

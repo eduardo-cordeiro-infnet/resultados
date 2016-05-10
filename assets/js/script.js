@@ -9,6 +9,7 @@ $(document).ready(function() {
 			]
 		}
 	});
+
 	// Altera o tipo de visualização
 	$(".ui-menu button").click(function(){
 		var rel = $(this).attr('rel');
@@ -28,6 +29,24 @@ $(document).ready(function() {
 			default:
 				console.log("Nada");
 		}
+	});
+});
+
+$(window).load(function() {
+	// Tooltip para os botões de ação
+	$('.tiptool').tooltipster({
+		'multiple': true,
+		'minWidth': 180,
+		'arrow': false
+	});
+
+	$('.ajax_list').on('click', function() {
+		setTimeout(
+			function() {
+				$('.tiptool').tooltipster();
+				console.log("list");
+			}, 500
+		);
 	});
 });
 
@@ -96,33 +115,38 @@ RelatorioTurma.exportarExcel = function(e) {
 		// Impedir que o link seja aberto pelo navegador (ação default)
 		e.preventDefault();
 
+		// Exibir mensagem de "carregando"
 		$('.mensagem_carregando').show()
 
 		// Criar cópia da tabela do relatório com ID específico
 		var $relatorioExport = $('.relatorio_container .relatorio').clone().attr('id', 'relatorio_export');
 
-		window.setTimeout(function() {
 		// Remover coluna de numeração e imagens da tabela, para evitar erros no arquivo gerado
 		$('.numero_linha, img', $relatorioExport).remove();
 
 		// Incluir cópia da tabela no documento, para poder ser utilizada pelo plugin de exportação
 		$('.relatorio_exportar_container').append($relatorioExport);
 
-		// Atribuir os estilos calculados diretamente a cada elemento da tabela
-		// (processo intenso para o navegador, trava a página por aproximadamente 3 minutos)
-		$('th, td, tr', '.relatorio_exportar_container').each(function() {$(this).css(CSSHelper.css($(this)));});
+		window.setTimeout(function() {
+			// Atribuir os estilos calculados diretamente a cada elemento da tabela
+			// (processo intenso para o navegador, trava a página por aproximadamente 3 minutos)
+			$('th, td, tr', '.relatorio_exportar_container').each(
+				function() {
+					//$(this).css(CSSHelper.css($(this)));
+				}
+			);
 
-		// Dados gerais da disciplina da tabela superior
-		var $linhasDadosDisciplina = $('.relatorio_cabecalho_linha tr');
+			// Dados gerais da disciplina da tabela superior
+			var $linhasDadosDisciplina = $('.relatorio_cabecalho_linha tr').clone();
 
-		// Ajustar os títulos dos dados gerais para alinhamento à direita
-		$('th', $linhasDadosDisciplina).css('text-align', 'right');
+			// Ajustar os títulos dos dados gerais para alinhamento à direita
+			$('th', $linhasDadosDisciplina).css('text-align', 'right');
 
-		// Incluir linha vazia após os dados gerais
-		$linhasDadosDisciplina.push($('<tr/>')[0]);
+			// Incluir linha vazia após os dados gerais
+			$linhasDadosDisciplina.push($('<tr/>')[0]);
 
-		// Incluir a tabela de dados gerais na cópia do relatório para exportação
-		$('thead', $relatorioExport).prepend($linhasDadosDisciplina);
+			// Incluir a tabela de dados gerais na cópia do relatório para exportação
+			$('thead', $relatorioExport).prepend($linhasDadosDisciplina);
 
 			// Gerar arquivo Excel para download
 			var conteudoExcel = $().battatech_excelexport({
@@ -132,6 +156,7 @@ RelatorioTurma.exportarExcel = function(e) {
 				returnUri: true
 			});
 
+			// Ocultar mensagem de "carregando"
 			$('.mensagem_carregando').hide();
 
 			// Atualizar o próprio link para passar a fazer download do arquivo e acionar o link
@@ -139,8 +164,24 @@ RelatorioTurma.exportarExcel = function(e) {
 			// definindo o nome do arquivo exportado e evitando a abertura de uma nova janela
 			$(e.target).attr('href', conteudoExcel)[0].click();
 		}, 50);
+
+		return false;
 	}
 
 	// Se houver cópia da tabela, não é necessário fazer nada, apenas seguir o link clicado
 	return true;
-}
+};
+
+PrepararEstrutura = {};
+// Altera a cor das linhas ao desmarcar as caixas de seleção.
+PrepararEstrutura.incluirListenerCheckboxes = function() {
+	$('.alteracoes-estrutura input[type=checkbox]').each(
+		function () {
+			$(this).change(
+				function() {
+					$(this).parents('tr').toggleClass('desmarcado')
+				}
+			);
+		}
+	);
+};

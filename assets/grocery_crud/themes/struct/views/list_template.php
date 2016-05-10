@@ -47,7 +47,7 @@ if($success_message !== null){?>
 	<div id="hidden-operations" class="hidden-operations"></div>
 	<div class="mDiv">
 		<div class="ftitle">
-			&nbsp;
+			<?php if(strtolower($subject) != 'record'): echo ucfirst($subject); else: echo '&nbsp;'; endif; ?>
 		</div>
 		<div title="<?php echo $this->l('minimize_maximize');?>" class="ptogtitle">
 			<span></span>
@@ -120,13 +120,13 @@ if($success_message !== null){?>
 			<div class="pGroup">
 				<span class="pcontrol">
 					<?php list($show_lang_string, $entries_lang_string) = explode('{paging}', $this->l('list_show_entries')); ?>
-					<?php echo $show_lang_string; ?>
+					<span class="string"><?php echo $show_lang_string; ?></span>
 					<select name="per_page" id='per_page' class="per_page">
 						<?php foreach($paging_options as $option){?>
 							<option value="<?php echo $option; ?>" <?php if($option == $default_per_page){?>selected="selected"<?php }?>><?php echo $option; ?>&nbsp;&nbsp;</option>
 						<?php }?>
 					</select>
-					<?php echo $entries_lang_string; ?>
+					<span class="string"><?php echo $entries_lang_string; ?></span>
 					<input type='hidden' name='order_by[0]' id='hidden-sorting' class='hidden-sorting' value='<?php if(!empty($order_by[0])){?><?php echo $order_by[0]?><?php }?>' />
 					<input type='hidden' name='order_by[1]' id='hidden-ordering' class='hidden-ordering'  value='<?php if(!empty($order_by[1])){?><?php echo $order_by[1]?><?php }?>'/>
 				</span>
@@ -144,9 +144,12 @@ if($success_message !== null){?>
 			<div class="btnseparator">
 			</div>
 			<div class="pGroup">
-				<span class="pcontrol"><?php echo $this->l('list_page'); ?> <input name='page' type="text" value="1" size="4" id='crud_page' class="crud_page">
-				<?php echo $this->l('list_paging_of'); ?>
+				<span class="pcontrol">
+				<span class="string"><?php echo $this->l('list_page'); ?></span>
+				<input name='page' type="text" value="1" size="4" id='crud_page' class="crud_page">
+				<span class="string"><?php echo $this->l('list_paging_of'); ?>
 				<span id='last-page-number' class="last-page-number"><?php echo ceil($total_results / $default_per_page)?></span></span>
+				</span>
 			</div>
 			<div class="btnseparator">
 			</div>

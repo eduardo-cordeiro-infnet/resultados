@@ -14,7 +14,9 @@ class Disciplina extends CI_Controller {
 	function _output_padrao($output = null)
 	{
 		$this->load->view('templates/cabecalho', $output);
-		$this->load->view('templates/padrao', $output);
+		$this->load->view('templates/menu', $output);
+		$this->load->view('templates/navbar', $output);
+		$this->load->view('templates/cadastros', $output);
 		$this->load->view('templates/rodape', $output);
 	}
 
