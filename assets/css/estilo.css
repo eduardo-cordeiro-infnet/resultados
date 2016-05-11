@@ -338,6 +338,10 @@ a:hover {
 	border: 1px solid;
 }
 
+.modal.in .modal-dialog {
+ z-index: 9999;
+}
+
 /* Não exibir botão "Salvar" nas telas de edição de cadastros */
 #form-button-save {
 	display: none;

@@ -173,15 +173,64 @@ RelatorioTurma.exportarExcel = function(e) {
 };
 
 PrepararEstrutura = {};
-// Altera a cor das linhas ao desmarcar as caixas de seleção.
-PrepararEstrutura.incluirListenerCheckboxes = function() {
-	$('.alteracoes-estrutura input[type=checkbox]').each(
+PrepararEstrutura.registrarListeners = function() {
+	PrepararEstrutura.registrarListenersBotoes();
+	PrepararEstrutura.registrarListenersCheckboxes();
+}
+
+PrepararEstrutura.registrarListenersBotoes = function() {
+	$('.voltar-cadastro').click(
+		function() {
+			window.location.href = window.location.href.replace('preparar_estrutura/', '');
+		}
+	);
+
+	$('#confirmar-atualizacao-estrutura').click(
+		function() {
+			document.getElementsByClassName('alteracoes-estrutura')[0].submit();
+		}
+	);
+}
+
+PrepararEstrutura.registrarListenersCheckboxes = function() {
+	// Ao clicar na célula que contém o checkbox, marcar/desmarcar o checkbox
+	$('.clicar-checkbox').click(
+		function(e) {
+			var chk = $('input:checkbox', this)[0];
+
+			// Não executar quando o próprio checkbox é clicado, para evitar marcação "dupla"
+			if(chk && e.target != chk)
+			{
+				chk.click();
+			}
+		}
+	);
+
+	$('.alteracoes-estrutura input:checkbox').each(
 		function () {
+			// Define a cor das linhas de acordo com as checkboxes marcadas
+			if ($(this).is(':checked')) {
+				$(this).parents('tr').removeClass('desmarcado');
+			} else {
+				$(this).parents('tr').addClass('desmarcado');
+			}
+
 			$(this).change(
 				function() {
-					$(this).parents('tr').toggleClass('desmarcado')
+					// Altera a cor das linhas ao marcar/desmarcar as checkboxes.
+					$(this).parents('tr').toggleClass('desmarcado');
 				}
 			);
 		}
 	);
+};
+
+PrepararEstrutura.confirmarAtualizacaoEstrutura = function() {
+	var qtdAlteracoesSelecionadas = $('input:checkbox:checked').length;
+	var divModal = (qtdAlteracoesSelecionadas > 0) ? 'confirmar-alteracao-estrutura' : 'nenhuma-acao-selecionada';
+
+	$('.qtd-alteracoes-selecionadas').html(qtdAlteracoesSelecionadas);
+	$('#modal-' + divModal).modal();
+
+	return false;
 };

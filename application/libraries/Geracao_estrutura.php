@@ -141,7 +141,11 @@ class Geracao_estrutura {
 									'elemento' => $turma_disciplina,
 									'link_moodle' => $turma_disciplina->obter_link_moodle(),
 									'caminho_curso_moodle' => $caminho_curso_moodle_atual,
-									'descricao' => 'Ajustar curso do Moodle para o seguinte: ' . anchor($elemento->obter_link_moodle(), $caminho_curso_moodle)
+									'descricao' => 'Ajustar curso do Moodle para o seguinte: ' . anchor_popup($elemento->obter_link_moodle(), $caminho_curso_moodle),
+									'array_para_batch' => array(
+										'id' => $turma_disciplina->id,
+										'id_mdl_course' => $id_mdl_course
+									)
 								);
 							}
 						}
@@ -152,7 +156,12 @@ class Geracao_estrutura {
 								'operacao' => 'cadastrar',
 								'elemento' => $elemento,
 								'link_moodle' => $elemento->obter_link_moodle(),
-								'caminho_curso_moodle' => $caminho_curso_moodle
+								'caminho_curso_moodle' => $caminho_curso_moodle,
+								'array_para_batch' => array(
+									'id_classe' => $registro->id,
+									'id_disciplina' => $disciplina->id,
+									'id_mdl_course' => $id_mdl_course
+								)
 							);
 						}
 					}
@@ -169,10 +178,15 @@ class Geracao_estrutura {
 
 						if (!isset($alteracao_turma))
 						{
-							$caminho_curso_moodle_atual = obj_prop_val($CI->db->query(
-								$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(false, true),
-								array($turma->id, (isset($turma->id_mdl_course) ? $turma->id_mdl_course : 0))
-							)->row(), 'curso_com_caminho');
+							$caminho_curso_moodle_atual = formatar_caminho(
+								obj_prop_val(
+									$CI->db->query(
+										$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(false, true),
+										array($turma->id, (isset($turma->id_mdl_course) ? $turma->id_mdl_course : 0))
+									)->row(),
+									'curso_com_caminho'
+								)
+							);
 
 							// Se não houver definição de alteração para alguma turma da estrutura atual, excluir
 							$alteracoes_estrutura['turmas'][] = array(

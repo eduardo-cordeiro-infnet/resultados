@@ -37,7 +37,10 @@ if ( ! function_exists('obj_array_search_prop'))
 
 		foreach($array as $obj)
 		{
-			if ($val == obj_prop_val($obj, $prop))
+			if (
+				(isset($obj->$prop) && $val == obj_prop_val($obj, $prop))
+				|| (isset($obj[$prop]) && $val == $obj[$prop])
+			)
 			{
 				$retorno[] = $obj;
 			}

@@ -7,27 +7,27 @@
 }
 
 .alteracoes-estrutura .manter {
-	background-color: #9F9;
+	background-color: #CFC;
 }
 
 .alteracoes-estrutura .atualizar {
 	background-color: #FF6;
 }
-.alteracoes-estrutura .atualizar.desmarcado {
+.alteracoes-estrutura .desmarcado .atualizar {
 	background-color: #FFC;
 }
 
 .alteracoes-estrutura .cadastrar {
 	background-color: #CDF;
 }
-.alteracoes-estrutura .cadastrar.desmarcado {
+.alteracoes-estrutura .desmarcado .cadastrar {
 	background-color: #DEF;
 }
 
 .alteracoes-estrutura .remover {
 	background-color: #FAA;
 }
-.alteracoes-estrutura .remover.desmarcado {
+.alteracoes-estrutura .desmarcado .remover {
 	background-color: #FEE;
 }
 

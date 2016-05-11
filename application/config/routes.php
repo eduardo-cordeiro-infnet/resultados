@@ -56,6 +56,7 @@ $route['cadastros/classe/turmas(.*)'] = 'cadastros/classe/turmas$1';
 $route['cadastros/classe/avaliacoes(.*)'] = 'cadastros/classe/avaliacoes$1';
 $route['cadastros/classe/rubricas(.*)'] = 'cadastros/classe/rubricas$1';
 $route['cadastros/classe/preparar_estrutura(.*)'] = 'cadastros/classe/preparar_estrutura$1';
+$route['cadastros/classe/atualizar_estrutura(.*)'] = 'cadastros/classe/atualizar_estrutura$1';
 $route['cadastros/competencia/subcompetencias(.*)'] = 'cadastros/competencia/subcompetencias$1';
 
 $route['cadastros/(:any)/(:any)/(:any)(.*)'] = 'cadastros/$1/cadastro/$2/$3$4';

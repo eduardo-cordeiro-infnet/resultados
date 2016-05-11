@@ -77,7 +77,6 @@ class Classe extends CI_Controller {
 		$this->_output_padrao($output);
 	}
 
-
 	/**
 	 * Preencher estrutura
 	 *
@@ -87,29 +86,89 @@ class Classe extends CI_Controller {
 	public function preparar_estrutura($id_classe)
 	{
 		$this->load
-			->library('Geracao_estrutura')
+			->library(array(
+				'Geracao_estrutura',
+				'session'
+			))
+			->helper('form')
 			->model('Classe_model')
 		;
 
 		$output = new stdClass();
-
-		$output->title = 'Preparar estrutura de classe';
 		$output->css_files = array(
 			base_url('assets/css/preparar_estrutura.css'),
 			base_url('assets/grocery_crud/themes/struct/css/struct.css')
 		);
-		$output->final_body = 'PrepararEstrutura.incluirListenerCheckboxes();';
+
+		$output->title = 'Preparar estrutura de classe';
 		$output->fechamento_body = "
 	<script>
 	$(function() {
-		PrepararEstrutura.incluirListenerCheckboxes();
+		PrepararEstrutura.registrarListeners();
 	});
 	</script>
 		";
 
 		$output->alteracoes_estrutura = $this->geracao_estrutura->obter_estrutura_classe($id_classe);
 
+		// Grava as alterações em uma variável de sessão, para poderem ser acessadas após submeter o formulário
+		$this->session->alteracoes_estrutura = $output->alteracoes_estrutura;
+
 		$this->_output_padrao($output, 'pages/preparar_estrutura');
+	}
+
+	public function atualizar_estrutura($id_classe = null)
+	{
+		$this->load
+			->helper(array(
+				'obj_array'
+			))
+			->model(array(
+				'Turma_model'
+			))
+			// Sessão deve ser carregada após modelos para as classes serem incluídas antes das instâncias serem desserializadas
+			->library('session')
+		;
+		$this->output->enable_profiler(TRUE);
+
+		$alteracoes_estrutura = $this->session->alteracoes_estrutura;
+		$alteracoes_selecionadas = $this->input->post();
+
+		$atualizar_batch = array();
+		$cadastrar_batch = array();
+		$remover_batch = array();
+
+		foreach ($alteracoes_selecionadas as $id_chk => $operacao) {
+			$array_chk = explode('-', $id_chk);
+			$tipo_item = $array_chk[0];
+			$index = $array_chk[1];
+
+			if ($operacao === 'remover')
+			{
+				$remover_batch[] = $alteracoes_estrutura[$tipo_item][$index]['elemento']->id;
+			}
+			else
+			{
+				${$operacao . '_batch'}[] = $alteracoes_estrutura[$tipo_item][$index]['array_para_batch'];
+			}
+		}
+
+		if (!empty($remover_batch))
+		{
+			$this->db->where_in('id', $remover_batch)->delete('turmas');
+		}
+
+		if (!empty($atualizar_batch))
+		{
+			$this->db->update_batch('turmas', $atualizar_batch, 'id');
+		}
+
+		if (!empty($cadastrar_batch))
+		{
+			$this->db->insert_batch('turmas', $cadastrar_batch);
+		}
+
+		redirect(str_replace('atualizar_estrutura', 'success', uri_string()));
 	}
 
 	public function turmas($id_classe = null)
