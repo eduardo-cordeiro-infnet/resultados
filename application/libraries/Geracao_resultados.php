@@ -67,7 +67,7 @@ class Geracao_resultados {
 			{
 				$qtd_rubricas_subcompetencias = $avaliacao->obter_qtd_rubricas_subcompetencias();
 
-				$rubricas_id =  array_map(function($rub) {return $rub->mdl_id;}, $avaliacao->rubricas);
+				$rubricas_id =  obj_array_map_prop($avaliacao->rubricas, 'mdl_id');
 
 				$idx_rubrica = array_search($id_rubrica, $rubricas_id);
 				$rubrica = $avaliacao->rubricas[$idx_rubrica];

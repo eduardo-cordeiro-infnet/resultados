@@ -11,6 +11,8 @@ class Classe_model extends CI_Model {
 
 	public $turmas = array();
 
+	private $populando = false;
+
 	public function __construct($param = null)
 	{
 		if (is_array($param))
@@ -47,9 +49,9 @@ class Classe_model extends CI_Model {
 			{
 				$this->ano = $param['ano'];
 			}
-			if (isset($param['id_mdl_course']))
+			if (isset($param['turmas']))
 			{
-				$this->id_mdl_course = $param['id_mdl_course'];
+				$this->turmas = $param['turmas'];
 			}
 		}
 		else if (isset($param))
@@ -72,60 +74,67 @@ class Classe_model extends CI_Model {
 	{
 		if (isset($this->id))
 		{
-			$this->load
-				->library('Consultas_SQL')
-				->helper('class_helper')
-			;
-			$dados = $this->db->query($this->consultas_sql->dados_classe(), array($this->id))->row();
+			if (!$this->populando)
+			{
+				$this->populando = true;
 
-			if (!isset($this->programa))
-			{
-				carregar_classe('models/Programa_model');
-				$this->programa = new Programa_model(array(
-					'id' => $dados->id_programa,
-					'nome' => $dados->nome_programa,
-					'sigla' => $dados->sigla_programa
-				));
-			}
+				$this->load
+					->library('Consultas_SQL')
+					->helper('class_helper')
+				;
+				$dados = $this->db->query($this->consultas_sql->dados_classe(), array($this->id))->row();
 
-			if (!isset($this->modalidade))
-			{
-				carregar_classe('models/Modalidade_model');
-				$this->modalidade = new Modalidade_model(array(
-					'id' => $dados->id_modalidade,
-					'nome' => $dados->nome_modalidade
-				));
-			}
+				if (!isset($this->programa))
+				{
+					carregar_classe('models/Programa_model');
+					$this->programa = new Programa_model(array(
+						'id' => $dados->id_programa,
+						'nome' => $dados->nome_programa,
+						'sigla' => $dados->sigla_programa
+					));
+				}
 
-			if (!isset($this->escola))
-			{
-				carregar_classe('models/Escola_model');
-				$this->escola = new Escola_model(array(
-					'id' => $dados->id_escola,
-					'nome' => $dados->nome_escola,
-					'sigla' => $dados->sigla_escola
-				));
-			}
+				if (!isset($this->modalidade))
+				{
+					carregar_classe('models/Modalidade_model');
+					$this->modalidade = new Modalidade_model(array(
+						'id' => $dados->id_modalidade,
+						'nome' => $dados->nome_modalidade
+					));
+				}
 
-			if (!isset($nome))
-			{
-				$this->nome = $dados->nome;
-			}
-			if (!isset($id_mdl_course_category))
-			{
-				$this->id_mdl_course_category = $dados->id_mdl_course_category;
-			}
-			if (!isset($trimestre))
-			{
-				$this->trimestre = $dados->trimestre;
-			}
-			if (!isset($ano))
-			{
-				$this->ano = $dados->ano;
-			}
-			if (empty($this->turmas))
-			{
-				$this->popular_turmas($apenas_estrutura);
+				if (!isset($this->escola))
+				{
+					carregar_classe('models/Escola_model');
+					$this->escola = new Escola_model(array(
+						'id' => $dados->id_escola,
+						'nome' => $dados->nome_escola,
+						'sigla' => $dados->sigla_escola
+					));
+				}
+
+				if (!isset($nome))
+				{
+					$this->nome = $dados->nome;
+				}
+				if (!isset($id_mdl_course_category))
+				{
+					$this->id_mdl_course_category = $dados->id_mdl_course_category;
+				}
+				if (!isset($trimestre))
+				{
+					$this->trimestre = $dados->trimestre;
+				}
+				if (!isset($ano))
+				{
+					$this->ano = $dados->ano;
+				}
+				if (empty($this->turmas))
+				{
+					$this->popular_turmas($apenas_estrutura);
+				}
+
+				$this->populando = false;
 			}
 
 			return $this;
@@ -138,23 +147,15 @@ class Classe_model extends CI_Model {
 
 	public function popular_turmas($apenas_estrutura = false)
 	{
-		$this->load->helper(array(
-			'class_helper',
-			'obj_array'
-		));
+		$this->load->helper('obj_array');
 		carregar_classe('models/Turma_model');
 
 		// Lista de IDs de turmas da classe obtidas da base de dados
-		$id_turmas_db = obj_array_map_id(
-			$this->db
-				->select('id')
-				->where('id_classe', $this->id)
-				->get('turmas')
-				->result()
-		);
+		$id_turmas_db = obj_array_map_id($this->db->get_where('turmas', array('id_classe' => $this->id))->result());
+		$id_turmas_nao_instanciadas = array_diff($id_turmas_db, obj_array_map_id($this->turmas));
 
 		// Inclui em $this->turmas todas as turmas que estão na base mas não instanciadas nesta classe
-		foreach (array_diff($id_turmas_db, obj_array_map_id($this->turmas)) as $id_turma)
+		foreach ($id_turmas_nao_instanciadas as $id_turma)
 		{
 			$turma = new Turma_model(array(
 				'id' => $id_turma,

@@ -53,7 +53,7 @@ class Consultas_SQL {
 		if ($curso_por_nome === true)
 		{
 			$sql .= "
-				where replace(crs.fullname, ' ', '') like replace(?, ' ', '')
+				where REMOVER_CARACTERES_ESPECIAIS(crs.fullname) like REMOVER_CARACTERES_ESPECIAIS(?)
 				having turma = 1
 				limit 1
 			";
@@ -70,6 +70,78 @@ class Consultas_SQL {
 				order by turma desc, c.path;
 			";
 		}
+
+		return $sql;
+	}
+
+	/**
+	 * Retorna módulos do Moodle com o caminho hierárquico.
+	 * Se for informado o nome da avaliação, é retornado um único módulo de acordo com o nome e curso Moodle.
+	 * Se for informada uma quantidade de instâncias de módulos, são retornadas todas as instâncias informadas.
+	 * @return string
+	 */
+	public function mdl_modulo_com_caminho_mdl_categoria($nome = null, $qtd_instances = null)
+	{
+		if (isset($nome))
+		{
+			// Antes de executar a query principal, definir as variáveis necessárias
+			$this->CI->db->query("set @prefixo_tp = REMOVER_CARACTERES_ESPECIAIS('Teste de Performance'), @nome = ?;", array($nome));
+		}
+
+		$sql = "
+			select cm.id,
+				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname, asg.name) modulo_com_caminho,
+				case
+					when right(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@nome)) = @nome and left(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@prefixo_tp)) = @prefixo_tp then 0
+			        when right(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@nome)) = @nome then 1
+			        when REMOVER_CARACTERES_ESPECIAIS(asg.name) like concat('%', @nome, '%') then 2
+			        else 100
+				end ordem_semelhanca
+			from lmsinfne_mdl.mdl_course_modules cm
+				join lmsinfne_mdl.mdl_modules m on m.id = cm.module
+			    join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
+			    join lmsinfne_mdl.mdl_course crs on crs.id = cm.course
+				left join lmsinfne_mdl.mdl_course_categories c on c.id = crs.category
+				left join lmsinfne_mdl.mdl_course_categories c2 on c2.id = c.parent
+				left join lmsinfne_mdl.mdl_course_categories c3 on c3.id = c2.parent
+				left join lmsinfne_mdl.mdl_course_categories c4 on c4.id = c3.parent
+				left join lmsinfne_mdl.mdl_course_categories c5 on c5.id = c4.parent
+				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
+			where m.name = 'assign'
+		";
+
+		if (isset($qtd_instances))
+		{
+			if ($qtd_instances > 0)
+			{
+				$sql .= "
+				    and cm.instance in (" . implode(',', array_fill(0, $qtd_instances, '?')) . ")
+			    ";
+			}
+			else
+			{
+				$sql .= "
+					and 1 = 0
+				";
+			}
+		}
+		else
+		{
+			$sql .= "
+			    and cm.course = ?
+		    ";
+		}
+
+		if (isset($nome))
+		{
+		$sql .= "
+			order by ordem_semelhanca
+			limit 1
+		";
+		}
+
+		$sql .= "
+		;";
 
 		return $sql;
 	}

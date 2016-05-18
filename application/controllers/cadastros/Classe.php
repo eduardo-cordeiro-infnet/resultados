@@ -155,17 +155,17 @@ class Classe extends CI_Controller {
 
 		if (!empty($remover_batch))
 		{
-			$this->db->where_in('id', $remover_batch)->delete('turmas');
+			$this->db->where_in('id', $remover_batch)->delete($tipo_item);
 		}
 
 		if (!empty($atualizar_batch))
 		{
-			$this->db->update_batch('turmas', $atualizar_batch, 'id');
+			$this->db->update_batch($tipo_item, $atualizar_batch, 'id');
 		}
 
 		if (!empty($cadastrar_batch))
 		{
-			$this->db->insert_batch('turmas', $cadastrar_batch);
+			$this->db->insert_batch($tipo_item, $cadastrar_batch);
 		}
 
 		redirect(str_replace('atualizar_estrutura', 'success', uri_string()));

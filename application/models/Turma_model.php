@@ -9,9 +9,10 @@ class Turma_model extends CI_Model {
 	public $ano_fim;
 	public $id_mdl_course;
 
-	public $estudantes = array();
 	public $avaliacoes = array();
 	public $competencias = array();
+
+	public $estudantes = array();
 	public $resultados_avaliacoes = array();
 	public $resultados_gerais = array();
 
@@ -20,6 +21,8 @@ class Turma_model extends CI_Model {
 	public $avaliacoes_sem_rubrica = array();
 	public $rubricas_sem_subcompetencias = array();
 	public $correcoes_nao_estudantes = array();
+
+	private $populando = false;
 
 	public function __construct($param = null)
 	{
@@ -197,9 +200,11 @@ class Turma_model extends CI_Model {
 			{
 				$avaliacao = new Avaliacao_model(array(
 					'id' => $linha->id_avaliacao,
+					'turma' => $this,
 					'nome' => $linha->nome_avaliacao,
 					'avaliacao_final' => $linha->avaliacao_final === '1'
 				));
+				$avaliacao->popular_ids_mdl_course_modules();
 
 				if ($avaliacao->avaliacao_final)
 				{
@@ -458,6 +463,12 @@ class Turma_model extends CI_Model {
 		return $avaliacao;
 	}
 
+	/**
+	 * Obter link Moodle
+	 *
+	 * Retorna a URL do curso Moodle associado à turma
+	 * @return Avaliacao_model
+	 */
 	public function obter_link_moodle()
 	{
 		return (isset($this->id_mdl_course)) ? URL_BASE_LMS . '/course/view.php?id=' . $this->id_mdl_course : null;

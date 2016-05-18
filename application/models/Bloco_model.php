@@ -3,6 +3,8 @@ class Bloco_model extends CI_Model {
 	public $id;
 	public $nome;
 
+	private $populando = false;
+
 	public function __construct($param = null)
 	{
 		if (is_array($param))
@@ -29,15 +31,22 @@ class Bloco_model extends CI_Model {
 	 * Retorna esta própria instância para permitir concatenação de funções ou null se não houver ID definido
 	 * @return Bloco_model
 	 */
-	public function popular($apenas_estrutura = false)
+	public function popular()
 	{
 		if (isset($this->id))
 		{
-			$dados_instancia = $this->db->where('id', $this->id)->get('blocos')->row();
-
-			if (!isset($this->nome))
+			if (!$this->populando)
 			{
-				$this->nome = $dados_instancia->nome;
+				$this->populando = true;
+
+				$dados_instancia = $this->db->get_where('blocos', array('id' => $this->id))->row();
+
+				if (!isset($this->nome))
+				{
+					$this->nome = $dados_instancia->nome;
+				}
+
+				$this->populando = false;
 			}
 
 			return $this;

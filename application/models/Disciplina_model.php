@@ -5,6 +5,8 @@ class Disciplina_model extends CI_Model {
 	public $denominacao_bloco;
 	public $bloco;
 
+	private $populando = false;
+
 	public function __construct($param = null)
 	{
 		if (is_array($param))
@@ -43,25 +45,32 @@ class Disciplina_model extends CI_Model {
 	{
 		if (isset($this->id))
 		{
-			$this->load->helper('class_helper');
-
-			$dados_instancia = $this->db->where('id', $this->id)->get('disciplinas')->row();
-
-			if (!isset($this->nome))
+			if (!$this->populando)
 			{
-				$this->nome = $dados_instancia->nome;
-			}
-			if (!isset($this->denominacao_bloco))
-			{
-				$this->denominacao_bloco = $dados_instancia->denominacao_bloco;
-			}
+				$this->populando = true;
 
-			if (!isset($this->bloco))
-			{
-				carregar_classe('models/Bloco_model');
-				$this->bloco = new Bloco_model(array('id' => $dados_instancia->id_bloco));
+				$this->load->helper('class_helper');
+
+				$dados_instancia = $this->db->get_where('disciplinas', array('id' => $this->id))->row();
+
+				if (!isset($this->nome))
+				{
+					$this->nome = $dados_instancia->nome;
+				}
+				if (!isset($this->denominacao_bloco))
+				{
+					$this->denominacao_bloco = $dados_instancia->denominacao_bloco;
+				}
+
+				if (!isset($this->bloco))
+				{
+					carregar_classe('models/Bloco_model');
+					$this->bloco = new Bloco_model(array('id' => $dados_instancia->id_bloco));
+				}
+				$this->bloco->popular($apenas_estrutura);
+
+				$this->populando = false;
 			}
-			$this->bloco->popular($apenas_estrutura);
 
 			return $this;
 		}

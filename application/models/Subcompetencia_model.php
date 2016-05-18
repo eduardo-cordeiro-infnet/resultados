@@ -1,16 +1,98 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-class Subcompetencia_model {
+class Subcompetencia_model extends CI_Model {
+	public $id;
+	public $competencia;
 	public $codigo_completo;
 	public $nome;
 	public $obrigatoria;
 
-	public function __construct($dados = null)
+	private $populando = false;
+
+	public function __construct($param = null)
 	{
-		if (is_array($dados))
+		if (is_array($param))
 		{
-			$this->codigo_completo = $dados['codigo_completo'];
-			$this->nome = $dados['nome'];
-			$this->obrigatoria = $dados['obrigatoria'];
+			if (isset($param['competencia']))
+			{
+				$this->competencia = $param['competencia'];
+			}
+			if (isset($param['codigo_completo']))
+			{
+				$this->codigo_completo = $param['codigo_completo'];
+			}
+			if (isset($param['nome']))
+			{
+				$this->nome = $param['nome'];
+			}
+			if (isset($param['obrigatoria']))
+			{
+				$this->obrigatoria = $param['obrigatoria'];
+			}
+		}
+		else if (isset($param))
+		{
+			$this->id = $param;
+		}
+
+		$this->load->database();
+	}
+
+	/**
+	 * Popular
+	 *
+	 * Preenche as propriedades da instância com valores obtidos na base a partir do ID da subcompetência
+	 * Retorna esta própria instância para permitir concatenação de funções ou null se não houver ID definido
+	 * Se for informado $id_avaliacao, apenas subcompetências da avaliação são incluídas ao popular a competência
+	 * @return Subcompetencia_model
+	 */
+	public function popular($apenas_estrutura = false, $id_avaliacao = null)
+	{
+		if (isset($this->id))
+		{
+			if (!$this->populando)
+			{
+				$this->populando = true;
+
+				$dados_instancia = $this->db->get_where('subcompetencias', array('id' => $this->id))->row();
+
+				if (!isset($this->codigo_completo))
+				{
+					$this->codigo_completo = $dados_instancia->codigo_completo_calc;
+				}
+				if (!isset($this->nome))
+				{
+					$this->nome = $dados_instancia->nome;
+				}
+				if (!isset($this->obrigatoria))
+				{
+					$this->obrigatoria = $dados_instancia->obrigatoria == 1;
+				}
+
+				if (!isset($this->competencia))
+				{
+					carregar_classe('models/Competencia_model');
+					$this->competencia = new Competencia_model($dados_instancia->id_competencia);
+				}
+				$this->competencia->popular($apenas_estrutura, $id_avaliacao);
+
+				if ($this->competencia->id == 590)
+				{
+					//*
+					$this->load->helper('debug');
+					var_dump_pre($this);
+					var_dump_pre(generate_call_trace());
+					die();
+					//*/
+				}
+
+				$this->populando = false;
+			}
+
+			return $this;
+		}
+		else
+		{
+			return null;
 		}
 	}
 

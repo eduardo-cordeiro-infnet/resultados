@@ -1,5 +1,6 @@
 <?php
-	echo validation_errors();
+	$botao_voltar = form_button(null, 'Voltar para o cadastro', 'class="voltar-cadastro btn btn-default"');
+	echo $botao_voltar;
 
 	echo form_open(
 		str_replace('preparar_estrutura', 'atualizar_estrutura', uri_string()),
@@ -70,10 +71,66 @@
 	</table>
 	<?php
 		endif;
+		if ($tipo_item === 'avaliacoes'):
+?>
+	<h2>Avaliações</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>&nbsp;</th>
+				<th>Ação</th>
+				<th>Disciplina</th>
+				<th>Avaliação</th>
+				<th>Módulos no Moodle</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ($alteracoes as $index => $alteracao):
+				$avaliacao = $alteracao['elemento'];
+				$operacao = $alteracao['operacao'];
+			?>
+			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
+				<td class="clicar-checkbox">
+					<?php
+					if ($operacao !== 'manter')
+					{
+						echo form_checkbox(
+							implode('-', array($tipo_item, $index)),
+							$operacao,
+							true
+						);
+					}
+					?>
+				</td>
+				<td class="<?php echo $operacao; ?>"><?php echo $alteracao['descricao']; ?></td>
+				<td><?php echo $avaliacao->turma->disciplina->nome; ?></td>
+				<td>
+					<?php
+					echo $avaliacao->nome;
+					if ($operacao !== 'cadastrar')
+					{
+						echo anchor_popup(
+							site_url('cadastros/classe/avaliacoes/' . $avaliacao->turma->id . '/edit/' . $avaliacao->id),
+							img('/assets/grocery_crud/themes/struct/css/images/ic_mode_edit_black_24px.svg'),
+							array('title' => 'Abrir cadastro da avaliação')
+						);
+					}
+					?>
+				</td>
+				<td>
+
+				</td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+	<?php
+		endif;
 	endforeach;
 
+	echo $botao_voltar;
 	echo form_submit(null, 'Aplicar ações selecionadas', 'class="btn btn-primary"');
-	echo form_button(null, 'Voltar para o cadastro', 'class="voltar-cadastro btn btn-default"');
 	echo form_close();
 	?>
 

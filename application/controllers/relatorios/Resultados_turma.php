@@ -22,11 +22,9 @@ class Resultados_turma extends CI_Controller {
 			base_url('assets/js/vendor/jquery.battatech.excelexport.min.js')
 		);
 
-		//$this->load->view('templates/cabecalho', $data);
 		$this->load->view('templates/cabecalho', $data);
 		$this->load->view('templates/menu', $data);
 		$this->load->view('templates/navbar', $data);
-		//$this->load->view('templates/padrao', $data);
 		$this->load->view('templates/relatorios', $data);
 
 		if (isset($data['avaliacoes']))
