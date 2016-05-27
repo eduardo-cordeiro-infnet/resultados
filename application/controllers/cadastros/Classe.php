@@ -119,12 +119,15 @@ class Classe extends CI_Controller {
 
 	public function atualizar_estrutura($id_classe = null)
 	{
+		$db = $this->db;
+
 		$this->load
 			->helper(array(
 				'obj_array'
 			))
 			->model(array(
-				'Turma_model'
+				'Turma_model',
+				'Avaliacao_model'
 			))
 			// Sessão deve ser carregada após modelos para as classes serem incluídas antes das instâncias serem desserializadas
 			->library('session')
@@ -134,38 +137,129 @@ class Classe extends CI_Controller {
 		$alteracoes_estrutura = $this->session->alteracoes_estrutura;
 		$alteracoes_selecionadas = $this->input->post();
 
-		$atualizar_batch = array();
-		$cadastrar_batch = array();
-		$remover_batch = array();
+		$itens_remover = array();
+		$itens_atualizar = array();
+		$itens_cadastrar = array();
 
 		foreach ($alteracoes_selecionadas as $id_chk => $operacao) {
 			$array_chk = explode('-', $id_chk);
 			$tipo_item = $array_chk[0];
 			$index = $array_chk[1];
+			$alteracao = $alteracoes_estrutura[$tipo_item][$index];
+
+			/*
+			// Tentativa de validar no back-end, não funcionando
+			if (isset($alteracao['dependencia']) && !isset($alteracoes_selecionadas[$alteracao['dependencia']]))
+			{
+				$this->preparar_estrutura($id_classe, 'Não foi possível gravar a seguinte alteração, pois uma alteração da qual ela depende não foi selecionada:<br />' + (string) $alteracao->elemento);
+			}
+			*/
 
 			if ($operacao === 'remover')
 			{
-				$remover_batch[] = $alteracoes_estrutura[$tipo_item][$index]['elemento']->id;
+				$itens_remover[$tipo_item][] = $alteracao['elemento']->id;
 			}
-			else
+			else if ($operacao === 'atualizar')
 			{
-				${$operacao . '_batch'}[] = $alteracoes_estrutura[$tipo_item][$index]['array_para_batch'];
+				$itens_atualizar[$tipo_item][] = $alteracao['array_para_base'];
+
+				if (isset($alteracao['relacionamentos_n_n']))
+				{
+					foreach ($alteracao['relacionamentos_n_n'] as $tabela => $alteracoes_n_n)
+					{
+						if (!empty($alteracoes_n_n['cadastrar']))
+						{
+							$itens_cadastrar[$tabela][] = array(
+								$alteracao['elemento']->id,
+								$alteracoes_n_n['cadastrar']
+							);
+						}
+
+						if (!empty($alteracoes_n_n['remover']))
+						{
+							$itens_remover[$tabela][] = array(
+								$alteracao['elemento']->id,
+								$alteracoes_n_n['remover']
+							);
+						}
+					}
+				}
+			}
+			else if ($operacao === 'cadastrar')
+			{
+				$itens_cadastrar[$tipo_item][$index] = $alteracao;
 			}
 		}
 
-		if (!empty($remover_batch))
+		if (!empty($itens_remover['avaliacoes_mdl_course_modules']))
 		{
-			$this->db->where_in('id', $remover_batch)->delete($tipo_item);
+			foreach ($itens_remover['avaliacoes_mdl_course_modules'] as $dados)
+			{
+				$db->where('id_avaliacao', $dados[0])->where_in('instance_mdl_course_modules', $dados[1])->delete('avaliacoes_mdl_course_modules');
+			}
 		}
 
-		if (!empty($atualizar_batch))
+		if (!empty($itens_remover['avaliacoes']))
 		{
-			$this->db->update_batch($tipo_item, $atualizar_batch, 'id');
+			$db->where_in('id_avaliacao', $itens_remover['avaliacoes'])->delete('avaliacoes_mdl_course_modules');
+			$db->where_in('id', $itens_remover['avaliacoes'])->delete('avaliacoes');
 		}
 
-		if (!empty($cadastrar_batch))
+		if (!empty($itens_remover['turmas']))
 		{
-			$this->db->insert_batch($tipo_item, $cadastrar_batch);
+			$db->where_in('id', $itens_remover['turmas'])->delete('turmas');
+		}
+
+		foreach ($itens_atualizar as $tipo_item => $dados)
+		{
+			$db->update_batch($tipo_item, $dados, 'id');
+		}
+
+		if (!empty($itens_cadastrar['turmas']))
+		{
+			foreach ($itens_cadastrar['turmas'] as $index => $alteracao)
+			{
+				$db->insert('turmas', $alteracao['array_para_base']);
+				$alteracoes_estrutura['turmas'][$index]['elemento']->id = $db->insert_id();
+			}
+		}
+
+		if (!empty($itens_cadastrar['avaliacoes']))
+		{
+			foreach ($itens_cadastrar['avaliacoes'] as $index => $alteracao)
+			{
+				$alteracao['array_para_base']['id_turma'] = $alteracao['elemento']->turma->id;
+				$db->insert('avaliacoes', $alteracao['array_para_base']);
+
+				$id_avaliacao = $db->insert_id();
+				$alteracoes_estrutura['avaliacoes'][$index]['elemento']->id = $id_avaliacao;
+
+				if (!empty($alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar']))
+				{
+					$itens_cadastrar['avaliacoes_mdl_course_modules'][] = array(
+						$id_avaliacao,
+						$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar']
+					);
+				}
+			}
+		}
+
+		if (!empty($itens_cadastrar['avaliacoes_mdl_course_modules']))
+		{
+			foreach ($itens_cadastrar['avaliacoes_mdl_course_modules'] as $itens)
+			{
+				$dados_insert_n_n = array();
+
+				foreach ($itens[1] as $instance)
+				{
+					$dados_insert_n_n[] = array(
+						'id_avaliacao' => $itens[0],
+						'instance_mdl_course_modules' => $instance
+					);
+				}
+
+				$db->insert_batch('avaliacoes_mdl_course_modules', $dados_insert_n_n);
+			}
 		}
 
 		redirect(str_replace('atualizar_estrutura', 'success', uri_string()));

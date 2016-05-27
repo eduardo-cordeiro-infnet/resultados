@@ -17,7 +17,15 @@
 	<table>
 		<thead>
 			<tr>
-				<th>&nbsp;</th>
+				<th>
+				<?php
+				echo form_checkbox(
+					null,
+					null,
+					true
+				);
+				?>
+				</th>
 				<th>Ação</th>
 				<th>Bloco</th>
 				<th>Denominação</th>
@@ -32,14 +40,15 @@
 				$operacao = $alteracao['operacao'];
 			?>
 			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
-				<td class="clicar-checkbox">
+				<td>
 					<?php
 					if ($operacao !== 'manter')
 					{
 						echo form_checkbox(
 							implode('-', array($tipo_item, $index)),
 							$operacao,
-							true
+							true,
+							$alteracao['atributos']
 						);
 					}
 					?>
@@ -77,10 +86,19 @@
 	<table>
 		<thead>
 			<tr>
-				<th>&nbsp;</th>
+				<th>
+				<?php
+				echo form_checkbox(
+					null,
+					null,
+					true
+				);
+				?>
+				</th>
 				<th>Ação</th>
 				<th>Disciplina</th>
 				<th>Avaliação</th>
+				<th>Avaliação final</th>
 				<th>Módulos no Moodle</th>
 			</tr>
 		</thead>
@@ -91,14 +109,15 @@
 				$operacao = $alteracao['operacao'];
 			?>
 			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
-				<td class="clicar-checkbox">
+				<td>
 					<?php
 					if ($operacao !== 'manter')
 					{
 						echo form_checkbox(
 							implode('-', array($tipo_item, $index)),
 							$operacao,
-							true
+							true,
+							$alteracao['atributos']
 						);
 					}
 					?>
@@ -118,8 +137,16 @@
 					}
 					?>
 				</td>
+				<td><?php echo ($avaliacao->avaliacao_final) ? 'Sim' : 'Não';?></td>
 				<td>
-
+					<ul>
+						<?php
+						foreach ($avaliacao->obter_caminhos_modulos_moodle() as $modulo_com_caminho)
+						{
+							echo '<li>' . anchor_popup($avaliacao->obter_links_moodle_sem_icone($modulo_com_caminho->instance)[0], formatar_caminho($modulo_com_caminho->modulo_com_caminho)) . '</li>';
+						}
+						?>
+					</ul>
 				</td>
 			</tr>
 			<?php endforeach; ?>

@@ -167,4 +167,12 @@ class Classe_model extends CI_Model {
 		}
 	}
 
+	public function __toString()
+	{
+		$nome_escola = (isset($this->escola->nome)) ? $this->escola->nome : null;
+		$nome_programa = (isset($this->programa)) ? (string) $this->programa : null;
+		$nome_modalidade = (isset($this->modalidade)) ? (string) $this->modalidade : null;
+		return implode(' > ', array($nome_escola, $nome_modalidade, $nome_programa, $this->nome));
+	}
+
 }

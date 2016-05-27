@@ -27,4 +27,9 @@ class Programa_model {
 		}
 	}
 
+	public function __toString()
+	{
+		return $this->nome;
+	}
+
 }

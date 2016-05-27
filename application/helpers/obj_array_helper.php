@@ -1,5 +1,29 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+if ( ! function_exists('array_map_params'))
+{
+	/**
+	 * Mapear array com parâmetros
+	 *
+	 * Executa uma função com cada elemento do array, passando os parâmetros indicados
+	 * O argumento $pos_item indica a posição em o que item do array deve ser incluída nos argumentos
+	 * @return array
+	 */
+	function array_map_params($array, $funcao, $params, $pos_item = 0)
+	{
+		$retorno = array();
+
+		foreach($array as $item)
+		{
+			$params_chamada = $params;
+			array_splice($params_chamada, $pos_item, 0, $item);
+			$retorno[] = call_user_func_array($funcao, $params_chamada);
+		}
+
+		return $retorno;
+	}
+}
+
 if ( ! function_exists('obj_array_search_id'))
 {
 	/**
@@ -82,7 +106,7 @@ if ( ! function_exists('obj_array_map_prop'))
 			{
 				$retorno[] = obj_prop_val($obj, $prop);
 			}
-			else if (isset($obj[$prop]))
+			else if (is_array($obj) && isset($obj[$prop]))
 			{
 				$retorno[] = $obj[$prop];
 			}

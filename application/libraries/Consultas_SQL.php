@@ -53,7 +53,7 @@ class Consultas_SQL {
 		if ($curso_por_nome === true)
 		{
 			$sql .= "
-				where REMOVER_CARACTERES_ESPECIAIS(crs.fullname) like REMOVER_CARACTERES_ESPECIAIS(?)
+				where FILTRAR_STRING_REGEXP(crs.fullname, null) like CONCAT('%', FILTRAR_STRING_REGEXP(?, null), '%')
 				having turma = 1
 				limit 1
 			";
@@ -82,32 +82,81 @@ class Consultas_SQL {
 	 */
 	public function mdl_modulo_com_caminho_mdl_categoria($nome = null, $qtd_instances = null)
 	{
+		$nome_numero = '';
+		$comparacoes_nome_like = array('0 = 1');
+		$comparacoes_nome_exato = array('0 = 1');
+
 		if (isset($nome))
 		{
+			$nomes_tps = unserialize(NOMES_TESTES_PERFORMANCE);
+			$nomes_ats = unserialize(NOMES_ASSESSMENT_FINAL);
+			$nomes_tps_sem_caracteres_especiais = array_map(
+				'strtolower',
+				array_map_params($nomes_tps, 'preg_replace', array('/[^A-z]+/', ''), 2)
+			);
+			$nomes_assessments_sem_caracteres_especiais = array_map(
+				'strtolower',
+				array_map_params($nomes_ats, 'preg_replace', array('/[^A-z]+/', ''), 2)
+			);
+
+			$nome_sem_caracteres_especiais = strtolower(preg_replace('/[^A-z0-9]+/', '', $nome));
+			$nome_numero = preg_replace('/[^0-9]+/', '', $nome);
+
+			$nomes_avaliacoes_sem_caracteres_especiais = array();
+			if (in_array($nome_sem_caracteres_especiais, $nomes_assessments_sem_caracteres_especiais))
+			{
+				$nomes_avaliacoes_sem_caracteres_especiais = $nomes_assessments_sem_caracteres_especiais;
+			}
+			else
+			{
+				$nomes_avaliacoes_sem_caracteres_especiais = $nomes_tps_sem_caracteres_especiais;
+			}
+
 			// Antes de executar a query principal, definir as variáveis necessárias
-			$this->CI->db->query("set @prefixo_tp = REMOVER_CARACTERES_ESPECIAIS('Teste de Performance'), @nome = ?;", array($nome));
+			$this->CI->db->query("
+				set @nome = ?;
+			", array($nome_sem_caracteres_especiais));
+
+			foreach ($nomes_avaliacoes_sem_caracteres_especiais as $nome_av)
+			{
+				$comparacoes_nome_like[] = "
+							FILTRAR_STRING_REGEXP(asg.name, null) like '%" . $nome_av . "%'";
+				$comparacoes_nome_exato[] = "
+							FILTRAR_STRING_REGEXP(asg.name, null) = '" . $nome_av . "'";
+			}
 		}
+
 
 		$sql = "
 			select cm.id,
-				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname, asg.name) modulo_com_caminho,
+				cm.instance,
+				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname, cs.name, asg.name) modulo_com_caminho,
 				case
-					when right(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@nome)) = @nome and left(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@prefixo_tp)) = @prefixo_tp then 0
-			        when right(REMOVER_CARACTERES_ESPECIAIS(asg.name), length(@nome)) = @nome then 1
-			        when REMOVER_CARACTERES_ESPECIAIS(asg.name) like concat('%', @nome, '%') then 2
-			        else 100
+					when '" . $nome_numero . "' <> ''
+						and FILTRAR_STRING_REGEXP(asg.name, '[[:digit:]]') = '" . $nome_numero . "'
+						and (
+							" . implode(' or', $comparacoes_nome_like) . "
+						)
+					then 0
+					when '" . $nome_numero . "' <> ''
+						and FILTRAR_STRING_REGEXP(asg.name, '[[:digit:]]') = CONCAT('%', '" . $nome_numero . "' , '%')
+					then 1
+					when " . implode(' or', $comparacoes_nome_exato) . "
+					then 2
+					else 100
 				end ordem_semelhanca
 			from lmsinfne_mdl.mdl_course_modules cm
 				join lmsinfne_mdl.mdl_modules m on m.id = cm.module
-			    join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
-			    join lmsinfne_mdl.mdl_course crs on crs.id = cm.course
+					and m.name = 'assign'
+				join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
+				join lmsinfne_mdl.mdl_course_sections cs on cs.id = cm.section
+				join lmsinfne_mdl.mdl_course crs on crs.id = cm.course
 				left join lmsinfne_mdl.mdl_course_categories c on c.id = crs.category
 				left join lmsinfne_mdl.mdl_course_categories c2 on c2.id = c.parent
 				left join lmsinfne_mdl.mdl_course_categories c3 on c3.id = c2.parent
 				left join lmsinfne_mdl.mdl_course_categories c4 on c4.id = c3.parent
 				left join lmsinfne_mdl.mdl_course_categories c5 on c5.id = c4.parent
 				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
-			where m.name = 'assign'
 		";
 
 		if (isset($qtd_instances))
@@ -115,26 +164,28 @@ class Consultas_SQL {
 			if ($qtd_instances > 0)
 			{
 				$sql .= "
-				    and cm.instance in (" . implode(',', array_fill(0, $qtd_instances, '?')) . ")
-			    ";
+					where cm.instance in (" . implode(',', array_fill(0, $qtd_instances, '?')) . ")
+				";
 			}
 			else
 			{
+				// Se $qtd_instances == 0, não retornar nenhum registro
 				$sql .= "
-					and 1 = 0
+					where 1 = 0
 				";
 			}
 		}
 		else
 		{
 			$sql .= "
-			    and cm.course = ?
-		    ";
+				where cm.course = ?
+			";
 		}
 
 		if (isset($nome))
 		{
 		$sql .= "
+			having ordem_semelhanca < 100
 			order by ordem_semelhanca
 			limit 1
 		";
@@ -142,6 +193,16 @@ class Consultas_SQL {
 
 		$sql .= "
 		;";
+
+		/*
+		if(in_array($nome_sem_caracteres_especiais, $nomes_assessments_sem_caracteres_especiais))
+		{
+			$this->CI->load->helper('debug');
+			var_dump_pre($sql);
+			var_dump_pre(generate_call_trace());
+			die();
+		}
+		//*/
 
 		return $sql;
 	}
@@ -268,10 +329,10 @@ class Consultas_SQL {
 			select cm.id, asg.name
 			from lmsinfne_mdl.mdl_course_modules cm
 				join lmsinfne_mdl.mdl_modules m on m.id = cm.module
+					and m.name = 'assign'
 				join lmsinfne_mdl.mdl_assign asg on asg.id = cm.instance
 				join avaliacoes_mdl_course_modules acm on acm.instance_mdl_course_modules = cm.instance
-			where m.name = 'assign'
-				and acm.id_avaliacao = ?
+			where acm.id_avaliacao = ?
 		";
 	}
 
@@ -416,4 +477,33 @@ class Consultas_SQL {
 				);
 		";
 	}
+
+	/**
+	 * Retorna registros de módulo do Moodle a partir do valor do campo instance
+	 * Se for informado $qtd_instances, são buscar
+	 * @return string
+	 */
+	public function mdl_modulo_instance($qtd_instances = null)
+	{
+		$sql = "
+			SELECT cm.*
+			FROM lmsinfne_mdl.mdl_course_modules AS cm
+				JOIN lmsinfne_mdl.mdl_modules AS m ON m.id = cm.module
+					AND m.name = 'assign'
+			WHERE cm.instance";
+
+		if ($qtd_instances > 0)
+		{
+			$sql .= " IN (" . implode(',', array_fill(0, $qtd_instances, '?')) . ")";
+		}
+		else
+		{
+			$sql .= " = ?";
+		}
+
+		$sql .= ";";
+
+		return $sql;
+	}
+
 }

@@ -22,4 +22,9 @@ class Modalidade_model {
 		}
 	}
 
+	public function __toString()
+	{
+		return $this->nome;
+	}
+
 }

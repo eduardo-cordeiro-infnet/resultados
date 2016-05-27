@@ -165,7 +165,7 @@ class Geracao_estrutura {
 							'link_moodle' => $turma_disciplina->obter_link_moodle(),
 							'caminho_curso_moodle' => $caminho_curso_moodle_atual,
 							'descricao' => $descricao,
-							'array_para_batch' => array(
+							'array_para_base' => array(
 								'id' => $turma_disciplina->id,
 								'id_mdl_course' => $id_mdl_course
 							)
@@ -180,7 +180,7 @@ class Geracao_estrutura {
 						'elemento' => $elemento,
 						'link_moodle' => $elemento->obter_link_moodle(),
 						'caminho_curso_moodle' => $caminho_curso_moodle,
-						'array_para_batch' => array(
+						'array_para_base' => array(
 							'id_classe' => $registro->id,
 							'id_disciplina' => $disciplina->id,
 							'id_mdl_course' => $id_mdl_course
@@ -233,20 +233,22 @@ class Geracao_estrutura {
 				$alteracoes_estrutura['competencias'] = array();
 			}
 
-			$projeto_bloco = ($registro->disciplina->denominacao_bloco != 'Projeto de bloco');
-			$qtd_tps = ($projeto_bloco === false) ? 9 : 4;
+			$projeto_bloco = $registro->disciplina->denominacao_bloco == 'Projeto de bloco';
+			$ultimo_tp = ($projeto_bloco) ? 9 : 3;
 
 			// Lista de avaliações que fazem parte do padrão das disciplinas
 			$avaliacoes = array();
 
 			carregar_classe('models/Avaliacao_model');
-			for ($i=1; $i <= $qtd_tps; $i++) {
+			for ($i=1; $i <= $ultimo_tp; $i += 2) {
 				$avaliacoes[] = new Avaliacao_model(array(
-					'nome' => 'TP' . $i,
+					'turma' => $registro,
+					'nome' => SIGLA_TESTE_PERFORMANCE . $i,
 					'avaliacao_final' => false
 				));
 			}
 			$avaliacoes[] = new Avaliacao_model(array(
+				'turma' => $registro,
 				'nome' => (($projeto_bloco === false) ? NOME_ASSESSMENT_FINAL : NOME_APRESENTACAO_PROJETO_FINAL),
 				'avaliacao_final' => true
 			));
@@ -256,6 +258,12 @@ class Geracao_estrutura {
 				$modulo_moodle = null;
 				$caminho_modulo_moodle = null;
 				$descricao = '';
+				$array_para_base = array(
+					'nome' => $avaliacao->nome,
+					'avaliacao_final' => ($avaliacao->avaliacao_final) ? 1 : 0
+				);
+				$modulos_adicionar = array();
+				$modulos_remover = array();
 
 				if (isset($registro->id_mdl_course))
 				{
@@ -267,7 +275,7 @@ class Geracao_estrutura {
 
 					if (isset($modulo_moodle))
 					{
-						$avaliacao->ids_mdl_course_modules[] = $modulo_moodle->id;
+						$avaliacao->instances_mdl_course_modules[] = $modulo_moodle->instance;
 						$caminho_modulo_moodle = formatar_caminho($modulo_moodle->modulo_com_caminho);
 					}
 				}
@@ -286,18 +294,27 @@ class Geracao_estrutura {
 				// Se houver uma avaliação correspondente, verificar se os dados estão corretos
 				if (isset($avaliacao_correspondente))
 				{
-					if ($avaliacao->ids_mdl_course_modules != $avaliacao_correspondente->ids_mdl_course_modules)
+					$array_para_base['id'] = $avaliacao_correspondente->id;
+
+					// Se estiver com a marcação de "avaliação final" incorreta, ajustar
+					if ($avaliacao->avaliacao_final !== $avaliacao_correspondente->avaliacao_final)
 					{
-						$modulos_adicionar = array_diff($avaliacao->ids_mdl_course_modules, $avaliacao_correspondente->ids_mdl_course_modules);
+						$descricao .= '<p>' . (($avaliacao->avaliacao_final) ? 'Marcar' : 'Desmarcar') . ' como "avaliação final"</p>';
+					}
+
+					if ($avaliacao->instances_mdl_course_modules != $avaliacao_correspondente->instances_mdl_course_modules)
+					{
+						$modulos_adicionar = array_diff($avaliacao->instances_mdl_course_modules, $avaliacao_correspondente->instances_mdl_course_modules);
+
 						// Incluir cada módulo que falta
-						foreach ($modulos_adicionar as $index => $instance_mdl_course_module)
+						foreach ($modulos_adicionar as $index => $instance_mdl_course_modules)
 						{
 							if ($index === 0)
 							{
 								$descricao .= 'Associar o(s) seguinte(s) módulos do Moodle:<ul>';
 							}
 
-							$descricao .= '<li>' . anchor_popup($avaliacao->obter_links_moodle_sem_icone($instance_mdl_course_module)[0], $caminho_modulo_moodle) . '</li>';
+							$descricao .= '<li>' . anchor_popup($avaliacao->obter_links_moodle_sem_icone($instance_mdl_course_modules)[0], $caminho_modulo_moodle) . '</li>';
 
 							if ($index === (count($modulos_adicionar) - 1))
 							{
@@ -305,95 +322,91 @@ class Geracao_estrutura {
 							}
 						}
 
-						//$modulos_remover = array_diff($avaliacao_correspondente->ids_mdl_course_modules, $avaliacao->ids_mdl_course_modules);
+						$modulos_remover = array_diff($avaliacao_correspondente->instances_mdl_course_modules, $avaliacao->instances_mdl_course_modules);
 
-						if (!empty($descricao))
+						$caminhos_modulos_moodle = $avaliacao_correspondente->obter_caminhos_modulos_moodle();
+
+						// Remover cada módulo associado incorretamente
+						foreach ($modulos_remover as $index => $instance_mdl_course_modules)
 						{
-							$alteracoes_estrutura['avaliacoes'][] = array(
-								'operacao' => 'atualizar',
-								'elemento' => $avaliacao_correspondente,
-								'descricao' => $descricao
-							);
+							$index_modulo = array_search($instance_mdl_course_modules, $avaliacao_correspondente->instances_mdl_course_modules);
+
+							if ($index === 0)
+							{
+								$descricao .= 'Desassociar o(s) seguinte(s) módulos do Moodle:<ul>';
+							}
+
+							$descricao .= '<li>' . anchor_popup($avaliacao_correspondente->obter_links_moodle_sem_icone($instance_mdl_course_modules)[0], formatar_caminho($caminhos_modulos_moodle[$index_modulo]->modulo_com_caminho)) . '</li>';
+
+							if ($index === (count($modulos_remover) - 1))
+							{
+								$descricao .= '</ul>';
+							}
 						}
 					}
-				}
-/*
-				else
-				{
-						// Se não houver elemento com os dados corretos, ajustar o primeiro elemento
-						$alteracoes_estrutura['turmas'][] = array(
-							'operacao' => 'atualizar',
-							'elemento' => $turma_disciplina,
-							'link_moodle' => $turma_disciplina->obter_link_moodle(),
-							'caminho_curso_moodle' => $caminho_curso_moodle_atual,
-							'descricao' => 'Ajustar curso do Moodle para o seguinte: ' . anchor_popup($elemento->obter_link_moodle(), $caminho_curso_moodle),
-							'array_para_batch' => array(
-								'id' => $turma_disciplina->id,
-								'id_mdl_course' => $id_mdl_course
-							)
+
+					// Se não houver descrição de alterações a ser realizadas, manter a avaliação
+					if (empty($descricao))
+					{
+						$alteracoes_estrutura['avaliacoes'][] = array(
+							'operacao' => 'manter',
+							'elemento' => $avaliacao_correspondente
 						);
 					}
 					else
 					{
-						// Definir a operação do primeiro elemento correto como "manter"
 						$alteracoes_estrutura['avaliacoes'][] = array(
-							'operacao' => 'manter',
-							'elemento' => $turma_disciplina,
-							'link_moodle' => $turma_disciplina->obter_link_moodle(),
-							'caminho_curso_moodle' => $caminho_curso_moodle
+							'operacao' => 'atualizar',
+							'elemento' => $avaliacao_correspondente,
+							'descricao' => $descricao,
+							'array_para_base' => $array_para_base,
+							'relacionamentos_n_n' => array(
+								'avaliacoes_mdl_course_modules' => array(
+									'cadastrar' => $modulos_adicionar,
+									'remover' => $modulos_remover
+								)
+							)
 						);
 					}
 				}
 				else
 				{
-					// Se não houver uma turma para a disciplina, incluir
-					$alteracoes_estrutura['turmas'][] = array(
+					// Se não houver uma avaliação com o mesmo nome, incluir
+					$alteracoes_estrutura['avaliacoes'][] = array(
 						'operacao' => 'cadastrar',
-						'elemento' => $elemento,
-						'link_moodle' => $elemento->obter_link_moodle(),
-						'caminho_curso_moodle' => $caminho_curso_moodle,
-						'array_para_batch' => array(
-							'id_classe' => $registro->id,
-							'id_disciplina' => $disciplina->id,
-							'id_mdl_course' => $id_mdl_course
+						'elemento' => $avaliacao,
+						'array_para_base' => $array_para_base,
+						'relacionamentos_n_n' => array(
+							'avaliacoes_mdl_course_modules' => array(
+								'cadastrar' => $avaliacao->instances_mdl_course_modules
+							)
 						)
 					);
 				}
 			}
 
-			foreach ($registro->turmas as $turma)
+			foreach ($registro->avaliacoes as $avaliacao)
 			{
-				$alteracao_turma = obj_array_search_id(
+				$alteracao_avaliacao = obj_array_search_id(
 					obj_array_map_prop(
-						$alteracoes_estrutura['turmas'],
+						$alteracoes_estrutura['avaliacoes'],
 						'elemento'
 					),
-					$turma->id
+					$avaliacao->id
 				);
 
-				if (!isset($alteracao_turma))
+				if (!isset($alteracao_avaliacao))
 				{
-					$caminho_curso_moodle_atual = formatar_caminho(
-						obj_prop_val(
-							$CI->db->query(
-								$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(false, true),
-								array($turma->id, (isset($turma->id_mdl_course) ? $turma->id_mdl_course : 0))
-							)->row(),
-							'curso_com_caminho'
-						)
-					);
-
 					// Se não houver definição de alteração para alguma turma da estrutura atual, excluir
-					$alteracoes_estrutura['turmas'][] = array(
+					$alteracoes_estrutura['avaliacoes'][] = array(
 						'operacao' => 'remover',
-						'elemento' => $turma,
-						'link_moodle' => $turma->obter_link_moodle(),
-						'caminho_curso_moodle' => $caminho_curso_moodle_atual
+						'elemento' => $avaliacao
 					);
 				}
-//*/
 			}
+
 		}
+
 		$this->alteracoes_estrutura = $alteracoes_estrutura;
 	}
 
@@ -407,6 +420,9 @@ class Geracao_estrutura {
 			// por isso está sendo usado $alteracoes_estrutura[$tipo_item]
 			foreach ($alteracoes_estrutura[$tipo_item] as $index => $alteracao)
 			{
+				// Inclui um vetor de atributos para serem aplicados ao checkbox
+				$alteracoes_estrutura[$tipo_item][$index]['atributos'] = array();
+
 				// Define a descrição da operação com o nome padrão quando não há uma descrição mais específica
 				if (!isset($alteracoes_estrutura[$tipo_item][$index]['descricao']))
 				{
@@ -417,6 +433,42 @@ class Geracao_estrutura {
 			if ($tipo_item === 'turmas')
 			{
 				usort($alteracoes_estrutura[$tipo_item], array($this, '_comparar_alteracoes_turmas'));
+			}
+			else if ($tipo_item === 'avaliacoes')
+			{
+				$turmas = obj_array_map_prop(
+					$alteracoes_estrutura['turmas'],
+					'elemento'
+				);
+				$turmas_id = obj_array_map_id($turmas, true);
+				$turmas_id_disciplina = obj_array_map_id(
+					obj_array_map_prop(
+						$turmas,
+						'disciplina'
+					)
+				);
+
+				foreach ($alteracoes_estrutura[$tipo_item] as $index => $alteracao)
+				{
+					$turma = $alteracao['elemento']->turma;
+					$item_dependencia = null;
+
+					if (isset($turma->id))
+					{
+						$item_dependencia = array_search($turma->id, $turmas_id);
+					}
+					else
+					{
+						$item_dependencia = array_search($turma->disciplina->id, $turmas_id_disciplina);
+					}
+
+					if ($alteracao['operacao'] !== 'atualizar' && $alteracao['operacao'] === $alteracoes_estrutura['turmas'][$item_dependencia]['operacao'])
+					{
+						// Se tanto a alteração da avaliação quanto da turma forem adicionar ou excluir, incluir dependência
+						$alteracoes_estrutura[$tipo_item][$index]['atributos']['dependencia'] = 'turmas-' . $item_dependencia;
+					}
+
+				}
 			}
 		}
 

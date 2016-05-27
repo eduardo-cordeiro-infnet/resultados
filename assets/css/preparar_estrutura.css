@@ -5,6 +5,9 @@
 .alteracoes-estrutura .desmarcado {
 	color: #AAA;
 }
+.alteracoes-estrutura .desmarcado a {
+	color: #9BD;
+}
 
 .alteracoes-estrutura .manter {
 	background-color: #CFC;

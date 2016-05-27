@@ -204,7 +204,7 @@ class Turma_model extends CI_Model {
 					'nome' => $linha->nome_avaliacao,
 					'avaliacao_final' => $linha->avaliacao_final === '1'
 				));
-				$avaliacao->popular_ids_mdl_course_modules();
+				$avaliacao->popular_instances_mdl_course_modules();
 
 				if ($avaliacao->avaliacao_final)
 				{
@@ -472,6 +472,13 @@ class Turma_model extends CI_Model {
 	public function obter_link_moodle()
 	{
 		return (isset($this->id_mdl_course)) ? URL_BASE_LMS . '/course/view.php?id=' . $this->id_mdl_course : null;
+	}
+
+	public function __toString()
+	{
+		$nome_classe = (isset($this->classe)) ? (string) $this->classe : null;
+		$nome_disciplina = (isset($this->disciplina)) ? (string) $this->disciplina : null;
+		return implode(' > ', array($nome_classe, $nome_disciplina));
 	}
 
 }

@@ -7,7 +7,7 @@ class Avaliacao_model extends CI_Model {
 
 	public $rubricas = array();
 	public $competencias = array();
-	public $ids_mdl_course_modules = array();
+	public $instances_mdl_course_modules = array();
 
 	private $populando = false;
 
@@ -81,9 +81,9 @@ class Avaliacao_model extends CI_Model {
 				{
 					$this->popular_competencias($apenas_estrutura);
 				}
-				if (empty($this->ids_mdl_course_modules))
+				if (empty($this->instances_mdl_course_modules))
 				{
-					$this->popular_ids_mdl_course_modules($apenas_estrutura);
+					$this->popular_instances_mdl_course_modules($apenas_estrutura);
 				}
 
 				$this->populando = false;
@@ -168,25 +168,18 @@ class Avaliacao_model extends CI_Model {
 	/**
 	 * Popular IDs de mdl_course_modules
 	 *
-	 * Preenche a propriedade $ids_mdl_course_modules a partir dos módulos do Moodle associados à avaliação
+	 * Preenche a propriedade $instances_mdl_course_modules a partir dos módulos do Moodle associados à avaliação
 	 */
-	public function popular_ids_mdl_course_modules($apenas_estrutura = false)
+	public function popular_instances_mdl_course_modules($apenas_estrutura = false)
 	{
 		$instances_mdl_course_modules_db = obj_array_map_prop(
 			$this->db->get_where('avaliacoes_mdl_course_modules', array('id_avaliacao' => $this->id))->result(),
 			'instance_mdl_course_modules'
 		);
 
-		$ids_mdl_course_modules_db = obj_array_map_id(
-			$this->db->query(
-				$this->consultas_sql->mdl_modulo_com_caminho_mdl_categoria(null, count($instances_mdl_course_modules_db)),
-				array($instances_mdl_course_modules_db)
-			)->result()
-		);
-
 		// Inclui em $this->instances_mdl_course_modules_db todas as instâncias de módulos Moodle que estão
 		// associadas a esta avaliação na base mas não incluídas nesta classe
-		$this->ids_mdl_course_modules = array_merge($ids_mdl_course_modules_db, $this->ids_mdl_course_modules);
+		$this->instances_mdl_course_modules = array_merge($instances_mdl_course_modules_db, $this->instances_mdl_course_modules);
 	}
 
 	/**
@@ -297,9 +290,11 @@ class Avaliacao_model extends CI_Model {
 	 */
 	public function obter_caminhos_modulos_moodle()
 	{
+		$this->load->library('Consultas_SQL');
+
 		return $this->db->query(
-			$CI->consultas_sql->mdl_modulo_com_caminho_mdl_categoria(null, count($avaliacao->ids_mdl_course_modules)),
-			array($avaliacao->ids_mdl_course_modules)
+			$this->consultas_sql->mdl_modulo_com_caminho_mdl_categoria(null, count($this->instances_mdl_course_modules)),
+			$this->instances_mdl_course_modules
 		)->result();
 	}
 
@@ -307,28 +302,45 @@ class Avaliacao_model extends CI_Model {
 	 * Obter links Moodle
 	 *
 	 * Retorna lista com URL de acesso aos módulos Moodle associados à avaliação
-	 * ou apenas dos que forem informados em $ids_mdl_course_modules
+	 * ou apenas dos que forem informados em $instances_mdl_course_modules
 	 * @return array
 	 */
-	public function obter_links_moodle_sem_icone($ids_mdl_course_modules = null)
+	public function obter_links_moodle_sem_icone($instances_mdl_course_modules = null)
 	{
+		$this->load
+			->library('Consultas_SQL')
+			->helper('obj_array_helper');
+		;
 		$retorno = array();
 
-		if (!isset($ids_mdl_course_modules))
+		if (!isset($instances_mdl_course_modules))
 		{
-			$ids_mdl_course_modules = $this->ids_mdl_course_modules;
+			$instances_mdl_course_modules = $this->instances_mdl_course_modules;
 		}
-		else if (!is_array($ids_mdl_course_modules))
+		else if (!is_array($instances_mdl_course_modules))
 		{
-			$ids_mdl_course_modules = array($ids_mdl_course_modules);
+			$instances_mdl_course_modules = array($instances_mdl_course_modules);
 		}
 
-		foreach ($ids_mdl_course_modules as $instance)
+		$ids_modulos = obj_array_map_id(
+			$this->db->query(
+				$this->consultas_sql->mdl_modulo_instance(count($this->instances_mdl_course_modules)),
+				$this->instances_mdl_course_modules
+			)->result()
+		);
+
+		foreach ($ids_modulos as $id)
 		{
-			$retorno[] = URL_BASE_LMS . '/mod/assign/view.php?id=' . $instance;
+			$retorno[] = URL_BASE_LMS . '/mod/assign/view.php?id=' . $id;
 		}
 
 		return $retorno;
+	}
+
+	public function __toString()
+	{
+		$nome_turma = (isset($this->turma)) ? (string) $this->turma : null;
+		return implode(' > ', array($nome_turma, $this->nome));
 	}
 
 }

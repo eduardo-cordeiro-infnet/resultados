@@ -194,39 +194,76 @@ PrepararEstrutura.registrarListenersBotoes = function() {
 
 PrepararEstrutura.registrarListenersCheckboxes = function() {
 	// Ao clicar na célula que contém o checkbox, marcar/desmarcar o checkbox
-	$('.clicar-checkbox').click(
-		function(e) {
-			var chk = $('input:checkbox', this)[0];
+	$('.alteracoes-estrutura input:checkbox').each(
+		function () {
+			var $chk = $(this);
 
-			// Não executar quando o próprio checkbox é clicado, para evitar marcação "dupla"
-			if(chk && e.target != chk)
-			{
-				chk.click();
-			}
+			$chk.parent().click(
+				function(e) {
+					var chk = $('input:checkbox', this)[0];
+
+					// Não executar quando o próprio checkbox é clicado, para evitar marcação "dupla"
+					if(chk && e.target != chk)
+					{
+						chk.click();
+					}
+				}
+			);
 		}
 	);
 
-	$('.alteracoes-estrutura input:checkbox').each(
+	// Ao clicar no checkbox do cabeçalho, marcar ou desmarcar todas os checkboxes da tabela
+	$('.alteracoes-estrutura th input:checkbox').change(
 		function () {
+			var $chk = $(this);
+			var estadoChks = ($chk.is(':checked')) ? ':not(:checked)' : ':checked';
+
+			$('td input:checkbox' + estadoChks, $chk.parents('table')).click();
+		}
+	);
+
+	$('.alteracoes-estrutura td input:checkbox').each(
+		function () {
+			var $chk = $(this);
+
 			// Define a cor das linhas de acordo com as checkboxes marcadas
-			if ($(this).is(':checked')) {
-				$(this).parents('tr').removeClass('desmarcado');
+			if ($chk.is(':checked')) {
+				$chk.parents('tr').removeClass('desmarcado');
 			} else {
-				$(this).parents('tr').addClass('desmarcado');
+				$chk.parents('tr').addClass('desmarcado');
 			}
 
-			$(this).change(
+			$chk.change(
 				function() {
 					// Altera a cor das linhas ao marcar/desmarcar as checkboxes.
-					$(this).parents('tr').toggleClass('desmarcado');
+					$chk.parents('tr').toggleClass('desmarcado');
+					PrepararEstrutura.atualizarCheckboxesDependentes(this);
 				}
 			);
 		}
 	);
 };
 
+PrepararEstrutura.atualizarCheckboxesDependentes = function(chk) {
+	var $chk = $(chk);
+
+	// Checkboxes de atualização não interferem na dependência de outros checkboxes
+	if ($chk.val() !== 'atualizar')
+	{
+		// Se o checkbox estiver sendo marcado ou desmarcado, os outros checkboxes sofrem a mesma ação
+		var marcar = $(chk).is(':checked');
+
+		// Se for marcação de cadastro ou desmarcação de remoção, aplicar ao checkbox do qual ele depende
+		// Senão, aplicar a marcação ou desmarcação aos checkboxes dependentes
+		var atributo = (($chk.val() === 'cadastrar' && marcar) || ($chk.val() === 'remover' && !marcar)) ? 'name' : 'dependencia';
+		var atributo_chk = (atributo === 'dependencia') ? 'name' : 'dependencia';
+
+		$('[' + atributo + '="' + $chk.attr(atributo_chk) + '"]' + ((marcar) ? ':not(:checked)' : ':checked')).click();
+	}
+};
+
 PrepararEstrutura.confirmarAtualizacaoEstrutura = function() {
-	var qtdAlteracoesSelecionadas = $('input:checkbox:checked').length;
+	var qtdAlteracoesSelecionadas = $('.alteracoes-estrutura td input:checkbox:checked').length;
 	var divModal = (qtdAlteracoesSelecionadas > 0) ? 'confirmar-alteracao-estrutura' : 'nenhuma-acao-selecionada';
 
 	$('.qtd-alteracoes-selecionadas').html(qtdAlteracoesSelecionadas);
