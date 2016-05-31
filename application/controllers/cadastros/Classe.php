@@ -94,27 +94,36 @@ class Classe extends CI_Controller {
 			->model('Classe_model')
 		;
 
-		$output = new stdClass();
-		$output->css_files = array(
-			base_url('assets/css/preparar_estrutura.css'),
-			base_url('assets/grocery_crud/themes/struct/css/struct.css')
-		);
+		$alteracoes_estrutura = $this->geracao_estrutura->obter_estrutura_classe($id_classe);
 
-		$output->title = 'Preparar estrutura de classe';
-		$output->fechamento_body = "
-	<script>
-	$(function() {
-		PrepararEstrutura.registrarListeners();
-	});
-	</script>
-		";
+		if (isset($alteracoes_estrutura))
+		{
+			$output = new stdClass();
+			$output->css_files = array(
+				base_url('assets/css/preparar_estrutura.css'),
+				base_url('assets/grocery_crud/themes/struct/css/struct.css')
+			);
 
-		$output->alteracoes_estrutura = $this->geracao_estrutura->obter_estrutura_classe($id_classe);
+			$output->title = 'Preparar estrutura de classe';
+			$output->fechamento_body = "
+		<script>
+		$(function() {
+			PrepararEstrutura.registrarListeners();
+		});
+		</script>
+			";
 
-		// Grava as alterações em uma variável de sessão, para poderem ser acessadas após submeter o formulário
-		$this->session->alteracoes_estrutura = $output->alteracoes_estrutura;
+			$output->alteracoes_estrutura = $alteracoes_estrutura;
 
-		$this->_output_padrao($output, 'pages/preparar_estrutura');
+			// Grava as alterações em uma variável de sessão, para poderem ser acessadas após submeter o formulário
+			$this->session->alteracoes_estrutura = $output->alteracoes_estrutura;
+
+			$this->_output_padrao($output, 'pages/preparar_estrutura');
+		}
+		else
+		{
+			redirect('cadastros/classe');
+		}
 	}
 
 	public function atualizar_estrutura($id_classe = null)
@@ -127,7 +136,8 @@ class Classe extends CI_Controller {
 			))
 			->model(array(
 				'Turma_model',
-				'Avaliacao_model'
+				'Avaliacao_model',
+				'Competencia_model'
 			))
 			// Sessão deve ser carregada após modelos para as classes serem incluídas antes das instâncias serem desserializadas
 			->library('session')
@@ -210,6 +220,11 @@ class Classe extends CI_Controller {
 			$db->where_in('id', $itens_remover['turmas'])->delete('turmas');
 		}
 
+		if (!empty($itens_remover['competencias']))
+		{
+			$db->where_in('id', $itens_remover['competencias'])->delete('competencias');
+		}
+
 		foreach ($itens_atualizar as $tipo_item => $dados)
 		{
 			$db->update_batch($tipo_item, $dados, 'id');
@@ -241,6 +256,15 @@ class Classe extends CI_Controller {
 						$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar']
 					);
 				}
+			}
+		}
+
+		if (!empty($itens_cadastrar['competencias']))
+		{
+			foreach ($itens_cadastrar['competencias'] as $index => $alteracao)
+			{
+				$db->insert('competencias', $alteracao['array_para_base']);
+				$alteracoes_estrutura['competencias'][$index]['elemento']->id = $db->insert_id();
 			}
 		}
 

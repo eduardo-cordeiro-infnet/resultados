@@ -71,17 +71,17 @@
 				</td>
 				<td>
 					<?php
-						echo (isset($turma->id_mdl_course)) ? anchor_popup($alteracao['link_moodle'], $alteracao['caminho_curso_moodle']) : nbs();
+					echo (isset($turma->id_mdl_course)) ? anchor_popup($alteracao['link_moodle'], $alteracao['caminho_curso_moodle']) : nbs();
 					?>
 				</td>
 			</tr>
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-	<?php
+		<?php
 		endif;
 		if ($tipo_item === 'avaliacoes'):
-?>
+		?>
 	<h2>Avaliações</h2>
 	<table>
 		<thead>
@@ -148,6 +148,69 @@
 						?>
 					</ul>
 				</td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+		<?php
+		endif;
+		if ($tipo_item === 'competencias'):
+		?>
+	<h2>Competências</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>
+				<?php
+				echo form_checkbox(
+					null,
+					null,
+					true
+				);
+				?>
+				</th>
+				<th>Ação</th>
+				<th>Disciplina</th>
+				<th>Código</th>
+				<th>Nome</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ($alteracoes as $index => $alteracao):
+				$competencia = $alteracao['elemento'];
+				$operacao = $alteracao['operacao'];
+			?>
+			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
+				<td>
+					<?php
+					if ($operacao !== 'manter')
+					{
+						echo form_checkbox(
+							implode('-', array($tipo_item, $index)),
+							$operacao,
+							true,
+							$alteracao['atributos']
+						);
+					}
+					?>
+				</td>
+				<td class="<?php echo $operacao; ?>"><?php echo $alteracao['descricao']; ?></td>
+				<td><?php echo $competencia->turma->disciplina->nome; ?></td>
+				<td>
+					<?php
+					echo $competencia->codigo;
+					if ($operacao !== 'cadastrar')
+					{
+						echo anchor_popup(
+							site_url('cadastros/competencia/' . $competencia->turma->id . '/edit/' . $competencia->id),
+							img('/assets/grocery_crud/themes/struct/css/images/ic_mode_edit_black_24px.svg'),
+							array('title' => 'Abrir cadastro da competência')
+						);
+					}
+					?>
+				</td>
+				<td><?php echo $competencia->nome; ?></td>
 			</tr>
 			<?php endforeach; ?>
 		</tbody>

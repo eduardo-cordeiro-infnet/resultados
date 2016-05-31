@@ -5,6 +5,7 @@ class Subcompetencia_model extends CI_Model {
 	public $codigo_completo;
 	public $nome;
 	public $obrigatoria;
+	public $rubrica;
 
 	private $populando = false;
 
@@ -12,6 +13,10 @@ class Subcompetencia_model extends CI_Model {
 	{
 		if (is_array($param))
 		{
+			if (isset($param['id']))
+			{
+				$this->id = $param['id'];
+			}
 			if (isset($param['competencia']))
 			{
 				$this->competencia = $param['competencia'];
@@ -27,6 +32,10 @@ class Subcompetencia_model extends CI_Model {
 			if (isset($param['obrigatoria']))
 			{
 				$this->obrigatoria = $param['obrigatoria'];
+			}
+			if (isset($param['rubrica']))
+			{
+				$this->rubrica = $param['rubrica'];
 			}
 		}
 		else if (isset($param))
@@ -74,16 +83,6 @@ class Subcompetencia_model extends CI_Model {
 					$this->competencia = new Competencia_model($dados_instancia->id_competencia);
 				}
 				$this->competencia->popular($apenas_estrutura, $id_avaliacao);
-
-				if ($this->competencia->id == 590)
-				{
-					//*
-					$this->load->helper('debug');
-					var_dump_pre($this);
-					var_dump_pre(generate_call_trace());
-					die();
-					//*/
-				}
 
 				$this->populando = false;
 			}

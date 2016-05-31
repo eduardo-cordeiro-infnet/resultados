@@ -81,63 +81,70 @@ class Turma_model extends CI_Model {
 	{
 		if (isset($this->id))
 		{
-			$this->load->helper('class_helper');
+			if (!$this->populando)
+			{
+				$this->populando = true;
 
-			$dados_instancia = $this->db->where('id', $this->id)->get('turmas')->row();
+				$this->load->helper('class_helper');
 
-			if (!isset($this->trimestre_inicio))
-			{
-				$this->trimestre_inicio = $dados_instancia->trimestre_inicio;
-			}
-			if (!isset($this->ano_inicio))
-			{
-				$this->ano_inicio = $dados_instancia->ano_inicio;
-			}
-			if (!isset($this->trimestre_fim))
-			{
-				$this->trimestre_fim = $dados_instancia->trimestre_fim;
-			}
-			if (!isset($this->ano_fim))
-			{
-				$this->ano_fim = $dados_instancia->ano_fim;
-			}
-			if (!isset($this->id_mdl_course))
-			{
-				$this->id_mdl_course = $dados_instancia->id_mdl_course;
-			}
+				$dados_instancia = $this->db->where('id', $this->id)->get('turmas')->row();
 
-			if (!isset($this->disciplina))
-			{
-				carregar_classe('models/Disciplina_model');
-				$this->disciplina = new Disciplina_model(array('id' => $dados_instancia->id_disciplina));
-			}
-			$this->disciplina->popular($apenas_estrutura);
-
-			if (!isset($this->classe))
-			{
-				carregar_classe('models/Classe_model');
-				$this->classe = new Classe_model(array('id' => $dados_instancia->id_classe));
-			}
-			$this->classe->popular($apenas_estrutura);
-
-			if (empty($this->avaliacoes))
-			{
-				$this->popular_avaliacoes();
-			}
-			if (empty($this->competencias))
-			{
-				$this->popular_competencias();
-			}
-			if ($apenas_estrutura !== true)
-			{
-				if (empty($this->estudantes))
+				if (!isset($this->trimestre_inicio))
 				{
-					$this->popular_estudantes();
+					$this->trimestre_inicio = $dados_instancia->trimestre_inicio;
 				}
-				if (empty($this->resultados))
+				if (!isset($this->ano_inicio))
 				{
-					$this->popular_resultados();
+					$this->ano_inicio = $dados_instancia->ano_inicio;
 				}
+				if (!isset($this->trimestre_fim))
+				{
+					$this->trimestre_fim = $dados_instancia->trimestre_fim;
+				}
+				if (!isset($this->ano_fim))
+				{
+					$this->ano_fim = $dados_instancia->ano_fim;
+				}
+				if (!isset($this->id_mdl_course))
+				{
+					$this->id_mdl_course = $dados_instancia->id_mdl_course;
+				}
+
+				if (!isset($this->disciplina))
+				{
+					carregar_classe('models/Disciplina_model');
+					$this->disciplina = new Disciplina_model(array('id' => $dados_instancia->id_disciplina));
+				}
+				$this->disciplina->popular($apenas_estrutura);
+
+				if (!isset($this->classe))
+				{
+					carregar_classe('models/Classe_model');
+					$this->classe = new Classe_model(array('id' => $dados_instancia->id_classe));
+				}
+				$this->classe->popular($apenas_estrutura);
+
+				if (empty($this->avaliacoes))
+				{
+					$this->popular_avaliacoes();
+				}
+				if (empty($this->competencias))
+				{
+					$this->popular_competencias();
+				}
+				if ($apenas_estrutura !== true)
+				{
+					if (empty($this->estudantes))
+					{
+						$this->popular_estudantes();
+					}
+					if (empty($this->resultados))
+					{
+						$this->popular_resultados();
+					}
+				}
+
+				$this->populando = false;
 			}
 
 			return $this;
@@ -166,136 +173,56 @@ class Turma_model extends CI_Model {
 	 * Preenche as propriedades da instância referentes a avaliações cadastradas na turma,
 	 * inclusive rubricas e subcompetências associadas
 	 */
-	public function popular_avaliacoes()
+	public function popular_avaliacoes($apenas_estrutura = false)
 	{
-		carregar_classe(array(
-			'models/Avaliacao_model',
-			'models/Rubrica_model',
-			'models/Competencia_model',
-			'models/Subcompetencia_model'
-		));
+		$this->load->helper('obj_array');
+		carregar_classe('models/Avaliacao_model');
 
-		$dados_avaliacoes = $this->db->query($this->consultas_sql->avaliacoes_turma(), array($this->id))->result();
+		// Lista de IDs de turmas da classe obtidas da base de dados
+		$id_avaliacoes_db = obj_array_map_id($this->db->get_where('avaliacoes', array('id_turma' => $this->id))->result());
+		$id_avaliacoes_nao_instanciadas = array_diff($id_avaliacoes_db, obj_array_map_id($this->avaliacoes));
+
+		// Inclui em $this->turmas todas as turmas que estão na base mas não instanciadas nesta classe
+		foreach ($id_avaliacoes_nao_instanciadas as $id_avaliacao)
+		{
+			$avaliacao = new Avaliacao_model(array(
+				'id' => $id_avaliacao,
+				'turma' => $this
+			));
+
+			$this->avaliacoes[] = $avaliacao;
+			$avaliacao->popular($apenas_estrutura);
+		}
 
 		$avaliacoes_sem_rubrica = array();
 		$rubricas_sem_subcompetencias = array();
 
-		$avaliacoes = array();
-		$avaliacao_final = null;
-		$avaliacao_final_sem_rubricas = false;
-
-		foreach ($dados_avaliacoes as $idx=>$linha)
+		foreach ($this->avaliacoes as $avaliacao)
 		{
-			$avaliacao = null;
-			$rubrica = null;
-			$competencia = null;
-			$subcompetencia = null;
-
-			$idx_avaliacao = array_search($linha->id_avaliacao, array_map(function($av) {return $av->id;}, $avaliacoes));
-			if ($idx_avaliacao !== false)
+			if (!isset($avaliacao_final) && $avaliacao->avaliacao_final)
 			{
-				$avaliacao = $avaliacoes[$idx_avaliacao];
-			}
-			else
-			{
-				$avaliacao = new Avaliacao_model(array(
-					'id' => $linha->id_avaliacao,
-					'turma' => $this,
-					'nome' => $linha->nome_avaliacao,
-					'avaliacao_final' => $linha->avaliacao_final === '1'
-				));
-				$avaliacao->popular_instances_mdl_course_modules();
-
-				if ($avaliacao->avaliacao_final)
-				{
-					$avaliacao_final = $avaliacao;
-				}
-
-				$avaliacoes[] = $avaliacao;
+				$avaliacao_final = $avaliacao;
 			}
 
-			$idx_rubrica = array_search($linha->id_mdl_gradingform_rubric_criteria, array_map(function($rub) {return $rub->mdl_id;}, $avaliacao->rubricas));
-			if ($idx_rubrica !== false)
+			if (empty($avaliacao->rubricas))
 			{
-				$rubrica = $avaliacao->rubricas[$idx_rubrica];
-			}
-			else
-			{
-				if ($linha->id_mdl_gradingform_rubric_criteria)
-				{
-					$rubrica = new Rubrica_model(array(
-						'mdl_id' => $linha->id_mdl_gradingform_rubric_criteria,
-						'descricao' => $linha->rubrica,
-						'ordem' => $linha->ordem_rubrica
-					));
-
-					$avaliacao->rubricas[] = $rubrica;
-				}
-				else
-				{
-					$avaliacoes_sem_rubrica[] = $avaliacao;
-
-					if ($avaliacao_final === $avaliacao)
-					{
-						$avaliacao_final_sem_rubricas = true;
-					}
-				}
+				$avaliacoes_sem_rubrica[] = $avaliacao;
 			}
 
-			$subcompetencias = $avaliacao->obter_subcompetencias();
-			$idx_subcompetencia = array_search($linha->codigo_subcompetencia, array_map(function($sub) {return $sub->codigo_completo;}, $subcompetencias));
-			if ($idx_subcompetencia !== false)
+			foreach ($avaliacao->rubricas as $rubrica)
 			{
-				$subcompetencia = $subcompetencias[$idx_subcompetencia];
-			}
-			else
-			{
-				$idx_competencia = array_search($linha->codigo_competencia, array_map(function($cmp) {return $cmp->codigo;}, $avaliacao->competencias));
-				if ($idx_competencia !== false)
+				if (empty($rubrica->subcompetencias))
 				{
-					$competencia = $avaliacao->competencias[$idx_competencia];
+					$rubricas_sem_subcompetencias[] = array(
+						'avaliacao' => $avaliacao,
+						'rubrica' => $rubrica
+					);
 				}
-				else
-				{
-					if ($linha->codigo_competencia)
-					{
-						$competencia = new Competencia_model(array(
-							'codigo' => $linha->codigo_competencia,
-							'nome' => $linha->nome_competencia
-						));
-
-						$avaliacao->competencias[] = $competencia;
-					}
-					else
-					{
-						$rubricas_sem_subcompetencias[] = array(
-							'avaliacao' => $avaliacao,
-							'rubrica' => $rubrica
-						);
-					}
-				}
-
-				if ($linha->codigo_subcompetencia)
-				{
-					$subcompetencia = new Subcompetencia_model(array(
-						'codigo_completo' => $linha->codigo_subcompetencia,
-						'nome' => $linha->nome_subcompetencia,
-						'obrigatoria' => ($linha->obrigatoria_subcompetencia == 1)
-					));
-
-					$competencia->subcompetencias[] = $subcompetencia;
-				}
-			}
-
-			if ($linha->codigo_subcompetencia)
-			{
-				$rubrica->subcompetencias[] = $subcompetencia;
 			}
 		}
 
-		$this->avaliacoes = $avaliacoes;
 		$this->avaliacao_final_inexistente = !isset($avaliacao_final);
-		$this->avaliacao_final_sem_rubricas = $avaliacao_final_sem_rubricas;
+		$this->avaliacao_final_sem_rubricas = empty($avaliacao_final->rubricas);
 		$this->avaliacoes_sem_rubrica = $avaliacoes_sem_rubrica;
 		$this->rubricas_sem_subcompetencias = $rubricas_sem_subcompetencias;
 	}
@@ -305,36 +232,24 @@ class Turma_model extends CI_Model {
 	 *
 	 * Preenche as competências da instância a partir das avaliações
 	 */
-	public function popular_competencias()
+	public function popular_competencias($apenas_estrutura = false)
 	{
+		$this->load->helper('obj_array');
 		carregar_classe('models/Competencia_model');
 
-		foreach ($this->avaliacoes as $avaliacao)
+		// Lista de IDs de competências da turma obtidas da base de dados
+		$id_competencias_db = obj_array_map_id($this->db->get_where('competencias', array('id_turma' => $this->id))->result());
+		$id_competencias_nao_instanciadas = array_diff($id_competencias_db, obj_array_map_id($this->competencias));
+
+		// Inclui em $this->competencias todas as competências que estão na base mas não instanciadas nesta turma
+		foreach ($id_competencias_nao_instanciadas as $id_competencia)
 		{
-			foreach ($avaliacao->competencias as $competencia_av) {
-				$idx_competencia = array_search($competencia_av->codigo, array_map(function($cmp){return $cmp->codigo;}, $this->competencias));
-
-				if ($idx_competencia === false)
-				{
-					$competencia = new Competencia_model(array(
-						'codigo' => $competencia_av->codigo,
-						'nome' => $competencia_av->nome
-					));
-
-					$this->competencias[] = $competencia;
-				}
-				else
-				{
-					$competencia = $this->competencias[$idx_competencia];
-				}
-
-				foreach ($competencia_av->subcompetencias as $subcompetencia) {
-					if (array_search($subcompetencia->obter_codigo_sem_obrigatoriedade(), array_map(function($scmp){return $scmp->obter_codigo_sem_obrigatoriedade();}, $competencia->subcompetencias)) === false)
-					{
-						$competencia->subcompetencias[] = $subcompetencia;
-					}
-				}
-			}
+			$competencia = new Competencia_model(array(
+				'id' => $id_competencia,
+				'turma' => $this
+			));
+			$competencia->popular($apenas_estrutura);
+			$this->competencias[] = $competencia;
 		}
 
 		if (count($this->competencias) > 0)

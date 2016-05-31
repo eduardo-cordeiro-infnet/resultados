@@ -80,11 +80,12 @@ if ( ! function_exists('obj_array_map_id'))
 	 * Mapear ID em array
 	 *
 	 * Retorna um array com os IDs de todos os objetos de um array
+	 * Se $manter_indices === true, retornar null para os objetos que não possuírem ID
 	 * @return array
 	 */
-	function obj_array_map_id($array)
+	function obj_array_map_id($array, $manter_indices = false)
 	{
-		return obj_array_map_prop($array, 'id');
+		return obj_array_map_prop($array, 'id', $manter_indices);
 	}
 }
 
@@ -96,7 +97,7 @@ if ( ! function_exists('obj_array_map_prop'))
 	 * Retorna um array com a propriedade informada de todos os objetos de um array
 	 * @return array
 	 */
-	function obj_array_map_prop($array, $prop)
+	function obj_array_map_prop($array, $prop, $manter_indices = false)
 	{
 		$retorno = array();
 
@@ -109,6 +110,10 @@ if ( ! function_exists('obj_array_map_prop'))
 			else if (is_array($obj) && isset($obj[$prop]))
 			{
 				$retorno[] = $obj[$prop];
+			}
+			else
+			{
+				$retorno[] = null;
 			}
 		}
 

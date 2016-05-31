@@ -3,6 +3,7 @@ class Competencia_model extends CI_Model {
 	public $id;
 	public $codigo;
 	public $nome;
+	public $turma;
 
 	public $subcompetencias = array();
 
@@ -23,6 +24,10 @@ class Competencia_model extends CI_Model {
 			if (isset($param['nome']))
 			{
 				$this->nome = $param['nome'];
+			}
+			if (isset($param['turma']))
+			{
+				$this->turma = $param['turma'];
 			}
 		}
 		else if (isset($param))

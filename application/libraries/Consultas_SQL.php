@@ -420,8 +420,10 @@ class Consultas_SQL {
 				vra.id_mdl_gradingform_rubric_criteria,
 				vra.rubrica,
 				vra.ordem_rubrica,
+				cmp.id id_competencia,
 				cmp.codigo codigo_competencia,
 				cmp.nome nome_competencia,
+				scmp.id id_subcompetencia,
 				scmp.codigo_completo_calc codigo_subcompetencia,
 				scmp.nome nome_subcompetencia,
 				scmp.obrigatoria obrigatoria_subcompetencia
@@ -506,4 +508,31 @@ class Consultas_SQL {
 		return $sql;
 	}
 
+	/**
+	 * Retorna rubricas do Moodle a partir do valor do campo instance de módulos
+	 * @return string
+	 */
+	public function mdl_rubricas_instance($qtd_instances)
+	{
+		$sql = "
+			SELECT vr.id_mdl_gradingform_rubric_criteria AS mdl_id,
+				   vr.rubrica AS descricao,
+				   vr.ordem_rubrica AS ordem,
+				   vr.*
+			FROM v_rubricas AS vr
+			WHERE vr.instance_mdl_course_module";
+
+		if ($qtd_instances > 0)
+		{
+			$sql .= " IN (" . implode(',', array_fill(0, $qtd_instances, '?')) . ")";
+		}
+		else
+		{
+			$sql .= " = ?";
+		}
+
+		$sql .= ";";
+
+		return $sql;
+	}
 }

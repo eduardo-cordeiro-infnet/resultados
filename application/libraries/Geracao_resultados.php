@@ -187,7 +187,10 @@ class Geracao_resultados {
 				{
 					$subcompetencia_codigo = $subcompetencia->obter_codigo_sem_obrigatoriedade();
 
-					if ($resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['demonstrada'] === false)
+					if (
+						!isset($resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['demonstrada'])
+						|| $resultados_gerais[$mdl_userid][$competencia_codigo][$subcompetencia_codigo]['demonstrada'] === false
+					)
 					{
 						if ($subcompetencia->obrigatoria)
 						{

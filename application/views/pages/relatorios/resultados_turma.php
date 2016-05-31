@@ -49,7 +49,7 @@
 				<th>Avaliação</th>
 	<?php
 	foreach($avaliacoes as $avaliacao):
-		if (count($avaliacao->obter_subcompetencias()) > 0):
+		if (!empty($avaliacao->obter_subcompetencias())):
 	?>
 				<th
 					colspan="<?php echo count($avaliacao->obter_subcompetencias()); ?>"
@@ -76,8 +76,8 @@
 	<?php
 	foreach($avaliacoes as $avaliacao):
 		if (count($avaliacao->obter_subcompetencias()) > 0):
+			foreach($avaliacao->competencias as $competencia):
 	?>
-			<?php foreach($avaliacao->competencias as $competencia): ?>
 				<th
 					colspan="<?php echo count($competencia->subcompetencias); ?>"
 					title="<?php echo $competencia->nome; ?>"
@@ -85,12 +85,11 @@
 				>
 					<?php echo $competencia->codigo; ?>
 				</th>
-			<?php endforeach; ?>
 	<?php
+			endforeach;
 		endif;
 	endforeach;
-	?>
-	<?php foreach ($turma->competencias as $competencia): ?>
+	foreach ($turma->competencias as $competencia): ?>
 				<th
 					colspan="<?php echo count($competencia->subcompetencias); ?>"
 					title="<?php echo $competencia->nome; ?>"
@@ -116,13 +115,14 @@
 	<?php
 		endif;
 	endforeach;
+	foreach ($turma->obter_subcompetencias() as $subcompetencia):
 	?>
-	<?php foreach ($turma->obter_subcompetencias() as $subcompetencia): ?>
 				<th title="<?php echo $subcompetencia->nome; ?>"><?php echo $subcompetencia->codigo_completo; ?></th>
-	<?php endforeach ?>
-	<?php foreach ($turma->competencias as $competencia): ?>
+	<?php
+	endforeach;
+	foreach ($turma->competencias as $competencia): ?>
 				<th title="<?php echo $competencia->nome; ?>"><?php echo $competencia->codigo; ?></th>
-	<?php endforeach ?>
+	<?php endforeach; ?>
 			</tr>
 		</thead>
 		<tbody>
@@ -135,14 +135,12 @@
 		<?php
 		foreach($avaliacoes as $avaliacao):
 			if (count($avaliacao->obter_subcompetencias()) > 0):
-		?>
-				<?php
 				foreach($avaliacao->obter_subcompetencias() as $subcompetencia):
 					$demonstrada = (
 						isset($resultados_avaliacoes[$estudante->mdl_userid][$avaliacao->id][$subcompetencia->obter_codigo_sem_obrigatoriedade()])
 						&& $resultados_avaliacoes[$estudante->mdl_userid][$avaliacao->id][$subcompetencia->obter_codigo_sem_obrigatoriedade()]['demonstrada']
 					);
-				?>
+		?>
 				<td
 					class="<?php if (!$demonstrada) {echo 'nao_';} ?>demonstrada"
 					title="<?php echo $avaliacao->nome . ' / ' . $subcompetencia->codigo_completo; ?>"
@@ -162,8 +160,6 @@
 		<?php
 			endif;
 		endforeach;
-		?>
-		<?php
 		foreach ($turma->obter_subcompetencias() as $subcompetencia):
 			$demonstrada = (
 				isset($resultados_gerais[$estudante->mdl_userid][$subcompetencia->obter_codigo_competencia()][$subcompetencia->obter_codigo_sem_obrigatoriedade()])
@@ -185,8 +181,8 @@
 					}
 					?>
 				</td>
-		<?php endforeach; ?>
 		<?php
+		endforeach;
 		foreach ($turma->competencias as $competencia):
 			$demonstrada = (
 				isset($resultados_gerais[$estudante->mdl_userid][$competencia->codigo])

@@ -63,15 +63,15 @@ class Avaliacao_model extends CI_Model {
 				}
 				if (!isset($this->avaliacao_final))
 				{
-					$this->avaliacao_final = $dados_instancia->avaliacao_final;
+					$this->avaliacao_final = $dados_instancia->avaliacao_final == 1;
 				}
 
 				if (!isset($this->turma))
 				{
 					carregar_classe('models/Turma_model');
-					$this->turma = new Turma_model(array('id' => $dados_instancia->id_turma));
+					$this->turma = new Turma_model($dados_instancia->id_turma);
 				}
-				$this->turma->popular(true);
+				$this->turma->popular($apenas_estrutura);
 
 				if (empty($this->rubricas))
 				{
@@ -135,33 +135,42 @@ class Avaliacao_model extends CI_Model {
 	public function popular_competencias($apenas_estrutura = false)
 	{
 		$this->load->helper('obj_array_helper');
-
 		carregar_classe('models/Competencia_model');
 
-		$id_competencias_db = obj_array_map_prop(
-			$this->db
-				->distinct()
-				->select('id_competencia')
-				->where_in(
-					'id',
-					obj_array_map_id(array($this, 'obter_subcompetencias'))
-				)
-				->get('subcompetencias')
-				->result(),
-			'id_competencia'
-		);
+		$id_competencias_db = array();
+		$subcompetencias = $this->obter_subcompetencias();
+
+		if (!empty($subcompetencias))
+		{
+			$id_competencias_db = obj_array_map_prop(
+				$this->db
+					->distinct()
+					->select('id_competencia')
+					->where_in(
+						'id',
+						obj_array_map_id($subcompetencias)
+					)
+					->get('subcompetencias')
+					->result(),
+				'id_competencia'
+			);
+		}
+
 		$id_competencias_nao_instanciadas = array_diff($id_competencias_db, obj_array_map_id($this->competencias));
 
 		// Inclui em $this->competencias todas as competências que estão
 		// associadas às rubricas desta avaliação na base mas não instanciadas nesta classe
 		foreach ($id_competencias_nao_instanciadas as $id_competencia)
 		{
-			$competencia = new Competencia_model($id_competencia);
+			$competencia = new Competencia_model(array(
+				'id' => $id_competencia,
+				'turma' => $this->turma
+			));
 
-			$this->competencias[] = $competencia;
 			// Popular a competência fornecendo o ID da avaliação,
 			// para buscar apenas subcompetências associadas às rubricas da avaliação
 			$competencia->popular($apenas_estrutura, $this->id);
+			$this->competencias[] = $competencia;
 		}
 	}
 
@@ -203,7 +212,8 @@ class Avaliacao_model extends CI_Model {
 		{
 			foreach ($this->rubricas as $rubrica)
 			{
-				foreach ($rubrica->subcompetencias as $subcompetencia) {
+				foreach ($rubrica->subcompetencias as $subcompetencia)
+				{
 					if (!in_array($subcompetencia->id, obj_array_map_id($subcompetencias)))
 					{
 						$subcompetencias[] = $subcompetencia;

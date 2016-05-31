@@ -3,6 +3,7 @@ class Rubrica_model extends CI_Model {
 	public $mdl_id;
 	public $descricao;
 	public $ordem;
+	public $avaliacao;
 
 	public $subcompetencias = array();
 
@@ -24,6 +25,10 @@ class Rubrica_model extends CI_Model {
 			{
 				$this->ordem = $param['ordem'];
 			}
+			if (isset($param['avaliacao']))
+			{
+				$this->avaliacao = $param['avaliacao'];
+			}
 		}
 		else if (isset($param))
 		{
@@ -40,7 +45,7 @@ class Rubrica_model extends CI_Model {
 	 * Retorna esta própria instância para permitir concatenação de funções ou null se não houver ID definido
 	 * @return Rubrica_model
 	 */
-	public function popular()
+	public function popular($apenas_estrutura = false)
 	{
 		if (isset($this->mdl_id))
 		{
@@ -61,7 +66,7 @@ class Rubrica_model extends CI_Model {
 
 				if (empty($this->subcompetencias))
 				{
-					$this->popular_subcompetencias();
+					$this->popular_subcompetencias($apenas_estrutura);
 				}
 
 				$this->populando = false;
@@ -95,7 +100,10 @@ class Rubrica_model extends CI_Model {
 		// Inclui em $this->subcompetencias todas as subcompetências que estão na base mas não instanciadas nesta classe
 		foreach ($id_subcompetencias_nao_instanciadas as $id_subcompetencia)
 		{
-			$subcompetencia = new Subcompetencia_model($id_subcompetencia);
+			$subcompetencia = new Subcompetencia_model(array(
+				'id' => $id_subcompetencia,
+				'rubrica' => $this
+			));
 
 			$subcompetencia->popular($apenas_estrutura);
 			$this->subcompetencias[] = $subcompetencia;
