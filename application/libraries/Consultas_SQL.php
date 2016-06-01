@@ -40,7 +40,18 @@ class Consultas_SQL {
 		$sql = "
 			select crs.id,
 				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname) curso_com_caminho,
-				case when ? in (select id from classes where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end turma
+				case when ? in (select id from classes where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end turma";
+
+		if ($curso_por_nome === true)
+		{
+			$sql .= ",
+				case when FILTRAR_STRING_REGEXP(crs.fullname, null) = FILTRAR_STRING_REGEXP(?, null) then 0
+					when FILTRAR_STRING_REGEXP(crs.fullname, null) like CONCAT('%', FILTRAR_STRING_REGEXP(?, null), '%') then 1
+				end nome_correspondente
+			";
+		}
+
+		$sql .= "
 			from lmsinfne_mdl.mdl_course crs
 				left join lmsinfne_mdl.mdl_course_categories c on c.id = crs.category
 				left join lmsinfne_mdl.mdl_course_categories c2 on c2.id = c.parent
@@ -53,8 +64,8 @@ class Consultas_SQL {
 		if ($curso_por_nome === true)
 		{
 			$sql .= "
-				where FILTRAR_STRING_REGEXP(crs.fullname, null) like CONCAT('%', FILTRAR_STRING_REGEXP(?, null), '%')
-				having turma = 1
+				having turma = 1 and nome_correspondente is not null
+				order by nome_correspondente
 				limit 1
 			";
 		}

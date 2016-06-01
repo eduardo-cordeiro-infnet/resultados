@@ -123,4 +123,15 @@ class Subcompetencia_model extends CI_Model {
 		return explode('.', $this->codigo_completo)[0];
 	}
 
+	/**
+	 * Obter código da subcompetência
+	 *
+	 * Retorna o código da subcompetência sem o código da competência
+	 * @return string
+	 */
+	public function obter_codigo_subcompetencia()
+	{
+		return explode('.', $this->obter_codigo_sem_obrigatoriedade())[1];
+	}
+
 }

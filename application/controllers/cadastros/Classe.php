@@ -104,7 +104,7 @@ class Classe extends CI_Controller {
 				base_url('assets/grocery_crud/themes/struct/css/struct.css')
 			);
 
-			$output->title = 'Preparar estrutura de classe';
+			$output->title = 'Preparar estrutura de classe: ' . $this->geracao_estrutura->elemento_principal;
 			$output->fechamento_body = "
 		<script>
 		$(function() {
@@ -113,6 +113,7 @@ class Classe extends CI_Controller {
 		</script>
 			";
 
+			$output->elemento_principal = $this->geracao_estrutura->elemento_principal;
 			$output->alteracoes_estrutura = $alteracoes_estrutura;
 
 			// Grava as alterações em uma variável de sessão, para poderem ser acessadas após submeter o formulário
@@ -137,7 +138,8 @@ class Classe extends CI_Controller {
 			->model(array(
 				'Turma_model',
 				'Avaliacao_model',
-				'Competencia_model'
+				'Competencia_model',
+				'Subcompetencia_model'
 			))
 			// Sessão deve ser carregada após modelos para as classes serem incluídas antes das instâncias serem desserializadas
 			->library('session')
@@ -151,7 +153,8 @@ class Classe extends CI_Controller {
 		$itens_atualizar = array();
 		$itens_cadastrar = array();
 
-		foreach ($alteracoes_selecionadas as $id_chk => $operacao) {
+		foreach ($alteracoes_selecionadas as $id_chk => $operacao)
+		{
 			$array_chk = explode('-', $id_chk);
 			$tipo_item = $array_chk[0];
 			$index = $array_chk[1];
@@ -209,6 +212,16 @@ class Classe extends CI_Controller {
 			}
 		}
 
+		if (!empty($itens_remover['subcompetencias']))
+		{
+			$db->where_in('id', $itens_remover['subcompetencias'])->delete('subcompetencias');
+		}
+
+		if (!empty($itens_remover['competencias']))
+		{
+			$db->where_in('id', $itens_remover['competencias'])->delete('competencias');
+		}
+
 		if (!empty($itens_remover['avaliacoes']))
 		{
 			$db->where_in('id_avaliacao', $itens_remover['avaliacoes'])->delete('avaliacoes_mdl_course_modules');
@@ -220,14 +233,9 @@ class Classe extends CI_Controller {
 			$db->where_in('id', $itens_remover['turmas'])->delete('turmas');
 		}
 
-		if (!empty($itens_remover['competencias']))
+		foreach ($itens_atualizar as $tabela => $dados)
 		{
-			$db->where_in('id', $itens_remover['competencias'])->delete('competencias');
-		}
-
-		foreach ($itens_atualizar as $tipo_item => $dados)
-		{
-			$db->update_batch($tipo_item, $dados, 'id');
+			$db->update_batch($tabela, $dados, 'id');
 		}
 
 		if (!empty($itens_cadastrar['turmas']))
@@ -259,15 +267,6 @@ class Classe extends CI_Controller {
 			}
 		}
 
-		if (!empty($itens_cadastrar['competencias']))
-		{
-			foreach ($itens_cadastrar['competencias'] as $index => $alteracao)
-			{
-				$db->insert('competencias', $alteracao['array_para_base']);
-				$alteracoes_estrutura['competencias'][$index]['elemento']->id = $db->insert_id();
-			}
-		}
-
 		if (!empty($itens_cadastrar['avaliacoes_mdl_course_modules']))
 		{
 			foreach ($itens_cadastrar['avaliacoes_mdl_course_modules'] as $itens)
@@ -283,6 +282,24 @@ class Classe extends CI_Controller {
 				}
 
 				$db->insert_batch('avaliacoes_mdl_course_modules', $dados_insert_n_n);
+			}
+		}
+
+		if (!empty($itens_cadastrar['competencias']))
+		{
+			foreach ($itens_cadastrar['competencias'] as $index => $alteracao)
+			{
+				$db->insert('competencias', $alteracao['array_para_base']);
+				$alteracoes_estrutura['competencias'][$index]['elemento']->id = $db->insert_id();
+			}
+		}
+
+		if (!empty($itens_cadastrar['subcompetencias']))
+		{
+			foreach ($itens_cadastrar['subcompetencias'] as $index => $alteracao)
+			{
+				$db->insert('subcompetencias', $alteracao['array_para_base']);
+				$alteracoes_estrutura['subcompetencias'][$index]['elemento']->id = $db->insert_id();
 			}
 		}
 

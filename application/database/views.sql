@@ -4,7 +4,8 @@ AS
 		 grc.description rubrica,
 		 grc.sortorder   ordem_rubrica,
 		 cm.instance     instance_mdl_course_module,
-		 asg.name        name_mdl_assign
+		 asg.name        name_mdl_assign,
+		 cm.course       id_course
 	FROM lmsinfne_mdl.mdl_gradingform_rubric_criteria grc
 		 JOIN lmsinfne_mdl.mdl_grading_definitions gd
 		   ON gd.id = grc.definitionid

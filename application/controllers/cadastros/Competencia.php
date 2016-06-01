@@ -43,6 +43,8 @@ class Competencia extends CI_Controller {
 			->callback_column('id_turma', array($this->Competencia_crud_model, 'obter_coluna_turma'))
 
 			->add_action('Cadastrar subcompetências', base_url('assets/img/ic_comp_add_black_24px.svg'), '', '', array($this->Competencia_crud_model, 'obter_caminho_subcompetencias'))
+
+			->unset_read()
 		;
 
 		if (intval($id_turma) > 0)
@@ -85,6 +87,8 @@ class Competencia extends CI_Controller {
 			->display_as('id_competencia', 'Competência')
 			->display_as('codigo_completo_calc', 'Código')
 			->display_as('obrigatoria', 'Obrigatória')
+
+			->unset_read()
 		;
 
 		if (intval($id_turma) > 0)

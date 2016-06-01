@@ -1,7 +1,10 @@
 <?php
 	$botao_voltar = form_button(null, 'Voltar para o cadastro', 'class="voltar-cadastro btn btn-default"');
 	echo $botao_voltar;
-
+?>
+	<h2><?php echo str_replace('_model', '', get_class($elemento_principal)); ?></h2>
+	<p><?php echo $elemento_principal; ?></p>
+<?php
 	echo form_open(
 		str_replace('preparar_estrutura', 'atualizar_estrutura', uri_string()),
 		array(
@@ -211,6 +214,71 @@
 					?>
 				</td>
 				<td><?php echo $competencia->nome; ?></td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+		<?php
+		endif;
+		if ($tipo_item === 'subcompetencias'):
+		?>
+	<h2>Subcompetências</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>
+				<?php
+				echo form_checkbox(
+					null,
+					null,
+					true
+				);
+				?>
+				</th>
+				<th>Ação</th>
+				<th>Disciplina</th>
+				<th>Código</th>
+				<th>Obrigatória</th>
+				<th>Nome</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ($alteracoes as $index => $alteracao):
+				$subcompetencia = $alteracao['elemento'];
+				$operacao = $alteracao['operacao'];
+			?>
+			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
+				<td>
+					<?php
+					if ($operacao !== 'manter')
+					{
+						echo form_checkbox(
+							implode('-', array($tipo_item, $index)),
+							$operacao,
+							true,
+							$alteracao['atributos']
+						);
+					}
+					?>
+				</td>
+				<td class="<?php echo $operacao; ?>"><?php echo $alteracao['descricao']; ?></td>
+				<td><?php echo $subcompetencia->competencia->turma->disciplina->nome; ?></td>
+				<td>
+					<?php
+					echo $subcompetencia->codigo_completo;
+					if ($operacao !== 'cadastrar')
+					{
+						echo anchor_popup(
+							site_url('cadastros/competencia/subcompetencias/' . $subcompetencia->competencia->turma->id . '/edit/' . $subcompetencia->id),
+							img('/assets/grocery_crud/themes/struct/css/images/ic_mode_edit_black_24px.svg'),
+							array('title' => 'Abrir cadastro da subcompetência')
+						);
+					}
+					?>
+				</td>
+				<td><?php echo ($subcompetencia->obrigatoria) ? 'Sim' : 'Não'; ?></td>
+				<td><?php echo $subcompetencia->nome; ?></td>
 			</tr>
 			<?php endforeach; ?>
 		</tbody>
