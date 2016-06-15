@@ -111,7 +111,7 @@ if ( ! function_exists('obj_array_map_prop'))
 			{
 				$retorno[] = $obj[$prop];
 			}
-			else
+			else if ($manter_indices == true)
 			{
 				$retorno[] = null;
 			}

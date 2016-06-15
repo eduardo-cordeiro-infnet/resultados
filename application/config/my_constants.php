@@ -1,5 +1,12 @@
 <?php
 defined('URL_BASE_LMS') OR define('URL_BASE_LMS', 'http://lms.infnet.edu.br/moodle');
+defined('NOMES_PROJETO_BLOCO') OR define('NOMES_PROJETO_BLOCO',
+	serialize(array(
+		'Projeto de bloco',
+		'Projeto do bloco'
+	))
+);
+defined('NOME_PROJETO_BLOCO') OR define('NOME_PROJETO_BLOCO', unserialize(NOMES_PROJETO_BLOCO)[0]);
 defined('SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE') OR define('SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE', '*');
 defined('NOMES_TESTES_PERFORMANCE') OR define('NOMES_TESTES_PERFORMANCE',
 	serialize(array(
@@ -13,9 +20,7 @@ defined('NOMES_ASSESSMENT_FINAL') OR define('NOMES_ASSESSMENT_FINAL',
 	serialize(array(
 		'Assessment final',
 		'Apresentação final',
-		'AT',
 		'Assessment',
-		'AP',
 		'Apresentação',
 		'Entrega do Projeto'
 	))

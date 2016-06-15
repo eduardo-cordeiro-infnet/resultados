@@ -139,7 +139,8 @@ class Classe extends CI_Controller {
 				'Turma_model',
 				'Avaliacao_model',
 				'Competencia_model',
-				'Subcompetencia_model'
+				'Subcompetencia_model',
+				'Rubrica_model'
 			))
 			// Sessão deve ser carregada após modelos para as classes serem incluídas antes das instâncias serem desserializadas
 			->library('session')
@@ -174,7 +175,16 @@ class Classe extends CI_Controller {
 			}
 			else if ($operacao === 'atualizar')
 			{
-				$itens_atualizar[$tipo_item][] = $alteracao['array_para_base'];
+				$campo_id = 'id';
+
+				if ($tipo_item === 'rubricas')
+				{
+					$campo_id = 'mdl_id';
+				}
+				else
+				{
+					$itens_atualizar[$tipo_item][] = $alteracao['array_para_base'];
+				}
 
 				if (isset($alteracao['relacionamentos_n_n']))
 				{
@@ -183,7 +193,7 @@ class Classe extends CI_Controller {
 						if (!empty($alteracoes_n_n['cadastrar']))
 						{
 							$itens_cadastrar[$tabela][] = array(
-								$alteracao['elemento']->id,
+								$alteracao['elemento']->$campo_id,
 								$alteracoes_n_n['cadastrar']
 							);
 						}
@@ -191,7 +201,7 @@ class Classe extends CI_Controller {
 						if (!empty($alteracoes_n_n['remover']))
 						{
 							$itens_remover[$tabela][] = array(
-								$alteracao['elemento']->id,
+								$alteracao['elemento']->$campo_id,
 								$alteracoes_n_n['remover']
 							);
 						}
@@ -212,8 +222,17 @@ class Classe extends CI_Controller {
 			}
 		}
 
+		if (!empty($itens_remover['subcompetencias_mdl_gradingform_rubric_criteria']))
+		{
+			foreach ($itens_remover['subcompetencias_mdl_gradingform_rubric_criteria'] as $dados)
+			{
+				$db->where('id_mdl_gradingform_rubric_criteria', $dados[0])->where_in('id_subcompetencia', $dados[1])->delete('subcompetencias_mdl_gradingform_rubric_criteria');
+			}
+		}
+
 		if (!empty($itens_remover['subcompetencias']))
 		{
+			$db->where_in('id_subcompetencia', $itens_remover['subcompetencias'])->delete('subcompetencias_mdl_gradingform_rubric_criteria');
 			$db->where_in('id', $itens_remover['subcompetencias'])->delete('subcompetencias');
 		}
 
@@ -289,6 +308,7 @@ class Classe extends CI_Controller {
 		{
 			foreach ($itens_cadastrar['competencias'] as $index => $alteracao)
 			{
+				$alteracao['array_para_base']['id_turma'] = $alteracoes_estrutura['competencias'][$index]['elemento']->turma->id;
 				$db->insert('competencias', $alteracao['array_para_base']);
 				$alteracoes_estrutura['competencias'][$index]['elemento']->id = $db->insert_id();
 			}
@@ -298,8 +318,27 @@ class Classe extends CI_Controller {
 		{
 			foreach ($itens_cadastrar['subcompetencias'] as $index => $alteracao)
 			{
+				$alteracao['array_para_base']['id_competencia'] = $alteracoes_estrutura['subcompetencias'][$index]['elemento']->competencia->id;
 				$db->insert('subcompetencias', $alteracao['array_para_base']);
 				$alteracoes_estrutura['subcompetencias'][$index]['elemento']->id = $db->insert_id();
+			}
+		}
+
+		if (!empty($itens_cadastrar['subcompetencias_mdl_gradingform_rubric_criteria']))
+		{
+			foreach ($itens_cadastrar['subcompetencias_mdl_gradingform_rubric_criteria'] as $itens)
+			{
+				$dados_insert_n_n = array();
+
+				foreach ($itens[1] as $subcompetencia)
+				{
+					$dados_insert_n_n[] = array(
+						'id_mdl_gradingform_rubric_criteria' => $itens[0],
+						'id_subcompetencia' => $subcompetencia->id
+					);
+				}
+
+				$db->insert_batch('subcompetencias_mdl_gradingform_rubric_criteria', $dados_insert_n_n);
 			}
 		}
 

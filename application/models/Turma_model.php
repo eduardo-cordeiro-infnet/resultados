@@ -11,6 +11,7 @@ class Turma_model extends CI_Model {
 
 	public $avaliacoes = array();
 	public $competencias = array();
+	public $rubricas = array();
 
 	public $estudantes = array();
 	public $resultados_avaliacoes = array();
@@ -387,6 +388,20 @@ class Turma_model extends CI_Model {
 	public function obter_link_moodle()
 	{
 		return (isset($this->id_mdl_course)) ? URL_BASE_LMS . '/course/view.php?id=' . $this->id_mdl_course : null;
+	}
+
+	/**
+	 * Obter rubricas
+	 *
+	 * Retorna as rubricas das avaliações da turma
+	 * @return array
+	 */
+	public function obter_rubricas()
+	{
+		$this->load->helper('obj_array');
+		$rubricas_avaliacoes = obj_array_map_prop($this->avaliacoes, 'rubricas');
+
+		return call_user_func_array('array_merge', $rubricas_avaliacoes);
 	}
 
 	public function __toString()

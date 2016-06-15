@@ -283,6 +283,81 @@
 			<?php endforeach; ?>
 		</tbody>
 	</table>
+		<?php
+		endif;
+		if ($tipo_item === 'rubricas'):
+		?>
+	<h2>Rubricas</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>
+				<?php
+				echo form_checkbox(
+					null,
+					null,
+					true
+				);
+				?>
+				</th>
+				<th>Ação</th>
+				<th>Disciplina</th>
+				<th>Avaliação</th>
+				<th>Número</th>
+				<th>Descrição</th>
+				<th>Subcompetências</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ($alteracoes as $index => $alteracao):
+				if (!isset($alteracao['elemento']))
+				{
+					var_dump($index);
+					var_dump($alteracao);
+					var_dump($alteracoes);
+					die();
+				}
+
+				$rubrica = $alteracao['elemento'];
+				$operacao = $alteracao['operacao'];
+			?>
+			<tr <?php echo ($operacao === 'manter') ? 'class="desmarcado"' : ''; ?>>
+				<td>
+					<?php
+					if ($operacao !== 'manter')
+					{
+						echo form_checkbox(
+							implode('-', array($tipo_item, $index)),
+							$operacao,
+							true,
+							$alteracao['atributos']
+						);
+					}
+					?>
+				</td>
+				<td class="<?php echo $operacao; ?>"><?php echo $alteracao['descricao']; ?></td>
+				<td><?php echo $rubrica->avaliacao->turma->disciplina->nome; ?></td>
+				<td><?php echo $rubrica->avaliacao->nome; ?></td>
+				<td><?php echo $rubrica->ordem; ?></td>
+				<td>
+					<?php
+					echo $rubrica->descricao;
+					if (isset($rubrica->avaliacao->id))
+					{
+						echo anchor_popup(
+							site_url('cadastros/classes/rubricas/' . $rubrica->avaliacao->id . '/edit/' . $rubrica->mdl_id),
+							img('/assets/grocery_crud/themes/struct/css/images/ic_mode_edit_black_24px.svg'),
+							array('title' => 'Abrir cadastro da rubrica')
+						);
+					}
+					?>
+				</td>
+				<td><?php echo implode(', ', obj_array_map_prop($alteracao['subcompetencias_db'], 'codigo_completo')); ?></td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
 	<?php
 		endif;
 	endforeach;

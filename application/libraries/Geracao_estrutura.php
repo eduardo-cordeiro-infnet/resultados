@@ -2,14 +2,6 @@
 class Geracao_estrutura {
 	private $CI;
 
-	// Elemento utilizado para gerar a estrutura, definido nesta instância
-	// para poder imprimir os dados do elemento na preparação de estrutura
-	public $elemento_principal;
-
-	// Lista de alterações da estrutura, definida como propriedade da instância
-	// para executar _preparar_alteracoes mais de uma vez usando o mesmo objeto
-	private $alteracoes_estrutura = array();
-
 	// Lista de comandos de alterações para padronizar as diferenças de registros
 	private $operacoes_descricoes = array(
 		'manter' => 'Nenhuma',
@@ -17,6 +9,14 @@ class Geracao_estrutura {
 		'cadastrar' => 'Cadastrar',
 		'remover' => 'Excluir'
 	);
+
+	// Elemento utilizado para gerar a estrutura, definido nesta instância
+	// para poder imprimir os dados do elemento na preparação de estrutura
+	public $elemento_principal;
+
+	// Lista de alterações da estrutura, definida como propriedade da instância
+	// para executar _preparar_alteracoes mais de uma vez usando o mesmo objeto
+	private $alteracoes_estrutura = array();
 
 	public function __construct()
 	{
@@ -74,7 +74,6 @@ class Geracao_estrutura {
 		$CI = $this->CI;
 		$CI->load
 			->helper(array(
-				//'class',
 				'obj_array',
 				'format'
 			))
@@ -95,26 +94,20 @@ class Geracao_estrutura {
 		}
 		else if ($classe_registro === 'Turma_model')
 		{
-			if (!isset($this->alteracoes_estrutura['avaliacoes']))
+			foreach (array('avaliacoes', 'competencias', 'subcompetencias', 'rubricas') as $item)
 			{
-				$this->alteracoes_estrutura['avaliacoes'] = array();
+				if (!isset($this->alteracoes_estrutura[$item]))
+				{
+					$this->alteracoes_estrutura[$item] = array();
+				}
+
+				$funcao = '_obter_alteracoes_' . $item;
+
+				$this->alteracoes_estrutura[$item] = array_merge(
+					$this->alteracoes_estrutura[$item],
+					$this->$funcao($registro)
+				);
 			}
-
-			$this->alteracoes_estrutura['avaliacoes'] = array_merge($this->alteracoes_estrutura['avaliacoes'], $this->_obter_alteracoes_avaliacoes($registro));
-
-			if (!isset($this->alteracoes_estrutura['competencias']))
-			{
-				$this->alteracoes_estrutura['competencias'] = array();
-			}
-
-			$this->alteracoes_estrutura['competencias'] = array_merge($this->alteracoes_estrutura['competencias'], $this->_obter_alteracoes_competencias($registro));
-
-			if (!isset($this->alteracoes_estrutura['subcompetencias']))
-			{
-				$this->alteracoes_estrutura['subcompetencias'] = array();
-			}
-
-			$this->alteracoes_estrutura['subcompetencias'] = array_merge($this->alteracoes_estrutura['subcompetencias'], $this->_obter_alteracoes_subcompetencias($registro));
 		}
 	}
 
@@ -149,14 +142,9 @@ class Geracao_estrutura {
 			$caminho_curso_moodle = null;
 			$descricao = null;
 
-			/*
-			var_dump($CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(true));
-			die();
-			*/
-
 			$curso_moodle = $CI->db->query(
-				$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(true),
-				array($classe->id, $disciplina->nome, $disciplina->nome)
+				$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria($disciplina->nome),
+				array($classe->id, $disciplina->bloco->nome)
 			)->row();
 			if (isset($curso_moodle))
 			{
@@ -176,7 +164,8 @@ class Geracao_estrutura {
 			$turma_disciplina = null;
 
 			// Obter a primeira turma cadastrada para a disciplina na classe
-			foreach ($classe->turmas as $turma) {
+			foreach ($classe->turmas as $turma)
+			{
 				if ($turma->disciplina->id === $disciplina->id)
 				{
 					$turma_disciplina = $turma;
@@ -201,7 +190,7 @@ class Geracao_estrutura {
 				{
 					// Obter caminho do curso Moodle atualmente associado à turma
 					$curso_moodle_atual = $CI->db->query(
-						$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(false, true),
+						$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(null, true),
 						array($turma_disciplina->id, (isset($turma_disciplina->id_mdl_course) ? $turma_disciplina->id_mdl_course : 0))
 					)->row();
 					$caminho_curso_moodle_atual = (isset($curso_moodle_atual)) ? formatar_caminho($curso_moodle_atual->curso_com_caminho) : null;
@@ -261,13 +250,13 @@ class Geracao_estrutura {
 				$caminho_curso_moodle_atual = formatar_caminho(
 					obj_prop_val(
 						$CI->db->query(
-							$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(false, true),
+							$CI->consultas_sql->mdl_curso_com_caminho_mdl_categoria(null, true),
 							array($turma->id, (isset($turma->id_mdl_course) ? $turma->id_mdl_course : 0))
 						)->row(),
 						'curso_com_caminho'
 					)
-				);
-
+				)
+;
 				// Se não houver definição de alteração para alguma turma da estrutura atual, excluir
 				$alteracoes_turmas[] = array(
 					'operacao' => 'remover',
@@ -299,7 +288,8 @@ class Geracao_estrutura {
 		$avaliacoes = array();
 
 		carregar_classe('models/Avaliacao_model');
-		for ($i=1; $i <= $ultimo_tp; $i += 2) {
+		for ($i=1; $i <= $ultimo_tp; $i += 2)
+		{
 			$avaliacoes[] = new Avaliacao_model(array(
 				'turma' => $turma,
 				'nome' => SIGLA_TESTE_PERFORMANCE . $i,
@@ -342,7 +332,8 @@ class Geracao_estrutura {
 			$avaliacao_correspondente = null;
 
 			// Obter a primeira avaliação cadastrada com o nome da avaliação
-			foreach ($turma->avaliacoes as $avaliacao_turma) {
+			foreach ($turma->avaliacoes as $avaliacao_turma)
+			{
 				if ($avaliacao_turma->nome === $avaliacao->nome)
 				{
 					$avaliacao_correspondente = $avaliacao_turma;
@@ -505,7 +496,8 @@ class Geracao_estrutura {
 			$competencia_correspondente = null;
 
 			// Obter a primeira competência cadastrada com o código
-			foreach ($turma->competencias as $competencia_turma) {
+			foreach ($turma->competencias as $competencia_turma)
+			{
 				if ($competencia_turma->codigo == $competencia->codigo)
 				{
 					$competencia_correspondente = $competencia_turma;
@@ -566,12 +558,14 @@ class Geracao_estrutura {
 	protected function _obter_alteracoes_subcompetencias($turma)
 	{
 		$CI = $this->CI;
-		carregar_classe('models/Competencia_model');
+		carregar_classe('models/Subcompetencia_model');
 
 		$alteracoes_subcompetencias = array();
 		$subcompetencias = array();
 
 		$rubricas = $this->_obter_rubricas_alteracoes($turma);
+		$competencias = $this->_obter_competencias_alteracoes($turma);
+
 		$subcompetencias_turma = $turma->obter_subcompetencias();
 
 		foreach ($rubricas as $rubrica)
@@ -582,19 +576,37 @@ class Geracao_estrutura {
 
 			if (!empty($tag_subcompetencia))
 			{
-				$competencia = obj_array_search_prop($turma->competencias, 'codigo', $tag_subcompetencia[1])[0];
+				$competencia = obj_array_search_prop($competencias, 'codigo', $tag_subcompetencia[1])[0];
 				$obrigatoria = preg_match('/\[\s*subcomp.*obrigat.*\].*/', $rubrica->descricao) !== false;
 				$codigo_completo = $tag_subcompetencia[1] . '.' . $tag_subcompetencia[2] . (($obrigatoria) ? SUBCOMPETENCIA_SIMBOLO_OBRIGATORIEDADE : '');
 
 				if (empty(obj_array_search_prop($subcompetencias, 'codigo_completo', $codigo_completo)))
 				{
-					$subcompetencias[] = new Subcompetencia_model(array(
-						'competencia' => $competencia,
-						'codigo_completo' => $codigo_completo,
-						'nome' => trim($tag_subcompetencia[3]),
-						'obrigatoria' => $obrigatoria,
-						'rubrica' => $rubrica
-					));
+					$subcompetencia_competencia = obj_array_search_prop($competencia->subcompetencias, 'codigo_completo', $codigo_completo);
+
+					if (!empty($subcompetencia_competencia))
+					{
+						$subcompetencia = $subcompetencia_competencia[0];
+					}
+					else
+					{
+						$subcompetencia = new Subcompetencia_model(array(
+							'competencia' => $competencia,
+							'codigo_completo' => $codigo_completo,
+							'nome' => trim($tag_subcompetencia[3]),
+							'obrigatoria' => $obrigatoria,
+							'rubrica' => $rubrica
+						));
+
+						$competencia->subcompetencias[] = $subcompetencia;
+					}
+
+					$subcompetencias[] = $subcompetencia;
+					$rubrica->subcompetencias[] = $subcompetencia;
+				}
+				else
+				{
+					$rubrica->subcompetencias[] = obj_array_search_prop($subcompetencias, 'codigo_completo', $codigo_completo)[0];
 				}
 			}
 		}
@@ -622,13 +634,6 @@ class Geracao_estrutura {
 			// Se houver uma subcompetência correspondente, verificar se os dados estão corretos
 			if (isset($subcompetencia_correspondente))
 			{
-				if (false && $subcompetencia_correspondente->id == 1783)
-				{
-					var_dump($subcompetencia);
-					var_dump($subcompetencia_correspondente);
-					die();
-				}
-
 				$array_para_base['id'] = $subcompetencia_correspondente->id;
 				$descricao = '';
 
@@ -699,76 +704,257 @@ class Geracao_estrutura {
 	}
 
 	/**
+	 * Obter alterações de rubricas
+	 *
+	 * Retorna alterações na estrutura de rubricas das avaliações da turma
+	 * @return array
+	 */
+	protected function _obter_alteracoes_rubricas($turma)
+	{
+		$CI = $this->CI;
+		carregar_classe('models/Rubrica_model');
+
+		$alteracoes_rubricas = array();
+
+		$rubricas = $this->_obter_rubricas_alteracoes($turma);
+		$subcompetencias = $this->_obter_subcompetencias_alteracoes($turma);
+
+		foreach ($rubricas as $rubrica)
+		{
+			$subcompetencias_remover = array();
+			$subcompetencias_adicionar = array();
+
+			$subcompetencias_db = $CI->db
+				->select('s.id as id_subcompetencia, s.codigo_completo_calc as codigo_completo')
+				->join('subcompetencias s', 's.id = sgrc.id_subcompetencia')
+				->get_where(
+					'subcompetencias_mdl_gradingform_rubric_criteria sgrc',
+					array(
+						'sgrc.id_mdl_gradingform_rubric_criteria' => $rubrica->mdl_id
+					)
+				)
+				->result()
+			;
+
+			$ids_subcompetencias_db = obj_array_map_prop($subcompetencias_db, 'id_subcompetencia');
+			$ids_subcompetencias_rubrica = obj_array_map_id($rubrica->subcompetencias);
+			$descricao = '';
+
+			if ($ids_subcompetencias_db != $ids_subcompetencias_rubrica)
+			{
+				$descricao .= 'Desassociar a(s) seguinte(s) subcompetências:<ul>';
+
+				foreach ($subcompetencias_db as $subcompetencia_db)
+				{
+					if (!in_array($subcompetencia_db->id_subcompetencia, $ids_subcompetencias_rubrica))
+					{
+						$descricao .= '<li>' . $subcompetencia_db->codigo_completo . '</li>';
+
+						$subcompetencias_remover[] = $subcompetencia_db->id_subcompetencia;
+					}
+				}
+
+				$descricao .= '</ul>';
+			}
+
+			foreach ($rubrica->subcompetencias as $subcompetencia)
+			{
+				if (!isset($subcompetencia->id))
+				{
+					$subcompetencias_adicionar[] = $subcompetencia;
+				}
+			}
+
+			foreach ($subcompetencias_adicionar as $index => $subcompetencia)
+			{
+				if ($index == 0)
+				{
+					$descricao .= 'Associar a(s) seguinte(s) subcompetências:<ul>';
+				}
+
+				$descricao .= '<li>' . $subcompetencia->codigo_completo . '</li>';
+
+				if ($index === (count($subcompetencias_adicionar) - 1))
+				{
+					$descricao .= '</ul>';
+				}
+			}
+
+			if (empty($descricao))
+			{
+				$alteracoes_rubricas[] = array(
+					'operacao' => 'manter',
+					'elemento' => $rubrica,
+					'subcompetencias_db' => $subcompetencias_db
+				);
+			}
+			else
+			{
+				$alteracoes_rubricas[] = array(
+					'operacao' => 'atualizar',
+					'elemento' => $rubrica,
+					'descricao' => $descricao,
+					'subcompetencias_db' => $subcompetencias_db,
+					'relacionamentos_n_n' => array(
+						'subcompetencias_mdl_gradingform_rubric_criteria' => array(
+							'cadastrar' => $subcompetencias_adicionar,
+							'remover' => $subcompetencias_remover
+						)
+					)
+				);
+			}
+		}
+
+		return $alteracoes_rubricas;
+	}
+
+	/**
 	 * Obter rubricas de alterações
 	 *
 	 * Retorna as rubricas das avaliações da turma a partir da lista de alterações
 	 */
 	protected function _obter_rubricas_alteracoes($turma)
 	{
-		carregar_classe('models/Rubrica_model');
-
-		$avaliacoes_instances = array();
-		$avaliacao_instances = array();
-
-		if (isset($this->alteracoes_estrutura['avaliacoes']))
+		if (empty($turma->rubricas))
 		{
-			foreach ($this->alteracoes_estrutura['avaliacoes'] as $alteracao)
+			carregar_classe('models/Rubrica_model');
+
+			$avaliacoes_instances = array();
+			$avaliacao_instances = array();
+
+			if (isset($this->alteracoes_estrutura['avaliacoes']))
 			{
-				$avaliacao = $alteracao['elemento'];
-				$operacao = $alteracao['operacao'];
+				foreach ($this->alteracoes_estrutura['avaliacoes'] as $alteracao)
+				{
+					$avaliacao = $alteracao['elemento'];
+					$operacao = $alteracao['operacao'];
 
-				$avaliacao_instances = array(
-					'avaliacao' => $avaliacao
-				);
+					if ($avaliacao->turma === $turma)
+					{
+						$avaliacao_instances = array(
+							'avaliacao' => $avaliacao
+						);
 
-				if (in_array($operacao, array('manter', 'remover')))
-				{
-					$avaliacao_instances['instances'] = $avaliacao->instances_mdl_course_modules;
+						if (in_array($operacao, array('manter', 'remover')))
+						{
+							$avaliacao_instances['instances'] = $avaliacao->instances_mdl_course_modules;
+						}
+						else if ($operacao === 'cadastrar')
+						{
+							$avaliacao_instances['instances'] = $alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar'];
+						}
+						else if ($operacao === 'atualizar')
+						{
+							$avaliacao_instances['instances'] = array_merge(
+								$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar'],
+								$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['remover']
+							);
+						}
+
+						$avaliacoes_instances[] = $avaliacao_instances;
+					}
 				}
-				else if ($operacao === 'cadastrar')
+			}
+			else
+			{
+				foreach ($turma->avaliacoes as $avaliacao)
 				{
-					$avaliacao_instances['instances'] = $alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar'];
-				}
-				else if ($operacao === 'atualizar')
-				{
-					$avaliacao_instances['instances'] = array_merge(
-						$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['cadastrar'],
-						$alteracao['relacionamentos_n_n']['avaliacoes_mdl_course_modules']['remover']
+					$avaliacoes_instances[] = array(
+						'avaliacao' => $avaliacao,
+						'instances' => $avaliacao->instances_mdl_course_modules
 					);
 				}
+			}
 
-				$avaliacoes_instances[] = $avaliacao_instances;
+			$rubricas = array();
+			foreach ($avaliacoes_instances as $avaliacao_instances)
+			{
+				if (!empty($avaliacao_instances['instances']))
+				{
+					$rubricas = $this->CI->db->query(
+						$this->CI->consultas_sql->mdl_rubricas_instance(count($avaliacao_instances['instances'])),
+						$avaliacao_instances['instances']
+					)->custom_result_object('Rubrica_model');
+				}
+
+				foreach ($rubricas as $rubrica)
+				{
+					$rubrica->avaliacao = $avaliacao_instances['avaliacao'];
+				}
+
+				$turma->rubricas = array_merge($turma->rubricas, $rubricas);
 			}
 		}
-		else
+
+		return $turma->rubricas;
+	}
+
+
+	/**
+	 * Obter competências de alterações
+	 *
+	 * Retorna as competências da turma a partir da lista de alterações
+	 */
+	protected function _obter_competencias_alteracoes($turma)
+	{
+		$competencias = array();
+
+		if (isset($this->alteracoes_estrutura['competencias']))
 		{
-			foreach ($turma->avaliacoes as $avaliacao)
+			$competencias_alteracoes = obj_array_map_prop($this->alteracoes_estrutura['competencias'], 'elemento');
+
+			foreach ($competencias_alteracoes as $competencia)
 			{
-				$avaliacoes_instances[] = array(
-					'avaliacao' => $avaliacao,
-					'instances' => $avaliacao->instances_mdl_course_modules
-				);
+				if (
+					isset($competencia->turma)
+					&& (
+						$competencia->turma === $turma
+						|| (
+							isset($competencia->turma->id)
+							&& $competencia->turma->id == $turma->id
+						)
+						|| $competencia->turma->disciplina->id == $turma->disciplina->id
+					)
+				)
+				{
+					$competencias[] = $competencia;
+				}
 			}
 		}
 
-		$rubricas = array();
-		foreach ($avaliacoes_instances as $avaliacao_instances)
+		return $competencias;
+	}
+
+	/**
+	 * Obter subcompetências de alterações
+	 *
+	 * Retorna as subcompetências da turma a partir da lista de alterações
+	 */
+	protected function _obter_subcompetencias_alteracoes($turma)
+	{
+		$subcompetencias = array();
+
+		if (isset($this->alteracoes_estrutura['subcompetencias']))
 		{
-			if (!empty($avaliacao_instances['instances']))
-			{
-				$rubricas = $this->CI->db->query(
-					$this->CI->consultas_sql->mdl_rubricas_instance(count($avaliacao_instances['instances'])),
-					$avaliacao_instances['instances']
-				)->custom_result_object('Rubrica_model');
-			}
+			$subcompetencias_alteracoes = obj_array_map_prop($this->alteracoes_estrutura['subcompetencias'], 'elemento');
 
-			foreach ($rubricas as $rubrica)
+			foreach ($subcompetencias_alteracoes as $subcompetencia)
 			{
-				$rubrica->avaliacao = $avaliacao_instances['avaliacao'];
+				if (
+					$subcompetencia->competencia->turma === $turma
+						|| (
+							isset($competencia->turma->id)
+							&& $subcompetencia->competencia->turma->id == $turma->id
+						)
+					|| $subcompetencia->competencia->turma->disciplina->id == $turma->disciplina->id
+				)
+				{
+					$subcompetencias[] = $subcompetencia;
+				}
 			}
 		}
 
-		return $rubricas;
+		return $subcompetencias;
 	}
 
 	/**
@@ -867,8 +1053,8 @@ class Geracao_estrutura {
 						foreach ($competencias_id_disciplina_codigo as $index => $competencia_id_disciplina_codigo)
 						{
 							if (
-								$competencias_id_disciplina_codigo['id_disciplina'] == $competencia->turma->disciplina->id
-								&& $competencias_id_disciplina_codigo['codigo'] == $competencia->codigo
+								$competencia_id_disciplina_codigo['id_disciplina'] == $competencia->turma->disciplina->id
+								&& $competencia_id_disciplina_codigo['codigo'] == $competencia->codigo
 							)
 							{
 								$item_dependencia = $index;
@@ -881,6 +1067,60 @@ class Geracao_estrutura {
 					{
 						// Se tanto a alteração do item quanto da turma forem adicionar ou excluir, incluir dependência
 						$alteracoes_estrutura[$tipo_item][$index]['atributos']['dependencia'] = 'competencias-' . $item_dependencia;
+					}
+				}
+			}
+			else if ($tipo_item === 'rubricas')
+			{
+				$subcompetencias = obj_array_map_prop(
+					$alteracoes_estrutura['subcompetencias'],
+					'elemento'
+				);
+				$subcompetencias_id = obj_array_map_id($subcompetencias, true);
+				$subcompetencias_id_disciplina_codigo = array();
+
+				foreach ($subcompetencias as $subcompetencia_alteracao)
+				{
+					$subcompetencias_id_disciplina_codigo[] = array(
+						'id_disciplina' => $subcompetencia_alteracao->competencia->turma->disciplina->id,
+						'codigo_completo' => $subcompetencia_alteracao->codigo_completo
+					);
+				}
+
+				foreach ($alteracoes_estrutura[$tipo_item] as $index => $alteracao)
+				{
+					$subcompetencias_rubrica = $alteracao['elemento']->subcompetencias;
+
+					if (false && !empty(array_merge($subcompetencias_rubrica, $alteracao['subcompetencias_db'])))
+					{
+						$id_subcompetencia = (!empty($subcompetencias_rubrica)) ? $subcompetencias_rubrica[0]->id : $alteracao['subcompetencias_db']->id_subcompetencia;
+
+						$item_dependencia = null;
+
+						if (isset($id_subcompetencia))
+						{
+							$item_dependencia = array_search($id_subcompetencia, $subcompetencias_id);
+						}
+						else
+						{
+							foreach ($subcompetencias_id_disciplina_codigo as $index_subcompetencia => $subcompetencia_id_disciplina_codigo)
+							{
+								if (
+									$subcompetencia_id_disciplina_codigo['id_disciplina'] == $subcompetencia->competencia->turma->disciplina->id
+									&& $subcompetencia_id_disciplina_codigo['codigo_completo'] == $subcompetencia->codigo_completo
+								)
+								{
+									$item_dependencia = $index_subcompetencia;
+									break;
+								}
+							}
+						}
+
+						if ($alteracao['operacao'] === 'atualizar' && in_array($alteracoes_estrutura['subcompetencias'][$item_dependencia]['operacao'], array('cadastrar', 'remover')))
+						{
+							// Se houver alteração na rubrica e a operação da subcompetência for adicionar ou excluir, incluir dependência
+							$alteracoes_estrutura[$tipo_item][$index]['atributos']['dependencia'] = 'subcompetencias-' . $item_dependencia;
+						}
 					}
 				}
 			}
@@ -916,6 +1156,11 @@ class Geracao_estrutura {
 			$disciplina_1 = $elemento_1->competencia->turma->disciplina;
 			$disciplina_2 = $elemento_2->competencia->turma->disciplina;
 		}
+		else if ($classe_elemento === 'Rubrica_model')
+		{
+			$disciplina_1 = $elemento_1->avaliacao->turma->disciplina;
+			$disciplina_2 = $elemento_2->avaliacao->turma->disciplina;
+		}
 
 		if ($disciplina_1->bloco->id !== $disciplina_2->bloco->id)
 		{
@@ -938,6 +1183,17 @@ class Geracao_estrutura {
 			else
 			{
 				return $elemento_1->obter_codigo_subcompetencia() - $elemento_2->obter_codigo_subcompetencia();
+			}
+		}
+		else if ($classe_elemento === 'Rubrica_model')
+		{
+			if ($elemento_1->avaliacao->nome !== $elemento_2->avaliacao->nome)
+			{
+				return strcmp($elemento_1->avaliacao->nome, $elemento_2->avaliacao->nome);
+			}
+			else
+			{
+				return $elemento_1->ordem - $elemento_2->ordem;
 			}
 		}
 	}

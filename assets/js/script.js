@@ -246,16 +246,17 @@ PrepararEstrutura.registrarListenersCheckboxes = function() {
 
 PrepararEstrutura.atualizarCheckboxesDependentes = function(chk) {
 	var $chk = $(chk);
+	var rubrica = $chk.attr('name').substr(0, $chk.attr('name').indexOf('-')) === 'rubricas';
 
-	// Checkboxes de atualização não interferem na dependência de outros checkboxes
-	if ($chk.val() !== 'atualizar')
+	// Checkboxes de atualização não interferem na dependência de outros checkboxes, exceto em caso de rubricas
+	if ($chk.val() !== 'atualizar' || rubrica)
 	{
 		// Se o checkbox estiver sendo marcado ou desmarcado, os outros checkboxes sofrem a mesma ação
 		var marcar = $(chk).is(':checked');
 
 		// Se for marcação de cadastro ou desmarcação de remoção, aplicar ao checkbox do qual ele depende
 		// Senão, aplicar a marcação ou desmarcação aos checkboxes dependentes
-		var atributo = (($chk.val() === 'cadastrar' && marcar) || ($chk.val() === 'remover' && !marcar)) ? 'name' : 'dependencia';
+		var atributo = (($chk.val() === 'cadastrar' && marcar) || ($chk.val() === 'remover' && !marcar) || rubrica) ? 'name' : 'dependencia';
 		var atributo_chk = (atributo === 'dependencia') ? 'name' : 'dependencia';
 
 		$('[' + atributo + '="' + $chk.attr(atributo_chk) + '"]' + ((marcar) ? ':not(:checked)' : ':checked')).click();

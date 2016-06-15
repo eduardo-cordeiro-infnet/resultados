@@ -35,18 +35,58 @@ class Consultas_SQL {
 	 * Mas se $curso_por_nome === true, deve ser informado o nome da disciplina para retornar apenas um curso
 	 * @return string
 	 */
-	public function mdl_curso_com_caminho_mdl_categoria($curso_por_nome = false, $curso_por_id_mdl = false)
+	public function mdl_curso_com_caminho_mdl_categoria($nome_curso = null, $curso_por_id_mdl = false)
 	{
+		if (isset($nome_curso))
+		{
+			$comparacoes_nome_like = array(/*'0 = 1'*/);
+			$comparacoes_nome_exato = array(/*'0 = 1'*/);
+
+			$nomes_projeto_bloco = unserialize(NOMES_PROJETO_BLOCO);
+			$nomes_projeto_bloco_sem_caracteres_especiais = array_map(
+				'strtolower',
+				array_map_params($nomes_projeto_bloco, 'preg_replace', array('/[^\p{L}]+/u', ''), 2)
+			);
+
+			$nome_sem_caracteres_especiais = strtolower(preg_replace('/[^\p{L}]+/u', '', $nome_curso));
+			$nomes_curso_sem_caracteres_especiais = array($nome_sem_caracteres_especiais);
+
+			foreach ($nomes_projeto_bloco_sem_caracteres_especiais as $nome_projeto_bloco)
+			{
+				if (strpos($nome_sem_caracteres_especiais, $nome_projeto_bloco) !== false)
+				{
+					$nomes_curso_sem_caracteres_especiais = array_merge($nomes_curso_sem_caracteres_especiais, $nomes_projeto_bloco_sem_caracteres_especiais);
+					break;
+				}
+			}
+
+			// Antes de executar a query principal, definir as variáveis necessárias
+			$this->CI->db->query("
+				set @nome = ?;
+			", array($nome_curso));
+
+			foreach ($nomes_curso_sem_caracteres_especiais as $nome)
+			{
+				$comparacoes_nome_like[] = "
+							FILTRAR_STRING_REGEXP(crs.fullname, null) like '%" . $nome . "%'";
+				$comparacoes_nome_exato[] = "
+							FILTRAR_STRING_REGEXP(crs.fullname, null) = '" . $nome . "'";
+			}
+		}
+
 		$sql = "
 			select crs.id,
 				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname) curso_com_caminho,
 				case when ? in (select id from classes where id_mdl_course_category in (c6.id, c5.id, c4.id, c3.id, c2.id, c.id)) then 1 else 0 end turma";
 
-		if ($curso_por_nome === true)
+		if (isset($nome_curso))
 		{
 			$sql .= ",
-				case when FILTRAR_STRING_REGEXP(crs.fullname, null) = FILTRAR_STRING_REGEXP(?, null) then 0
-					when FILTRAR_STRING_REGEXP(crs.fullname, null) like CONCAT('%', FILTRAR_STRING_REGEXP(?, null), '%') then 1
+				case
+					when " . implode(' or', $comparacoes_nome_exato) . "
+					then 0
+					when " . implode(' or', $comparacoes_nome_like) . "
+					then 1
 				end nome_correspondente
 			";
 		}
@@ -61,9 +101,10 @@ class Consultas_SQL {
 				left join lmsinfne_mdl.mdl_course_categories c6 on c6.id = c5.parent
 		";
 
-		if ($curso_por_nome === true)
+		if (isset($nome_curso))
 		{
 			$sql .= "
+				where FILTRAR_STRING_REGEXP(c.name, null) = FILTRAR_STRING_REGEXP(?, null)
 				having turma = 1 and nome_correspondente is not null
 				order by nome_correspondente
 				limit 1
@@ -103,18 +144,18 @@ class Consultas_SQL {
 			$nomes_ats = unserialize(NOMES_ASSESSMENT_FINAL);
 			$nomes_tps_sem_caracteres_especiais = array_map(
 				'strtolower',
-				array_map_params($nomes_tps, 'preg_replace', array('/[^A-z]+/', ''), 2)
+				array_map_params($nomes_tps, 'preg_replace', array('/[^\p{L}]+/u', ''), 2)
 			);
 			$nomes_assessments_sem_caracteres_especiais = array_map(
 				'strtolower',
-				array_map_params($nomes_ats, 'preg_replace', array('/[^A-z]+/', ''), 2)
+				array_map_params($nomes_ats, 'preg_replace', array('/[^\p{L}]+/u', ''), 2)
 			);
 
-			$nome_sem_caracteres_especiais = strtolower(preg_replace('/[^A-z0-9]+/', '', $nome));
+			$nome_sem_caracteres_especiais = strtolower(preg_replace('/[^\p{L}0-9]+/', '', $nome));
 			$nome_numero = preg_replace('/[^0-9]+/', '', $nome);
 
 			$nomes_avaliacoes_sem_caracteres_especiais = array();
-			if (in_array($nome_sem_caracteres_especiais, $nomes_assessments_sem_caracteres_especiais))
+			if (empty($nome_numero))
 			{
 				$nomes_avaliacoes_sem_caracteres_especiais = $nomes_assessments_sem_caracteres_especiais;
 			}
@@ -143,16 +184,17 @@ class Consultas_SQL {
 				cm.instance,
 				CONCAT_WS(' > ', c6.name, c5.name, c4.name, c3.name, c2.name, c.name, crs.fullname, cs.name, asg.name) modulo_com_caminho,
 				case
-					when '" . $nome_numero . "' <> ''
-						and FILTRAR_STRING_REGEXP(asg.name, '[[:digit:]]') = '" . $nome_numero . "'
-						and (
+					when " . implode(' or', $comparacoes_nome_exato) . "
+					then 0
+					when (
+							'" . $nome_numero . "' = ''
+							or FILTRAR_STRING_REGEXP(asg.name, '[[:digit:]]') = '" . $nome_numero . "'
+						) and (
 							" . implode(' or', $comparacoes_nome_like) . "
 						)
-					then 0
+					then 1
 					when '" . $nome_numero . "' <> ''
 						and FILTRAR_STRING_REGEXP(asg.name, '[[:digit:]]') = CONCAT('%', '" . $nome_numero . "' , '%')
-					then 1
-					when " . implode(' or', $comparacoes_nome_exato) . "
 					then 2
 					else 100
 				end ordem_semelhanca
