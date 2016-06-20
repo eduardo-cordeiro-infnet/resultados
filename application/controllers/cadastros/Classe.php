@@ -31,7 +31,7 @@ class Classe extends CI_Controller {
 		$crud->set_subject('classe')
 			->set_table('classes')
 
-			->columns('id_escola_red', 'id_programa', 'nome', 'id_modalidade', 'periodo', 'link_moodle', 'qtd_disciplinas_calc', 'ativa')
+			->columns('id_escola_red', 'id_programa', 'nome', 'id_modalidade', 'periodo', 'link_moodle', 'ativa')
 			->fields('nome', 'id_programa', 'id_modalidade', 'id_mdl_course_category', 'trimestre', 'ano', 'ativa')
 
 			->set_relation('id_escola_red', 'escolas', '{sigla}')
@@ -48,7 +48,6 @@ class Classe extends CI_Controller {
 			->display_as('id_escola_red', 'Escola')
 			->display_as('id_programa', 'Programa')
 			->display_as('id_modalidade', 'Modalidade')
-			->display_as('qtd_disciplinas_calc', 'Disciplinas')
 			->display_as('id_mdl_course_category', 'Categoria no Moodle')
 			->display_as('periodo', 'Período')
 			->display_as('link_moodle', 'Acessar Moodle')

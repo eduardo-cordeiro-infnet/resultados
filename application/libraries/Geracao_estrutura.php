@@ -255,8 +255,8 @@ class Geracao_estrutura {
 						)->row(),
 						'curso_com_caminho'
 					)
-				)
-;
+				);
+
 				// Se não houver definição de alteração para alguma turma da estrutura atual, excluir
 				$alteracoes_turmas[] = array(
 					'operacao' => 'remover',
